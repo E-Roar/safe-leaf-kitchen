@@ -1,7 +1,7 @@
 export const APP_CONFIG = {
   // API Keys - These should be set via environment variables in production
-  OPENROUTER_API_KEY: process.env.VITE_OPENROUTER_API_KEY || '',
-  ROBOFLOW_API_KEY: process.env.VITE_ROBOFLOW_API_KEY || '',
+  OPENROUTER_API_KEY: import.meta.env.VITE_OPENROUTER_API_KEY || '',
+  ROBOFLOW_API_KEY: import.meta.env.VITE_ROBOFLOW_API_KEY || '',
   
   // API Endpoints
   OPENROUTER_URL: 'https://openrouter.ai/api/v1/chat/completions',
