@@ -2,41 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SafeLeafKitchen Design System - Moroccan-inspired green glowing theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core background and foreground */
+    --background: 120 8% 5%;
+    --foreground: 120 15% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card system with glass morphism */
+    --card: 120 10% 8%;
+    --card-foreground: 120 15% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover with glass effect */
+    --popover: 120 12% 10%;
+    --popover-foreground: 120 15% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary green gradient system */
+    --primary: 140 60% 45%;
+    --primary-foreground: 120 15% 95%;
+    --primary-glow: 140 70% 55%;
+    --primary-dark: 140 50% 25%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary earth tones (Moroccan inspired) */
+    --secondary: 25 35% 45%;
+    --secondary-foreground: 120 15% 95%;
+    --secondary-glow: 25 45% 55%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted greens */
+    --muted: 120 15% 15%;
+    --muted-foreground: 120 10% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent terracotta */
+    --accent: 15 60% 55%;
+    --accent-foreground: 120 15% 95%;
+    --accent-glow: 15 70% 65%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive */
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 120 15% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and inputs with transparency */
+    --border: 120 20% 20%;
+    --input: 120 15% 12%;
+    --ring: 140 60% 45%;
 
-    --radius: 0.5rem;
+    /* Glass morphism variables */
+    --glass-bg: 120 15% 10%;
+    --glass-border: 120 30% 25%;
+    --glass-glow: 140 70% 50%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-dark)), hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
+    --gradient-glass: linear-gradient(145deg, hsla(var(--glass-bg) / 0.3), hsla(var(--glass-bg) / 0.1));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(120 12% 8%));
+
+    /* Shadows with green glow */
+    --shadow-glow: 0 0 30px hsla(var(--glass-glow) / 0.3);
+    --shadow-glow-strong: 0 0 50px hsla(var(--glass-glow) / 0.5);
+    --shadow-elegant: 0 10px 30px -5px hsla(var(--primary) / 0.2);
+
+    /* Animation timings */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -55,43 +86,6 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
 }
 
 @layer base {
@@ -100,6 +94,62 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    background: var(--gradient-hero);
+  }
+
+  /* Custom glass morphism utilities */
+  .glass-card {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsla(var(--glass-border) / 0.3);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glass-button {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(8px);
+    border: 1px solid hsla(var(--glass-border) / 0.4);
+    transition: var(--transition-smooth);
+  }
+
+  .glass-button:hover {
+    background: hsla(var(--primary) / 0.2);
+    box-shadow: var(--shadow-glow-strong);
+    transform: translateY(-2px);
+  }
+
+  /* Moroccan geometric pattern overlay */
+  .moroccan-pattern {
+    background-image: radial-gradient(circle at 2px 2px, hsla(var(--accent) / 0.1) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+
+  /* Leaf-inspired animations */
+  @keyframes leaf-sway {
+    0%, 100% { transform: rotate(-2deg) translateX(0); }
+    50% { transform: rotate(2deg) translateX(4px); }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: var(--shadow-glow); }
+    50% { box-shadow: var(--shadow-glow-strong); }
+  }
+
+  .leaf-animation {
+    animation: leaf-sway 3s ease-in-out infinite;
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  /* Organic curves */
+  .organic-border {
+    border-radius: 2rem 1rem 2rem 1rem;
+  }
+
+  .organic-border-alt {
+    border-radius: 1rem 2rem 1rem 2rem;
   }
 }
