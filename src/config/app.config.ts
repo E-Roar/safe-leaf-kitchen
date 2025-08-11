@@ -1,5 +1,17 @@
+
 export const APP_CONFIG = {
   // API Keys - These should be set via environment variables in production
+  // 
+  // HOW TO ADD YOUR API KEYS:
+  // 1. In your project settings, go to Environment Variables
+  // 2. Add these variables:
+  //    - VITE_OPENROUTER_API_KEY = your_openrouter_api_key_here
+  //    - VITE_ROBOFLOW_API_KEY = your_roboflow_api_key_here
+  // 3. The app will automatically pick them up from import.meta.env
+  //
+  // For local development, you can temporarily hardcode them here:
+  // OPENROUTER_API_KEY: 'your_key_here',
+  // ROBOFLOW_API_KEY: 'your_key_here',
   OPENROUTER_API_KEY: import.meta.env.VITE_OPENROUTER_API_KEY || '',
   ROBOFLOW_API_KEY: import.meta.env.VITE_ROBOFLOW_API_KEY || '',
   

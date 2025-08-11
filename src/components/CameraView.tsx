@@ -1,8 +1,9 @@
+
 import React, { useRef, useState, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Camera, CameraOff, Scan, RotateCcw } from 'lucide-react';
+import { Camera, CameraOff, Scan, RotateCcw, Leaf } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app.config';
 
 interface CameraViewProps {
@@ -101,28 +102,58 @@ export const CameraView: React.FC<CameraViewProps> = ({
               <RotateCcw className="w-5 h-5" />
             </Button>
 
-            <Button
-              variant="floating"
-              size="icon-lg"
-              onClick={capture}
-              disabled={isScanning}
-              className="backdrop-blur-sm"
-            >
-              {isScanning ? (
-                <div className="w-6 h-6 border-2 border-primary-glow border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Scan className="w-6 h-6" />
+            {/* Enhanced Striking Scan Button */}
+            <div className="relative">
+              <Button
+                variant="hero"
+                size="icon-xl"
+                onClick={capture}
+                disabled={isScanning}
+                className="backdrop-blur-sm relative overflow-hidden group transform transition-all duration-300 hover:scale-110 active:scale-95"
+              >
+                {/* Pulsing background effect */}
+                <div className="absolute inset-0 bg-gradient-primary opacity-20 rounded-full animate-ping group-hover:opacity-40" />
+                
+                {/* Rotating border effect */}
+                <div className="absolute inset-0 rounded-full border-2 border-primary-glow animate-spin opacity-30 group-hover:opacity-60" />
+                
+                {/* Button content */}
+                <div className="relative z-10 flex items-center justify-center">
+                  {isScanning ? (
+                    <div className="w-8 h-8 border-3 border-primary-glow border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <div className="relative">
+                      <Leaf className="w-8 h-8 text-primary-glow drop-shadow-glow transform group-hover:rotate-12 transition-transform duration-300" />
+                      <div className="absolute inset-0 w-8 h-8 bg-primary-glow opacity-20 rounded-full blur-sm group-hover:opacity-40 transition-opacity duration-300" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Ripple effect on click */}
+                <div className="absolute inset-0 rounded-full bg-primary-glow opacity-0 group-active:opacity-30 group-active:animate-ping" />
+              </Button>
+              
+              {/* Floating text indicator */}
+              {!isScanning && (
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-glass-bg/80 backdrop-blur-sm rounded-full border border-glass-border text-xs text-primary-glow font-medium whitespace-nowrap animate-pulse">
+                  Tap to scan leaf
+                </div>
               )}
-            </Button>
+            </div>
           </div>
         </div>
 
-        {/* Scanning Overlay */}
+        {/* Scanning Overlay with enhanced animation */}
         {isScanning && (
-          <div className="absolute inset-0 bg-background/20 backdrop-blur-sm flex items-center justify-center">
+          <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center">
             <div className="text-center">
-              <div className="w-12 h-12 border-4 border-primary-glow border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-foreground font-medium">Analyzing leaf...</p>
+              <div className="relative mb-4">
+                <div className="w-16 h-16 border-4 border-primary-glow border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="absolute inset-0 w-16 h-16 border-2 border-primary border-b-transparent rounded-full animate-spin animate-reverse mx-auto" />
+              </div>
+              <p className="text-foreground font-medium text-lg bg-glass-bg/80 backdrop-blur-sm px-4 py-2 rounded-full border border-glass-border">
+                🌿 Analyzing leaf...
+              </p>
             </div>
           </div>
         )}

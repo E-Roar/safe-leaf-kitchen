@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Mic, MicOff, Volume2, VolumeX, Camera } from 'lucide-react';
+import { Send, Mic, MicOff, Volume2, VolumeX, Camera, Trash2 } from 'lucide-react';
 import CameraView from './CameraView';
 import { APP_CONFIG } from '@/config/app.config';
+import { chatStorage } from '@/services/chatStorage';
 
 interface Message {
   id: string;
@@ -20,15 +21,7 @@ interface ChatInterfaceProps {
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'assistant',
-      content: 'السلام عليكم! Welcome to SafeLeafKitchen! I\'m here to help you discover the nutritional benefits of Moroccan leafy vegetables. You can chat with me, use voice commands, or scan leaves with your camera. How can I assist you today?',
-      timestamp: new Date()
-    }
-  ]);
-  
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -38,6 +31,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthesisRef = useRef<SpeechSynthesis | null>(null);
+
+  // Load chat history on component mount
+  useEffect(() => {
+    const session = chatStorage.getCurrentSession();
+    const loadedMessages = chatStorage.convertToMessages(session.messages);
+    setMessages(loadedMessages);
+  }, []);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -97,6 +97,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
     setInputValue('');
     setIsLoading(true);
 
+    // Save user message to storage
+    chatStorage.saveMessage({
+      id: userMessage.id,
+      type: userMessage.type,
+      content: userMessage.content,
+      leafData: userMessage.leafData
+    });
+
     try {
       // Simulate API call to OpenRouter
       const response = await simulateAPICall(content, leafData);
@@ -109,6 +117,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Save assistant message to storage
+      chatStorage.saveMessage({
+        id: assistantMessage.id,
+        type: assistantMessage.type,
+        content: assistantMessage.content
+      });
       
       // Text-to-speech for assistant response
       if (synthesisRef.current && !isSpeaking) {
@@ -130,6 +145,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
     }
     
     return `Thank you for your question about "${content}". I'd be happy to help you with nutritional information and Moroccan recipes featuring leafy vegetables. Could you tell me more about what specific information you're looking for?`;
+  };
+
+  const clearChatHistory = () => {
+    chatStorage.clearHistory();
+    const newSession = chatStorage.createNewSession();
+    const loadedMessages = chatStorage.convertToMessages(newSession.messages);
+    setMessages(loadedMessages);
   };
 
   const toggleListening = () => {
@@ -191,13 +213,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
           <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             SafeLeaf Chat
           </h1>
-          <Button
-            variant="camera"
-            size="icon"
-            onClick={() => setShowCamera(!showCamera)}
-          >
-            <Camera className="w-5 h-5" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="camera"
+              size="icon"
+              onClick={clearChatHistory}
+              title="Clear chat history"
+            >
+              <Trash2 className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="camera"
+              size="icon"
+              onClick={() => setShowCamera(!showCamera)}
+            >
+              <Camera className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
