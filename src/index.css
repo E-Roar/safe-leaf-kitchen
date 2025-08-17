@@ -1,128 +1,122 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* SafeLeafKitchen Design System - Organic, Natural, Modern */
+/* SafeLeafKitchen Design System - Dark Modern Theme */
 
 @layer base {
   :root {
-    /* Base colors - Natural greens and earthy tones */
-    --background: 160 15% 97%;
-    --foreground: 140 20% 15%;
+    /* Base colors - Dark modern theme */
+    --background: 220 15% 8%;
+    --foreground: 210 15% 95%;
 
-    /* Cards with subtle green tint */
-    --card: 150 25% 95%;
-    --card-foreground: 140 20% 15%;
+    /* Cards with subtle depth */
+    --card: 220 15% 12%;
+    --card-foreground: 210 15% 95%;
 
     /* Popovers */
-    --popover: 150 25% 98%;
-    --popover-foreground: 140 20% 15%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 210 15% 95%;
 
-    /* Primary - Rich forest green */
-    --primary: 155 60% 35%;
-    --primary-foreground: 150 25% 98%;
-    --primary-glow: 155 65% 55%;
+    /* Primary - Modern cyan-blue */
+    --primary: 200 85% 55%;
+    --primary-foreground: 220 15% 8%;
+    --primary-glow: 200 90% 65%;
 
-    /* Secondary - Soft sage */
-    --secondary: 140 25% 88%;
-    --secondary-foreground: 140 40% 25%;
+    /* Secondary - Deep slate */
+    --secondary: 215 20% 18%;
+    --secondary-foreground: 210 15% 85%;
 
-    /* Muted - Light natural tones */
-    --muted: 145 20% 92%;
-    --muted-foreground: 140 15% 45%;
+    /* Muted - Dark grays */
+    --muted: 215 15% 15%;
+    --muted-foreground: 215 10% 65%;
 
-    /* Accent - Vibrant leaf green */
-    --accent: 120 45% 65%;
-    --accent-foreground: 140 20% 15%;
+    /* Accent - Modern purple */
+    --accent: 270 70% 65%;
+    --accent-foreground: 220 15% 8%;
 
-    /* Destructive - Natural red */
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 150 25% 98%;
+    /* Destructive - Modern red */
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 210 15% 95%;
 
     /* Borders and inputs */
-    --border: 145 25% 85%;
-    --input: 145 25% 90%;
-    --ring: 155 60% 45%;
+    --border: 215 20% 22%;
+    --input: 215 20% 18%;
+    --ring: 200 85% 55%;
 
-    /* Enhanced radius for organic feel */
-    --radius: 1rem;
+    /* Enhanced radius for modern feel */
+    --radius: 0.75rem;
 
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(155 60% 45%), hsl(140 55% 35%));
-    --gradient-hero: linear-gradient(135deg, hsl(155 65% 55%), hsl(140 60% 40%), hsl(125 55% 35%));
-    --gradient-organic: linear-gradient(180deg, hsl(150 40% 85%), hsl(155 35% 75%));
-    --gradient-glow: radial-gradient(circle, hsl(155 70% 60% / 0.3), transparent 70%);
+    /* Custom design tokens - Modern gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(200 85% 55%), hsl(240 70% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 15%), hsl(210 15% 8%));
+    --gradient-organic: linear-gradient(180deg, hsl(215 20% 15%), hsl(220 15% 12%));
+    --gradient-glow: radial-gradient(circle, hsl(200 85% 55% / 0.3), transparent 70%);
     
-    /* Shadows with organic glow */
-    --shadow-organic: 0 10px 30px -10px hsl(155 60% 35% / 0.2);
-    --shadow-glow: 0 0 40px hsl(155 70% 60% / 0.3);
-    --shadow-leaf: 0 20px 50px -15px hsl(140 50% 30% / 0.25);
+    /* Shadows with modern depth */
+    --shadow-organic: 0 10px 30px -10px hsl(220 25% 5% / 0.5);
+    --shadow-glow: 0 0 40px hsl(200 85% 55% / 0.4);
+    --shadow-leaf: 0 20px 50px -15px hsl(220 25% 5% / 0.6);
     
-    /* Glass effects */
-    --glass-bg: hsl(150 25% 95% / 0.8);
-    --glass-border: hsl(155 30% 70% / 0.3);
+    /* Glass effects - Modern dark glass */
+    --glass-bg: hsl(220 15% 12% / 0.8);
+    --glass-border: hsl(215 20% 25% / 0.4);
     
     /* Animations */
     --transition-organic: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --transition-glow: all 0.3s ease-out;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 220 15% 10%;
+    --sidebar-foreground: 210 15% 90%;
+    --sidebar-primary: 200 85% 55%;
+    --sidebar-primary-foreground: 220 15% 8%;
+    --sidebar-accent: 215 20% 18%;
+    --sidebar-accent-foreground: 210 15% 85%;
+    --sidebar-border: 215 20% 22%;
+    --sidebar-ring: 200 85% 55%;
   }
 
   .dark {
-    /* Dark mode - Deep forest theme */
-    --background: 140 25% 8%;
-    --foreground: 150 25% 92%;
+    /* Same as root since we're going full dark */
+    --background: 220 15% 8%;
+    --foreground: 210 15% 95%;
 
-    --card: 140 30% 12%;
-    --card-foreground: 150 25% 92%;
+    --card: 220 15% 12%;
+    --card-foreground: 210 15% 95%;
 
-    --popover: 140 30% 10%;
-    --popover-foreground: 150 25% 92%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 210 15% 95%;
 
-    --primary: 155 60% 55%;
-    --primary-foreground: 140 25% 8%;
-    --primary-glow: 155 70% 65%;
+    --primary: 200 85% 55%;
+    --primary-foreground: 220 15% 8%;
+    --primary-glow: 200 90% 65%;
 
-    --secondary: 140 20% 18%;
-    --secondary-foreground: 150 25% 85%;
+    --secondary: 215 20% 18%;
+    --secondary-foreground: 210 15% 85%;
 
-    --muted: 140 15% 15%;
-    --muted-foreground: 145 15% 65%;
+    --muted: 215 15% 15%;
+    --muted-foreground: 215 10% 65%;
 
-    --accent: 120 50% 60%;
-    --accent-foreground: 140 25% 8%;
+    --accent: 270 70% 65%;
+    --accent-foreground: 220 15% 8%;
 
-    --destructive: 0 70% 60%;
-    --destructive-foreground: 150 25% 92%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 210 15% 95%;
 
-    --border: 140 20% 22%;
-    --input: 140 20% 18%;
-    --ring: 155 60% 55%;
+    --border: 215 20% 22%;
+    --input: 215 20% 18%;
+    --ring: 200 85% 55%;
 
     /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(155 60% 45%), hsl(140 50% 35%));
-    --gradient-hero: linear-gradient(135deg, hsl(155 65% 50%), hsl(140 55% 40%), hsl(125 50% 30%));
-    --gradient-organic: linear-gradient(180deg, hsl(140 25% 15%), hsl(135 20% 12%));
-    --gradient-glow: radial-gradient(circle, hsl(155 70% 50% / 0.4), transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(200 85% 55%), hsl(240 70% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 15%), hsl(210 15% 8%));
+    --gradient-organic: linear-gradient(180deg, hsl(215 20% 15%), hsl(220 15% 12%));
+    --gradient-glow: radial-gradient(circle, hsl(200 85% 55% / 0.3), transparent 70%);
     
     /* Dark glass effects */
-    --glass-bg: hsl(140 25% 12% / 0.8);
-    --glass-border: hsl(155 30% 35% / 0.4);
+    --glass-bg: hsl(220 15% 12% / 0.8);
+    --glass-border: hsl(215 20% 25% / 0.4);
   }
 }
 
@@ -137,20 +131,22 @@
 }
 
 @layer components {
-  /* Glass morphism effects */
+  /* Glass morphism effects - Modern dark style */
   .glass {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-organic);
   }
 
-  /* Organic button styles */
+  /* Modern button styles */
   .btn-organic {
     background: var(--gradient-primary);
     transition: var(--transition-glow);
-    border-radius: 2rem;
+    border-radius: 1rem;
     box-shadow: var(--shadow-organic);
+    border: 1px solid var(--glass-border);
   }
 
   .btn-organic:hover {
@@ -163,14 +159,14 @@
     background: var(--gradient-hero);
   }
 
-  /* Floating leaf animation */
+  /* Floating animation */
   .leaf-float {
-    animation: leafFloat 6s ease-in-out infinite;
+    animation: leafFloat 8s ease-in-out infinite;
   }
 
   @keyframes leafFloat {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(5deg); }
+    50% { transform: translateY(-15px) rotate(3deg); }
   }
 
   /* Glow effect for interactive elements */
@@ -193,16 +189,17 @@
     opacity: 1;
   }
 
-  /* Organic input styling */
+  /* Modern input styling */
   .input-organic {
     background: var(--glass-bg);
     border: 2px solid var(--glass-border);
-    border-radius: 1.5rem;
+    border-radius: 1rem;
     transition: var(--transition-organic);
+    backdrop-filter: blur(10px);
   }
 
   .input-organic:focus {
     border-color: hsl(var(--primary));
-    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
   }
 }

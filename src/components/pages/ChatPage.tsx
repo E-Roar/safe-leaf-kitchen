@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Send, Mic, Camera, MicOff, Volume2 } from "lucide-react";
 import { APIService, StorageService, ChatMessage } from "@/services/apiService";
@@ -24,6 +25,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [isFirstMessage, setIsFirstMessage] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const stopListeningRef = useRef<(() => void) | null>(null);
 
@@ -53,20 +55,41 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const chatMessages: ChatMessage[] = messages
+      const chatMessages: ChatMessage[] = [];
+      
+      // Only add system message for the first user message
+      if (isFirstMessage) {
+        chatMessages.push({
+          role: "system",
+          content: `You are SafeLeafKitchen, a knowledgeable cooking and nutrition assistant specializing in vegetable leaves and herbs. You provide:
+
+1. Nutritional information about leaves and vegetables with detailed breakdowns
+2. Cooking tips and creative recipe suggestions
+3. Health benefits and safety information
+4. Seasonal availability and storage tips
+5. Identification help for edible plants
+
+Be friendly, informative, and always prioritize food safety. When discussing wild plants, always recommend consulting experts before consumption. Provide comprehensive answers with practical cooking advice.`
+        });
+        setIsFirstMessage(false);
+      }
+
+      // Add conversation history (excluding system messages from UI)
+      const conversationHistory = messages
         .filter(m => m.type !== 'system')
         .map(m => ({
           role: m.type === 'user' ? 'user' : 'assistant',
           content: m.content
         }));
 
+      chatMessages.push(...conversationHistory);
       chatMessages.push({ role: 'user', content: text });
 
       const response = await APIService.sendChatMessage(chatMessages);
       addMessage('bot', response);
       StorageService.incrementChats();
       
-      // Optional: Speak the response
+      // Speak the response with feminine voice
       APIService.speak(response);
     } catch (error) {
       console.error("Chat error:", error);
@@ -119,7 +142,20 @@ export default function ChatPage() {
       addMessage('system', `📸 Detected: ${leafType} (${(detection.confidence * 100).toFixed(1)}% confidence)`);
       
       try {
-        const insight = await APIService.generateNutritionInsight(leafType);
+        const chatMessages: ChatMessage[] = [];
+        
+        // Add system message for camera detection
+        chatMessages.push({
+          role: "system",
+          content: `You are SafeLeafKitchen, a knowledgeable cooking and nutrition assistant specializing in vegetable leaves and herbs. Provide comprehensive information including nutritional data, cooking methods, health benefits, and safety considerations.`
+        });
+
+        chatMessages.push({
+          role: 'user',
+          content: `I've detected ${leafType} leaves. Please provide detailed nutritional information, health benefits, cooking suggestions, and any safety considerations for this plant.`
+        });
+
+        const insight = await APIService.generateNutritionInsight(leafType, chatMessages);
         addMessage('bot', insight);
         StorageService.addDetectedLeaf(leafType);
         StorageService.incrementScans();

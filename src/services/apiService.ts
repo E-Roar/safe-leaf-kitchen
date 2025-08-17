@@ -46,22 +46,9 @@ export class APIService {
 
   static async sendChatMessage(messages: ChatMessage[]): Promise<string> {
     try {
-      const systemMessage: ChatMessage = {
-        role: "system",
-        content: `You are SafeLeafKitchen, a knowledgeable cooking and nutrition assistant specializing in vegetable leaves and herbs. You provide:
-
-1. Nutritional information about leaves and vegetables
-2. Cooking tips and recipe suggestions
-3. Health benefits and safety information
-4. Seasonal availability and storage tips
-5. Identification help for edible plants
-
-Be friendly, informative, and always prioritize food safety. When discussing wild plants, always recommend consulting experts before consumption.`
-      };
-
       const requestBody = {
         model: "openai/gpt-4o-mini",
-        messages: [systemMessage, ...messages],
+        messages: messages,
         temperature: 0.7,
         max_tokens: 500
       };
@@ -81,8 +68,16 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
     }
   }
 
-  static async generateNutritionInsight(leafType: string): Promise<string> {
+  static async generateNutritionInsight(leafType: string, chatMessages?: ChatMessage[]): Promise<string> {
+    if (chatMessages) {
+      return this.sendChatMessage(chatMessages);
+    }
+
     const messages: ChatMessage[] = [
+      {
+        role: "system",
+        content: `You are SafeLeafKitchen, a knowledgeable cooking and nutrition assistant specializing in vegetable leaves and herbs. Provide comprehensive information including nutritional data, cooking methods, health benefits, and safety considerations.`
+      },
       {
         role: "user",
         content: `I've detected ${leafType} leaves. Please provide detailed nutritional information, health benefits, cooking suggestions, and any safety considerations for this plant.`
@@ -92,13 +87,35 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
     return this.sendChatMessage(messages);
   }
 
-  // Text-to-Speech using Web Speech API (fallback for ElevenLabs)
+  // Text-to-Speech using Web Speech API with feminine voice
   static speak(text: string): void {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
-      utterance.pitch = 1;
+      utterance.pitch = 1.2; // Higher pitch for more feminine sound
       utterance.volume = 0.8;
+      
+      // Try to find a feminine voice
+      const voices = speechSynthesis.getVoices();
+      const feminineVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') ||
+        voice.name.toLowerCase().includes('woman') ||
+        voice.name.toLowerCase().includes('samantha') ||
+        voice.name.toLowerCase().includes('victoria') ||
+        voice.name.toLowerCase().includes('karen') ||
+        voice.name.toLowerCase().includes('susan')
+      );
+      
+      if (feminineVoice) {
+        utterance.voice = feminineVoice;
+      } else {
+        // Fallback: use first available voice with higher pitch
+        const availableVoices = voices.filter(voice => voice.lang.startsWith('en'));
+        if (availableVoices.length > 0) {
+          utterance.voice = availableVoices[0];
+        }
+      }
+      
       speechSynthesis.speak(utterance);
     }
   }
