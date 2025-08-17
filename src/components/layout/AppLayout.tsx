@@ -1,0 +1,174 @@
+import { useState } from "react";
+import { Home, MessageCircle, BarChart3, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+  activeTab: "home" | "chat" | "stats";
+  onTabChange: (tab: "home" | "chat" | "stats") => void;
+}
+
+export default function AppLayout({ children, activeTab, onTabChange }: AppLayoutProps) {
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsPassword, setSettingsPassword] = useState("");
+  const [isSettingsUnlocked, setIsSettingsUnlocked] = useState(false);
+
+  const tabs = [
+    { id: "home" as const, icon: Home, label: "Home" },
+    { id: "chat" as const, icon: MessageCircle, label: "Chat" },
+    { id: "stats" as const, icon: BarChart3, label: "Insights" },
+  ];
+
+  const handleSettingsClick = () => {
+    setShowSettings(true);
+  };
+
+  const handlePasswordSubmit = () => {
+    if (settingsPassword === "hidachi") {
+      setIsSettingsUnlocked(true);
+      setShowSettings(false);
+      setSettingsPassword("");
+    } else {
+      alert("Incorrect password");
+      setSettingsPassword("");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Floating background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-glow rounded-full opacity-30 animate-leaf-float"></div>
+        <div className="absolute top-1/3 right-8 w-16 h-16 bg-gradient-glow rounded-full opacity-20 animate-leaf-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-1/4 left-1/4 w-12 h-12 bg-gradient-glow rounded-full opacity-25 animate-leaf-float" style={{ animationDelay: '4s' }}></div>
+      </div>
+
+      {/* Settings button */}
+      <button
+        onClick={handleSettingsClick}
+        className="absolute top-4 right-4 z-50 p-3 glass rounded-full glow transition-all duration-300 hover:scale-110"
+      >
+        <Settings className="w-5 h-5 text-primary" />
+      </button>
+
+      {/* Settings Password Modal */}
+      {showSettings && !isSettingsUnlocked && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass rounded-3xl p-6 max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Enter Settings Password</h3>
+            <input
+              type="password"
+              value={settingsPassword}
+              onChange={(e) => setSettingsPassword(e.target.value)}
+              className="input-organic w-full p-3 mb-4 text-foreground placeholder:text-muted-foreground"
+              placeholder="Password"
+              onKeyPress={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowSettings(false);
+                  setSettingsPassword("");
+                }}
+                className="flex-1 p-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordSubmit}
+                className="flex-1 btn-organic text-primary-foreground p-3 font-medium"
+              >
+                Unlock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Panel */}
+      {isSettingsUnlocked && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Settings</h3>
+              <button
+                onClick={() => setIsSettingsUnlocked(false)}
+                className="p-2 rounded-full hover:bg-muted transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Roboflow API Key
+                </label>
+                <input
+                  type="text"
+                  defaultValue="qhQqXopubSFgUgSVLN0C"
+                  className="input-organic w-full p-3 text-foreground"
+                  readOnly
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Roboflow Endpoint
+                </label>
+                <input
+                  type="text"
+                  defaultValue="https://serverless.roboflow.com/leaves-hds6k/1"
+                  className="input-organic w-full p-3 text-foreground"
+                  readOnly
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  OpenRouter API Key
+                </label>
+                <input
+                  type="password"
+                  defaultValue="sk-or-v1-hardcoded-key-here"
+                  className="input-organic w-full p-3 text-foreground"
+                  readOnly
+                />
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
+                Settings reset to defaults on app restart
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main content */}
+      <main className="min-h-screen pb-20">
+        {children}
+      </main>
+
+      {/* Bottom navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border">
+        <div className="flex items-center justify-around p-4">
+          {tabs.map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => onTabChange(id)}
+              className={cn(
+                "flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300",
+                activeTab === id
+                  ? "text-primary bg-primary/10 scale-105"
+                  : "text-muted-foreground hover:text-foreground hover:scale-105"
+              )}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-xs font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}
