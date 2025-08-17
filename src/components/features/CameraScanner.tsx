@@ -125,20 +125,18 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-3 sm:p-4 glass">
+      {/* Floating Header Buttons */}
+      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
         <button
           onClick={onClose}
-          className="p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+          className="p-2 text-white hover:bg-white/10 rounded-full transition-colors bg-black/20 backdrop-blur-sm pointer-events-auto"
         >
           <X className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         
-        <h3 className="text-white font-medium text-sm sm:text-base">Scan Leaf</h3>
-        
         <button
           onClick={toggleCamera}
-          className="p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+          className="p-2 text-white hover:bg-white/10 rounded-full transition-colors bg-black/20 backdrop-blur-sm pointer-events-auto"
         >
           <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
