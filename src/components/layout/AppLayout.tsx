@@ -183,7 +183,9 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
         "min-h-screen transition-all duration-300 ease-in-out",
         isNavExpanded ? "pb-24" : "pb-12"
       )}>
-        {children}
+        <div className="h-full">
+          {children}
+        </div>
       </main>
 
       {/* Bottom navigation */}

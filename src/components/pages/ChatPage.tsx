@@ -183,10 +183,10 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="glass border-b border-border p-4 flex items-center justify-between sticky top-0 z-10">
-        <h2 className="text-lg font-semibold text-foreground">
+      <div className="glass border-b border-border p-3 sm:p-4 flex items-center justify-between sticky top-0 z-20 bg-background/95 backdrop-blur-sm">
+        <h2 className="text-base sm:text-lg font-semibold text-foreground">
           SafeLeaf Assistant
         </h2>
         <button
@@ -198,27 +198,27 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
           }`}
           title={isTTSMuted ? "Unmute TTS" : "Mute TTS"}
         >
-          {isTTSMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          {isTTSMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
         </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 pb-2">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`max-w-[80%] relative group ${
+            <div className={`max-w-[85%] sm:max-w-[80%] relative group ${
               message.type === 'user' 
                 ? 'bg-gradient-primary text-primary-foreground' 
                 : message.type === 'system'
                 ? 'bg-accent/20 text-accent-foreground'
                 : 'glass text-foreground'
-            } p-3 rounded-2xl ${
+            } p-2 sm:p-3 rounded-2xl ${
               message.type === 'user' ? 'rounded-br-md' : 'rounded-bl-md'
             }`}>
-              <p className="text-sm leading-relaxed">{message.content}</p>
+              <p className="text-sm sm:text-sm leading-relaxed">{message.content}</p>
               
               {message.type === 'bot' && (
                 <button
@@ -258,15 +258,15 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
       </div>
 
       {/* Input area */}
-      <div className="glass border-t border-border p-4 sticky bottom-0 z-10">
-        <div className="flex items-end gap-2">
+      <div className="glass border-t border-border p-3 sm:p-4 sticky bottom-0 z-20 bg-background/95 backdrop-blur-sm">
+        <div className="flex items-end gap-1 sm:gap-2">
           <div className="flex-1 relative">
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about nutrition, recipes, or scan a leaf..."
-              className="input-organic w-full p-3 pr-12 text-foreground placeholder:text-muted-foreground resize-none min-h-[44px] max-h-32"
+              className="input-organic w-full p-2 sm:p-3 pr-12 text-foreground placeholder:text-muted-foreground resize-none min-h-[40px] sm:min-h-[44px] max-h-32 text-sm sm:text-base"
               rows={1}
               disabled={isLoading}
             />
@@ -274,7 +274,7 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
           
           <button
             onClick={toggleTTSMute}
-            className={`p-3 rounded-xl transition-all duration-300 ${
+            className={`p-2 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0 ${
               isTTSMuted 
                 ? 'bg-destructive/20 text-destructive hover:bg-destructive/30' 
                 : 'bg-primary/20 text-primary hover:bg-primary/30'
@@ -282,35 +282,35 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
             disabled={isLoading}
             title={isTTSMuted ? "Unmute TTS" : "Mute TTS"}
           >
-            {isTTSMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            {isTTSMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
           
           <button
             onClick={toggleListening}
-            className={`p-3 rounded-xl transition-all duration-300 ${
+            className={`p-2 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0 ${
               isListening 
                 ? 'bg-destructive text-destructive-foreground scale-110' 
                 : 'bg-secondary text-secondary-foreground hover:scale-105'
             }`}
             disabled={isLoading}
           >
-            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {isListening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
           
           <button
             onClick={() => setShowCamera(true)}
-            className="p-3 bg-accent text-accent-foreground rounded-xl hover:scale-105 transition-all duration-300"
+            className="p-2 sm:p-3 bg-accent text-accent-foreground rounded-xl hover:scale-105 transition-all duration-300 flex-shrink-0"
             disabled={isLoading}
           >
-            <Camera className="w-5 h-5" />
+            <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           
           <button
             onClick={handleSendClick}
             disabled={!inputText.trim() || isLoading}
-            className="btn-organic p-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-organic p-2 sm:p-3 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
