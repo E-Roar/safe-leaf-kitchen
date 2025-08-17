@@ -1,8 +1,50 @@
-# Welcome to your Lovable project
+# SafeLeafKitchen - AI-Powered Leaf Detection & Nutrition Assistant
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/71344359-082d-4901-a8c2-8534ce3cb835
+SafeLeafKitchen is an intelligent web application that helps users identify edible leaves and provides comprehensive nutritional information, cooking suggestions, and safety considerations. The app uses AI-powered image recognition and natural language processing to deliver personalized assistance for cooking with fresh, healthy ingredients.
+
+## Features
+
+- **🌿 Leaf Detection**: AI-powered camera scanning to identify various types of leaves
+- **🍽️ Nutrition Assistant**: Detailed nutritional information and health benefits
+- **👨‍🍳 Recipe Suggestions**: Cooking tips and creative recipe ideas
+- **🎤 Voice Interaction**: Text-to-speech and speech-to-text capabilities
+- **📊 Usage Statistics**: Track your scanning and chat history
+- **🎨 Modern UI**: Beautiful, nature-inspired dark theme
+
+## Environment Configuration
+
+The application uses environment variables for API configuration. Create a `.env` file in the root directory with the following variables:
+
+```env
+# OpenRouter Configuration
+VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
+VITE_OPENROUTER_ENDPOINT=https://openrouter.ai/api/v1/chat/completions
+
+# Roboflow Configuration
+VITE_ROBOFLOW_API_KEY=your_roboflow_api_key_here
+VITE_ROBOFLOW_ENDPOINT=https://serverless.roboflow.com/leaves-hds6k/1
+```
+
+## Recent Updates
+
+### 🎨 New Color Palette
+- Updated to a nature-inspired green theme
+- Vibrant primary green colors (HSL: 142 76% 36%)
+- Sage green accent colors
+- Forest-inspired dark backgrounds
+
+### 🔇 Enhanced TTS Controls
+- Global mute/unmute button in the chat header
+- Individual message speak buttons show muted state
+- Improved visual feedback for TTS status
+- Automatic speech cancellation when muted
+
+### ⚙️ Environment-Based Configuration
+- API endpoints and keys now configurable via .env file
+- Fallback to default values if environment variables are not set
+- Improved security and deployment flexibility
 
 ## How can I edit this code?
 

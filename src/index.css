@@ -7,61 +7,61 @@
 
 @layer base {
   :root {
-    /* Base colors - Dark modern theme */
-    --background: 220 15% 8%;
-    --foreground: 210 15% 95%;
+    /* Base colors - Nature-inspired dark theme */
+    --background: 160 15% 8%;
+    --foreground: 160 15% 95%;
 
     /* Cards with subtle depth */
-    --card: 220 15% 12%;
-    --card-foreground: 210 15% 95%;
+    --card: 160 15% 12%;
+    --card-foreground: 160 15% 95%;
 
     /* Popovers */
-    --popover: 220 15% 10%;
-    --popover-foreground: 210 15% 95%;
+    --popover: 160 15% 10%;
+    --popover-foreground: 160 15% 95%;
 
-    /* Primary - Modern cyan-blue */
-    --primary: 200 85% 55%;
-    --primary-foreground: 220 15% 8%;
-    --primary-glow: 200 90% 65%;
+    /* Primary - Vibrant green */
+    --primary: 142 76% 36%;
+    --primary-foreground: 160 15% 8%;
+    --primary-glow: 142 90% 45%;
 
-    /* Secondary - Deep slate */
-    --secondary: 215 20% 18%;
-    --secondary-foreground: 210 15% 85%;
+    /* Secondary - Deep forest */
+    --secondary: 160 25% 18%;
+    --secondary-foreground: 160 15% 85%;
 
-    /* Muted - Dark grays */
-    --muted: 215 15% 15%;
-    --muted-foreground: 215 10% 65%;
+    /* Muted - Dark forest grays */
+    --muted: 160 20% 15%;
+    --muted-foreground: 160 10% 65%;
 
-    /* Accent - Modern purple */
-    --accent: 270 70% 65%;
-    --accent-foreground: 220 15% 8%;
+    /* Accent - Sage green */
+    --accent: 120 40% 50%;
+    --accent-foreground: 160 15% 8%;
 
     /* Destructive - Modern red */
     --destructive: 0 75% 60%;
-    --destructive-foreground: 210 15% 95%;
+    --destructive-foreground: 160 15% 95%;
 
     /* Borders and inputs */
-    --border: 215 20% 22%;
-    --input: 215 20% 18%;
-    --ring: 200 85% 55%;
+    --border: 160 25% 22%;
+    --input: 160 25% 18%;
+    --ring: 142 76% 36%;
 
     /* Enhanced radius for modern feel */
     --radius: 0.75rem;
 
-    /* Custom design tokens - Modern gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(200 85% 55%), hsl(240 70% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 15%), hsl(210 15% 8%));
-    --gradient-organic: linear-gradient(180deg, hsl(215 20% 15%), hsl(220 15% 12%));
-    --gradient-glow: radial-gradient(circle, hsl(200 85% 55% / 0.3), transparent 70%);
+    /* Custom design tokens - Nature-inspired gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(120 60% 40%));
+    --gradient-hero: linear-gradient(135deg, hsl(160 25% 10%), hsl(160 20% 15%), hsl(160 15% 8%));
+    --gradient-organic: linear-gradient(180deg, hsl(160 20% 15%), hsl(160 15% 12%));
+    --gradient-glow: radial-gradient(circle, hsl(142 76% 36% / 0.3), transparent 70%);
     
-    /* Shadows with modern depth */
-    --shadow-organic: 0 10px 30px -10px hsl(220 25% 5% / 0.5);
-    --shadow-glow: 0 0 40px hsl(200 85% 55% / 0.4);
-    --shadow-leaf: 0 20px 50px -15px hsl(220 25% 5% / 0.6);
+    /* Shadows with nature depth */
+    --shadow-organic: 0 10px 30px -10px hsl(160 25% 5% / 0.5);
+    --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.4);
+    --shadow-leaf: 0 20px 50px -15px hsl(160 25% 5% / 0.6);
     
-    /* Glass effects - Modern dark glass */
-    --glass-bg: hsl(220 15% 12% / 0.8);
-    --glass-border: hsl(215 20% 25% / 0.4);
+    /* Glass effects - Nature dark glass */
+    --glass-bg: hsl(160 15% 12% / 0.8);
+    --glass-border: hsl(160 20% 25% / 0.4);
     
     /* Animations */
     --transition-organic: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -79,44 +79,44 @@
 
   .dark {
     /* Same as root since we're going full dark */
-    --background: 220 15% 8%;
-    --foreground: 210 15% 95%;
+    --background: 160 15% 8%;
+    --foreground: 160 15% 95%;
 
-    --card: 220 15% 12%;
-    --card-foreground: 210 15% 95%;
+    --card: 160 15% 12%;
+    --card-foreground: 160 15% 95%;
 
-    --popover: 220 15% 10%;
-    --popover-foreground: 210 15% 95%;
+    --popover: 160 15% 10%;
+    --popover-foreground: 160 15% 95%;
 
-    --primary: 200 85% 55%;
-    --primary-foreground: 220 15% 8%;
-    --primary-glow: 200 90% 65%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 160 15% 8%;
+    --primary-glow: 142 90% 45%;
 
-    --secondary: 215 20% 18%;
-    --secondary-foreground: 210 15% 85%;
+    --secondary: 160 25% 18%;
+    --secondary-foreground: 160 15% 85%;
 
-    --muted: 215 15% 15%;
-    --muted-foreground: 215 10% 65%;
+    --muted: 160 20% 15%;
+    --muted-foreground: 160 10% 65%;
 
-    --accent: 270 70% 65%;
-    --accent-foreground: 220 15% 8%;
+    --accent: 120 40% 50%;
+    --accent-foreground: 160 15% 8%;
 
     --destructive: 0 75% 60%;
-    --destructive-foreground: 210 15% 95%;
+    --destructive-foreground: 160 15% 95%;
 
-    --border: 215 20% 22%;
-    --input: 215 20% 18%;
-    --ring: 200 85% 55%;
+    --border: 160 25% 22%;
+    --input: 160 25% 18%;
+    --ring: 142 76% 36%;
 
     /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(200 85% 55%), hsl(240 70% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 15%), hsl(210 15% 8%));
-    --gradient-organic: linear-gradient(180deg, hsl(215 20% 15%), hsl(220 15% 12%));
-    --gradient-glow: radial-gradient(circle, hsl(200 85% 55% / 0.3), transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(120 60% 40%));
+    --gradient-hero: linear-gradient(135deg, hsl(160 25% 10%), hsl(160 20% 15%), hsl(160 15% 8%));
+    --gradient-organic: linear-gradient(180deg, hsl(160 20% 15%), hsl(160 15% 12%));
+    --gradient-glow: radial-gradient(circle, hsl(142 76% 36% / 0.3), transparent 70%);
     
     /* Dark glass effects */
-    --glass-bg: hsl(220 15% 12% / 0.8);
-    --glass-border: hsl(215 20% 25% / 0.4);
+    --glass-bg: hsl(160 15% 12% / 0.8);
+    --glass-border: hsl(160 20% 25% / 0.4);
   }
 }
 

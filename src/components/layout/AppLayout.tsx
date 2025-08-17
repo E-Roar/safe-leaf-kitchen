@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, MessageCircle, BarChart3, Settings } from "lucide-react";
+import { Home, MessageCircle, BarChart3, Settings, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SettingsService } from "@/services/settingsService";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
   const [showSettings, setShowSettings] = useState(false);
   const [settingsPassword, setSettingsPassword] = useState("");
   const [isSettingsUnlocked, setIsSettingsUnlocked] = useState(false);
+  const [isNavExpanded, setIsNavExpanded] = useState(true);
 
   const initialSettings = SettingsService.getSettings();
   const [roboflowApiKey, setRoboflowApiKey] = useState(initialSettings.roboflowApiKey);
@@ -178,25 +179,49 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
       )}
 
       {/* Main content */}
-      <main className="min-h-screen pb-20">
+      <main className={cn(
+        "min-h-screen transition-all duration-300 ease-in-out",
+        isNavExpanded ? "pb-24" : "pb-12"
+      )}>
         {children}
       </main>
 
       {/* Bottom navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border">
-        <div className="flex items-center justify-around p-4">
+      <nav className={cn(
+        "fixed bottom-0 left-0 right-0 glass border-t border-border transition-all duration-300 ease-in-out",
+        isNavExpanded ? "h-24" : "h-12"
+      )}>
+        {/* Toggle button */}
+        <div className="flex justify-center -mt-3 mb-2">
+          <button
+            onClick={() => setIsNavExpanded(!isNavExpanded)}
+            className="p-2 bg-background/80 backdrop-blur-sm rounded-full border border-border hover:bg-background/90 transition-all duration-300"
+          >
+            {isNavExpanded ? (
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            ) : (
+              <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            )}
+          </button>
+        </div>
+
+        {/* Navigation tabs - only visible when expanded */}
+        <div className={cn(
+          "flex items-center justify-around transition-all duration-300 ease-in-out",
+          isNavExpanded ? "p-3 opacity-100 h-16" : "p-0 opacity-0 pointer-events-none h-0 overflow-hidden"
+        )}>
           {tabs.map(({ id, icon: Icon, label }) => (
             <button
               key={id}
               onClick={() => onTabChange(id)}
               className={cn(
-                "flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300",
+                "flex flex-col items-center gap-1 p-2 rounded-full transition-all duration-300 min-w-[60px]",
                 activeTab === id
-                  ? "text-primary bg-primary/10 scale-105"
-                  : "text-muted-foreground hover:text-foreground hover:scale-105"
+                  ? "text-primary bg-primary/20 scale-110 shadow-lg"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-105"
               )}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4" />
               <span className="text-xs font-medium">{label}</span>
             </button>
           ))}

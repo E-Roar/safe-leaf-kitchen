@@ -83,6 +83,10 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
       if (result.predictions && result.predictions.length > 0) {
         onDetection(result.predictions);
         toast.success("Leaf detected successfully!");
+        // Automatically close camera when leaf is detected
+        setTimeout(() => {
+          onClose();
+        }, 1000); // Small delay to show success message
       } else {
         onDetection([]);
         toast.error("No leaves detected in image");

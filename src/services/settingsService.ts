@@ -6,10 +6,10 @@ export type AppSettings = {
 };
 
 const DEFAULTS: AppSettings = {
-  roboflowApiKey: "qhQqXopubSFgUgSVLN0C",
-  roboflowEndpoint: "https://serverless.roboflow.com/leaves-hds6k/1",
-  openrouterApiKey: "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",
-  openrouterEndpoint: "https://openrouter.ai/api/v1/chat/completions",
+  roboflowApiKey: import.meta.env.VITE_ROBOFLOW_API_KEY || "qhQqXopubSFgUgSVLN0C",
+  roboflowEndpoint: import.meta.env.VITE_ROBOFLOW_ENDPOINT || "https://serverless.roboflow.com/leaves-hds6k/1",
+  openrouterApiKey: import.meta.env.VITE_OPENROUTER_API_KEY || "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",
+  openrouterEndpoint: import.meta.env.VITE_OPENROUTER_ENDPOINT || "https://openrouter.ai/api/v1/chat/completions",
 };
 
 class SettingsService {

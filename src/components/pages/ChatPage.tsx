@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic, Camera, MicOff, Volume2 } from "lucide-react";
+import { Send, Mic, Camera, MicOff, Volume2, VolumeX } from "lucide-react";
 import { APIService, StorageService, ChatMessage } from "@/services/apiService";
 import CameraScanner from "@/components/features/CameraScanner";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ export default function ChatPage() {
   const [isListening, setIsListening] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [isFirstMessage, setIsFirstMessage] = useState(true);
+  const [isTTSMuted, setIsTTSMuted] = useState(APIService.isTTSMuted());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const stopListeningRef = useRef<(() => void) | null>(null);
 
@@ -78,7 +79,7 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
       const conversationHistory = messages
         .filter(m => m.type !== 'system')
         .map(m => ({
-          role: m.type === 'user' ? 'user' : 'assistant',
+          role: m.type === 'user' ? 'user' as const : 'assistant' as const,
           content: m.content
         }));
 
@@ -146,7 +147,7 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
         
         // Add system message for camera detection
         chatMessages.push({
-          role: "system",
+          role: "system" as const,
           content: `You are SafeLeafKitchen, a knowledgeable cooking and nutrition assistant specializing in vegetable leaves and herbs. Provide comprehensive information including nutritional data, cooking methods, health benefits, and safety considerations.`
         });
 
@@ -175,13 +176,30 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
     APIService.speak(content);
   };
 
+  const toggleTTSMute = () => {
+    const newMutedState = !isTTSMuted;
+    setIsTTSMuted(newMutedState);
+    APIService.setMuted(newMutedState);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <div className="glass border-b border-border p-4">
-        <h2 className="text-lg font-semibold text-foreground text-center">
+      <div className="glass border-b border-border p-4 flex items-center justify-between sticky top-0 z-10">
+        <h2 className="text-lg font-semibold text-foreground">
           SafeLeaf Assistant
         </h2>
+        <button
+          onClick={toggleTTSMute}
+          className={`p-2 rounded-lg transition-all duration-300 ${
+            isTTSMuted 
+              ? 'bg-destructive/20 text-destructive hover:bg-destructive/30' 
+              : 'bg-primary/20 text-primary hover:bg-primary/30'
+          }`}
+          title={isTTSMuted ? "Unmute TTS" : "Mute TTS"}
+        >
+          {isTTSMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        </button>
       </div>
 
       {/* Messages */}
@@ -205,9 +223,15 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
               {message.type === 'bot' && (
                 <button
                   onClick={() => speakMessage(message.content)}
-                  className="absolute -right-2 -top-2 w-6 h-6 bg-primary/20 hover:bg-primary/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={isTTSMuted}
+                  className={`absolute -right-2 -top-2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isTTSMuted 
+                      ? 'bg-muted/20 text-muted-foreground cursor-not-allowed opacity-60' 
+                      : 'bg-primary/20 hover:bg-primary/30 text-primary opacity-100 hover:scale-110'
+                  }`}
+                  title={isTTSMuted ? "TTS is muted" : "Speak message"}
                 >
-                  <Volume2 className="w-3 h-3 text-primary" />
+                  {isTTSMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
                 </button>
               )}
               
@@ -234,7 +258,7 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
       </div>
 
       {/* Input area */}
-      <div className="glass border-t border-border p-4">
+      <div className="glass border-t border-border p-4 sticky bottom-0 z-10">
         <div className="flex items-end gap-2">
           <div className="flex-1 relative">
             <textarea
@@ -247,6 +271,19 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
               disabled={isLoading}
             />
           </div>
+          
+          <button
+            onClick={toggleTTSMute}
+            className={`p-3 rounded-xl transition-all duration-300 ${
+              isTTSMuted 
+                ? 'bg-destructive/20 text-destructive hover:bg-destructive/30' 
+                : 'bg-primary/20 text-primary hover:bg-primary/30'
+            }`}
+            disabled={isLoading}
+            title={isTTSMuted ? "Unmute TTS" : "Mute TTS"}
+          >
+            {isTTSMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </button>
           
           <button
             onClick={toggleListening}

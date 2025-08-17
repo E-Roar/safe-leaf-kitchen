@@ -26,6 +26,19 @@ export interface ChatMessage {
 }
 
 export class APIService {
+  private static isMuted = false;
+
+  static setMuted(muted: boolean) {
+    this.isMuted = muted;
+    if (muted) {
+      speechSynthesis.cancel(); // Stop any ongoing speech
+    }
+  }
+
+  static isTTSMuted(): boolean {
+    return this.isMuted;
+  }
+
   static async detectLeaf(imageBase64: string): Promise<RoboflowResponse> {
     try {
       const { roboflowEndpoint, roboflowApiKey } = SettingsService.getSettings();
@@ -89,6 +102,10 @@ export class APIService {
 
   // Text-to-Speech using Web Speech API with feminine voice
   static speak(text: string): void {
+    if (this.isMuted) {
+      return; // Don't speak if muted
+    }
+    
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
