@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Camera, RotateCcw } from "lucide-react";
+import { X, RotateCcw } from "lucide-react";
 import { APIService } from "@/services/apiService";
 import { toast } from "sonner";
 
@@ -12,8 +12,10 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
   const [isScanning, setIsScanning] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [longPressActive, setLongPressActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     startCamera();
@@ -104,6 +106,23 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
+  const handleLongPressStart = () => {
+    if (isScanning) return;
+    
+    longPressTimerRef.current = setTimeout(() => {
+      setLongPressActive(true);
+      captureAndAnalyze();
+    }, 800); // 800ms for long press
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    setLongPressActive(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Header */}
@@ -137,9 +156,18 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
         
         {/* Scanning overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative w-48 h-48 sm:w-64 sm:h-64">
+          <div 
+            className="relative w-48 h-48 sm:w-64 sm:h-64 cursor-pointer select-none"
+            onMouseDown={handleLongPressStart}
+            onMouseUp={handleLongPressEnd}
+            onMouseLeave={handleLongPressEnd}
+            onTouchStart={handleLongPressStart}
+            onTouchEnd={handleLongPressEnd}
+          >
             {/* Scanning frame */}
-            <div className="absolute inset-0 border-2 border-primary rounded-3xl">
+            <div className={`absolute inset-0 border-2 rounded-3xl transition-all duration-300 ${
+              longPressActive ? 'border-white scale-105' : 'border-primary'
+            }`}>
               <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-3xl"></div>
               <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-3xl"></div>
               <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-3xl"></div>
@@ -150,30 +178,20 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
             {isScanning && (
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/30 to-transparent animate-pulse rounded-3xl"></div>
             )}
+
+            {/* Long press indicator */}
+            {longPressActive && !isScanning && (
+              <div className="absolute inset-0 bg-white/20 rounded-3xl animate-pulse"></div>
+            )}
           </div>
         </div>
 
         {/* Instructions */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-24 sm:translate-y-32 text-center">
           <p className="text-white/80 text-xs sm:text-sm px-4">
-            Position the leaf within the frame
+            Position the leaf within the frame and long press to scan
           </p>
         </div>
-      </div>
-
-      {/* Capture button */}
-      <div className="p-4 sm:p-6 flex justify-center">
-        <button
-          onClick={captureAndAnalyze}
-          disabled={isScanning}
-          className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-primary rounded-full flex items-center justify-center shadow-leaf disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-110"
-        >
-          {isScanning ? (
-            <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-          )}
-        </button>
       </div>
 
       {/* Hidden canvas for image processing */}
