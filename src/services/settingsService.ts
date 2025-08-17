@@ -7,8 +7,8 @@ export type AppSettings = {
 
 const DEFAULTS: AppSettings = {
   roboflowApiKey: import.meta.env.VITE_ROBOFLOW_API_KEY || "qhQqXopubSFgUgSVLN0C",
-  roboflowEndpoint: import.meta.env.VITE_ROBOFLOW_ENDPOINT || "https://serverless.roboflow.com/leaves-hds6k/1",
-  openrouterApiKey: import.meta.env.VITE_OPENROUTER_API_KEY || "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",
+  roboflowEndpoint: import.meta.env.VITE_ROBOFLOW_ENDPOINT || "https://serverless.roboflow.com/vegetable-detection-rtnua-ymjxz/1",
+  openrouterApiKey: import.meta.env.VITE_OPENROUTER_API_KEY || "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",
   openrouterEndpoint: import.meta.env.VITE_OPENROUTER_ENDPOINT || "https://openrouter.ai/api/v1/chat/completions",
 };
 
