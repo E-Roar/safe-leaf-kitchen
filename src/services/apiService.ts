@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-// Hardcoded API credentials as requested
-const ROBOFLOW_API_KEY = "qhQqXopubSFgUgSVLN0C";
-const ROBOFLOW_ENDPOINT = "https://serverless.roboflow.com/leaves-hds6k/1";
-const OPENROUTER_API_KEY = "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";
-const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+// Settings are managed via SettingsService (with hardcoded defaults)
+import { SettingsService } from "@/services/settingsService";
 
 export interface DetectionResult {
   class: string;
@@ -31,16 +28,13 @@ export interface ChatMessage {
 export class APIService {
   static async detectLeaf(imageBase64: string): Promise<RoboflowResponse> {
     try {
+      const { roboflowEndpoint, roboflowApiKey } = SettingsService.getSettings();
       const response = await axios({
         method: "POST",
-        url: ROBOFLOW_ENDPOINT,
-        params: {
-          api_key: ROBOFLOW_API_KEY
-        },
+        url: roboflowEndpoint,
+        params: { api_key: roboflowApiKey },
         data: imageBase64,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
       });
 
       return response.data;
@@ -72,9 +66,10 @@ Be friendly, informative, and always prioritize food safety. When discussing wil
         max_tokens: 500
       };
 
-      const response = await axios.post(OPENROUTER_ENDPOINT, requestBody, {
+      const { openrouterEndpoint, openrouterApiKey } = SettingsService.getSettings();
+      const response = await axios.post(openrouterEndpoint, requestBody, {
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Authorization": `Bearer ${openrouterApiKey}`,
           "Content-Type": "application/json"
         }
       });

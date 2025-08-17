@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Home, MessageCircle, BarChart3, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SettingsService } from "@/services/settingsService";
+import { toast } from "sonner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -12,6 +14,12 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
   const [showSettings, setShowSettings] = useState(false);
   const [settingsPassword, setSettingsPassword] = useState("");
   const [isSettingsUnlocked, setIsSettingsUnlocked] = useState(false);
+
+  const initialSettings = SettingsService.getSettings();
+  const [roboflowApiKey, setRoboflowApiKey] = useState(initialSettings.roboflowApiKey);
+  const [roboflowEndpoint, setRoboflowEndpoint] = useState(initialSettings.roboflowEndpoint);
+  const [openrouterApiKey, setOpenrouterApiKey] = useState(initialSettings.openrouterApiKey);
+  const [openrouterEndpoint, setOpenrouterEndpoint] = useState(initialSettings.openrouterEndpoint);
 
   const tabs = [
     { id: "home" as const, icon: Home, label: "Home" },
@@ -32,6 +40,16 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
       alert("Incorrect password");
       setSettingsPassword("");
     }
+  };
+
+  const handleSaveSettings = () => {
+    SettingsService.update({
+      roboflowApiKey,
+      roboflowEndpoint,
+      openrouterApiKey,
+      openrouterEndpoint,
+    });
+    toast.success("Settings saved. Changes apply immediately for this session.");
   };
 
   return (
@@ -106,9 +124,9 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
                 </label>
                 <input
                   type="text"
-                  defaultValue="qhQqXopubSFgUgSVLN0C"
+                  value={roboflowApiKey}
+                  onChange={(e) => setRoboflowApiKey(e.target.value)}
                   className="input-organic w-full p-3 text-foreground"
-                  readOnly
                 />
               </div>
               
@@ -118,9 +136,9 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
                 </label>
                 <input
                   type="text"
-                  defaultValue="https://serverless.roboflow.com/leaves-hds6k/1"
+                  value={roboflowEndpoint}
+                  onChange={(e) => setRoboflowEndpoint(e.target.value)}
                   className="input-organic w-full p-3 text-foreground"
-                  readOnly
                 />
               </div>
               
@@ -130,13 +148,28 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
                 </label>
                 <input
                   type="password"
-                  defaultValue="sk-or-v1-hardcoded-key-here"
+                  value={openrouterApiKey}
+                  onChange={(e) => setOpenrouterApiKey(e.target.value)}
                   className="input-organic w-full p-3 text-foreground"
-                  readOnly
                 />
               </div>
-              
-              <p className="text-xs text-muted-foreground">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  OpenRouter Endpoint
+                </label>
+                <input
+                  type="text"
+                  value={openrouterEndpoint}
+                  onChange={(e) => setOpenrouterEndpoint(e.target.value)}
+                  className="input-organic w-full p-3 text-foreground"
+                />
+              </div>
+              <div className="flex gap-3 mt-2">
+                <button onClick={handleSaveSettings} className="btn-organic px-4 py-2 font-medium">
+                  Save
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
                 Settings reset to defaults on app restart
               </p>
             </div>
