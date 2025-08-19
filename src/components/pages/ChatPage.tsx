@@ -4,7 +4,7 @@ import { Send, Mic, Camera, MicOff, Volume2, VolumeX, ChefHat, Plus, MessageSqua
 import { APIService, StorageService, ChatMessage } from "@/services/apiService";
 import CameraScanner from "@/components/features/CameraScanner";
 import { recipes } from "@/data/recipes";
-import { toast } from "sonner";
+// Removed toast import
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -47,7 +47,7 @@ export default function ChatPage() {
       window.dispatchEvent(new CustomEvent('navigateToRecipe', { 
         detail: { recipeId: recipe.id } 
       }));
-      toast.success(`Opening ${recipeTitle} recipe!`);
+      // Removed toast notification
     }
   };
 
@@ -140,7 +140,7 @@ export default function ChatPage() {
     ]);
     setIsFirstMessage(true);
     setShowConversations(false);
-    toast.success("Started new conversation");
+          // Removed toast notification
   };
 
   const loadConversation = (conversationId: string) => {
@@ -151,7 +151,7 @@ export default function ChatPage() {
       StorageService.setCurrentConversationId(conversationId);
       setIsFirstMessage(false);
       setShowConversations(false);
-      toast.success("Conversation loaded");
+      // Removed toast notification
     }
   };
 
@@ -167,7 +167,7 @@ export default function ChatPage() {
       startNewConversation();
     }
     
-    toast.success("Conversation deleted");
+          // Removed toast notification
   };
 
   const clearFilters = () => {
@@ -291,7 +291,7 @@ You: "Onion leaves are rich in antioxidants and vitamins. They provide excellent
         addMessage('bot', fallbackResponse);
       }
       
-      toast.error("Failed to send message");
+      // Removed toast notification
     } finally {
       setIsLoading(false);
     }
@@ -326,7 +326,7 @@ You: "Onion leaves are rich in antioxidants and vitamins. They provide excellent
         setIsListening(true);
       } catch (error) {
         console.error("Speech recognition error:", error);
-        toast.error("Speech recognition not supported in this browser");
+        // Removed toast notification
       }
     }
   };
@@ -382,14 +382,14 @@ Examples:
           StorageService.incrementRecipeSuggestions();
         }
         
-        toast.success(`Successfully identified ${leafType}!`);
+        // Removed toast notification
       } catch (error) {
         console.error("Nutrition insight error:", error);
         addMessage('bot', `I've detected ${leafType} leaves, but I'm having trouble providing detailed information right now. Please try asking me about this plant directly.`);
       }
     } else {
       addMessage('system', "No leaves detected in the image. Please try again with a clearer view of the leaf.");
-      toast.error("No leaves detected");
+      // Removed toast notification
     }
     setShowCamera(false);
   };
@@ -575,16 +575,18 @@ Examples:
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`max-w-[85%] sm:max-w-[80%] relative group ${
+            <div             className={`max-w-[85%] sm:max-w-[80%] relative group ${
               message.type === 'user' 
                 ? 'bg-gradient-primary text-primary-foreground' 
                 : message.type === 'system'
-                ? 'bg-accent/20 text-accent-foreground'
+                ? 'bg-primary/20 text-primary border-2 border-primary/30 shadow-lg'
                 : 'glass text-foreground'
             } p-2 sm:p-3 rounded-2xl ${
               message.type === 'user' ? 'rounded-br-md' : 'rounded-bl-md'
             }`}>
-              <p className="text-sm sm:text-sm leading-relaxed">{message.content}</p>
+              <p className={`leading-relaxed ${
+                message.type === 'system' ? 'text-base font-medium' : 'text-sm sm:text-sm'
+              }`}>{message.content}</p>
               
               {/* Recipe Suggestion Button */}
               {message.type === 'bot' && message.suggestedRecipe && (
