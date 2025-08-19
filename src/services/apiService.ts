@@ -60,13 +60,16 @@ export class APIService {
   static async sendChatMessage(messages: ChatMessage[]): Promise<string> {
     try {
       const requestBody = {
-        model: "openai/gpt-4o-mini",
+        model: "meta-llama/llama-3.1-8b-instruct",
         messages: messages,
-        temperature: 0.7,
-        max_tokens: 500
+        temperature: 0.3,
+        max_tokens: 200
       };
 
       const { openrouterEndpoint, openrouterApiKey } = SettingsService.getSettings();
+      
+      console.log("Sending request to OpenRouter:", { endpoint: openrouterEndpoint, messages: messages.length });
+      
       const response = await axios.post(openrouterEndpoint, requestBody, {
         headers: {
           "Authorization": `Bearer ${openrouterApiKey}`,
@@ -74,9 +77,38 @@ export class APIService {
         }
       });
 
+      console.log("OpenRouter response:", response.data);
+
+      // Validate response structure
+      if (!response.data) {
+        throw new Error("No data received from OpenRouter API");
+      }
+
+      if (!response.data.choices || !Array.isArray(response.data.choices) || response.data.choices.length === 0) {
+        console.error("Invalid response structure:", response.data);
+        throw new Error("Invalid response format from OpenRouter API");
+      }
+
+      if (!response.data.choices[0].message || !response.data.choices[0].message.content) {
+        console.error("No message content in response:", response.data.choices[0]);
+        throw new Error("No message content in API response");
+      }
+
       return response.data.choices[0].message.content;
     } catch (error) {
       console.error("OpenRouter API error:", error);
+      
+      // More specific error handling
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("API Response Error:", error.response.status, error.response.data);
+          throw new Error(`OpenRouter API error: ${error.response.status} - ${error.response.statusText}`);
+        } else if (error.request) {
+          console.error("Network Error:", error.request);
+          throw new Error("Network error: Unable to reach OpenRouter API");
+        }
+      }
+      
       throw new Error("Failed to get response from chat assistant");
     }
   }
@@ -215,12 +247,19 @@ export class StorageService {
   // Conversation cache management
   static saveConversation(conversationId: string, messages: any[]): void {
     const key = this.getStorageKey('conversation_' + conversationId);
-    localStorage.setItem(key, JSON.stringify({
+    
+    // Create conversation metadata
+    const conversationData = {
       id: conversationId,
       messages,
       lastUpdated: new Date().toISOString(),
-      messageCount: messages.length
-    }));
+      messageCount: messages.length,
+      title: this.generateConversationTitle(messages),
+      tags: this.extractConversationTags(messages),
+      hasRecipeSuggestions: messages.some(m => m.suggestedRecipe)
+    };
+    
+    localStorage.setItem(key, JSON.stringify(conversationData));
     
     // Update conversation list
     const conversations = this.getConversationList();
@@ -229,7 +268,10 @@ export class StorageService {
       id: conversationId,
       lastUpdated: new Date().toISOString(),
       messageCount: messages.length,
-      preview: messages.length > 1 ? messages[1].content.substring(0, 50) + '...' : 'New conversation'
+      title: conversationData.title,
+      tags: conversationData.tags,
+      hasRecipeSuggestions: conversationData.hasRecipeSuggestions,
+      preview: messages.length > 1 ? messages[1].content.substring(0, 60) + '...' : 'New conversation'
     };
     
     if (existingIndex >= 0) {
@@ -238,9 +280,40 @@ export class StorageService {
       conversations.unshift(conversationInfo);
     }
     
-    // Keep only last 10 conversations
-    const limitedConversations = conversations.slice(0, 10);
+    // Keep only last 15 conversations
+    const limitedConversations = conversations.slice(0, 15);
     localStorage.setItem(this.getStorageKey('conversation_list'), JSON.stringify(limitedConversations));
+  }
+
+  private static generateConversationTitle(messages: any[]): string {
+    if (messages.length <= 1) return 'New Conversation';
+    
+    // Find first user message
+    const firstUserMessage = messages.find(m => m.type === 'user');
+    if (firstUserMessage) {
+      const content = firstUserMessage.content;
+      if (content.length <= 30) return content;
+      return content.substring(0, 30) + '...';
+    }
+    
+    return 'Conversation';
+  }
+
+  private static extractConversationTags(messages: any[]): string[] {
+    const tags = new Set<string>();
+    
+    messages.forEach(message => {
+      if (message.type === 'user') {
+        const content = message.content.toLowerCase();
+        if (content.includes('recipe')) tags.add('recipe');
+        if (content.includes('nutrition') || content.includes('health')) tags.add('nutrition');
+        if (content.includes('leaf') || content.includes('plant')) tags.add('identification');
+        if (content.includes('cook') || content.includes('cooking')) tags.add('cooking');
+        if (message.suggestedRecipe) tags.add('recipe-suggested');
+      }
+    });
+    
+    return Array.from(tags);
   }
 
   static loadConversation(conversationId: string): any[] | null {
@@ -248,7 +321,13 @@ export class StorageService {
     const stored = localStorage.getItem(key);
     if (stored) {
       const conversation = JSON.parse(stored);
-      return conversation.messages;
+      const messages = conversation.messages || [];
+      
+      // Convert timestamp strings back to Date objects
+      return messages.map(message => ({
+        ...message,
+        timestamp: new Date(message.timestamp)
+      }));
     }
     return null;
   }
@@ -256,6 +335,32 @@ export class StorageService {
   static getConversationList(): any[] {
     const stored = localStorage.getItem(this.getStorageKey('conversation_list'));
     return stored ? JSON.parse(stored) : [];
+  }
+
+  static searchConversations(query: string): any[] {
+    const conversations = this.getConversationList();
+    if (!query.trim()) return conversations;
+    
+    const searchTerm = query.toLowerCase();
+    return conversations.filter(conversation => 
+      conversation.title.toLowerCase().includes(searchTerm) ||
+      conversation.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm)) ||
+      conversation.preview.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  static getConversationsByTag(tag: string): any[] {
+    const conversations = this.getConversationList();
+    return conversations.filter(conversation => 
+      conversation.tags.includes(tag)
+    );
+  }
+
+  static getConversationsWithRecipes(): any[] {
+    const conversations = this.getConversationList();
+    return conversations.filter(conversation => 
+      conversation.hasRecipeSuggestions
+    );
   }
 
   static deleteConversation(conversationId: string): void {
@@ -271,5 +376,18 @@ export class StorageService {
 
   static createNewConversationId(): string {
     return 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  // Current conversation tracking
+  static setCurrentConversationId(conversationId: string): void {
+    localStorage.setItem(this.getStorageKey('current_conversation'), conversationId);
+  }
+
+  static getCurrentConversationId(): string | null {
+    return localStorage.getItem(this.getStorageKey('current_conversation'));
+  }
+
+  static clearCurrentConversationId(): void {
+    localStorage.removeItem(this.getStorageKey('current_conversation'));
   }
 }

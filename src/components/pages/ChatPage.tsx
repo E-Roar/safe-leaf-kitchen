@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic, Camera, MicOff, Volume2, VolumeX, ChefHat, Plus, MessageSquare, Trash2 } from "lucide-react";
+import { Send, Mic, Camera, MicOff, Volume2, VolumeX, ChefHat, Plus, MessageSquare, Trash2, Search, Tag, Filter } from "lucide-react";
 import { APIService, StorageService, ChatMessage } from "@/services/apiService";
 import CameraScanner from "@/components/features/CameraScanner";
 import { recipes } from "@/data/recipes";
@@ -26,6 +26,9 @@ export default function ChatPage() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<any[]>([]);
   const [showConversations, setShowConversations] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const stopListeningRef = useRef<(() => void) | null>(null);
 
@@ -62,14 +65,56 @@ export default function ChatPage() {
       const conversationList = StorageService.getConversationList();
       setConversations(conversationList);
       
-      // If no current conversation, start a new one
-      if (!currentConversationId) {
+      // Try to restore the last active conversation
+      const lastConversationId = StorageService.getCurrentConversationId();
+      if (lastConversationId && conversationList.find(c => c.id === lastConversationId)) {
+        const savedMessages = StorageService.loadConversation(lastConversationId);
+        if (savedMessages) {
+          setMessages(savedMessages);
+          setCurrentConversationId(lastConversationId);
+          setIsFirstMessage(false);
+          console.log('Restored last active conversation:', lastConversationId);
+          return;
+        }
+      }
+      
+      // Try to load the most recent conversation if no last active conversation
+      if (!currentConversationId && conversationList.length > 0) {
+        const mostRecentConversation = conversationList[0];
+        const savedMessages = StorageService.loadConversation(mostRecentConversation.id);
+        if (savedMessages) {
+          setMessages(savedMessages);
+          setCurrentConversationId(mostRecentConversation.id);
+          setIsFirstMessage(false);
+          StorageService.setCurrentConversationId(mostRecentConversation.id);
+          console.log('Loaded most recent conversation:', mostRecentConversation.id);
+          return;
+        }
+      }
+      
+      // Only start new conversation if no conversations exist
+      if (!currentConversationId && conversationList.length === 0) {
         startNewConversation();
       }
     };
     
     loadConversations();
   }, []);
+
+  // Filter conversations based on search and tags
+  useEffect(() => {
+    let filteredConversations = StorageService.getConversationList();
+    
+    if (searchQuery.trim()) {
+      filteredConversations = StorageService.searchConversations(searchQuery);
+    }
+    
+    if (selectedTag) {
+      filteredConversations = filteredConversations.filter(c => c.tags.includes(selectedTag));
+    }
+    
+    setConversations(filteredConversations);
+  }, [searchQuery, selectedTag]);
 
   // Save conversation whenever messages change
   useEffect(() => {
@@ -84,6 +129,7 @@ export default function ChatPage() {
   const startNewConversation = () => {
     const newConversationId = StorageService.createNewConversationId();
     setCurrentConversationId(newConversationId);
+    StorageService.setCurrentConversationId(newConversationId);
     setMessages([
       {
         id: '1',
@@ -102,6 +148,7 @@ export default function ChatPage() {
     if (savedMessages) {
       setMessages(savedMessages);
       setCurrentConversationId(conversationId);
+      StorageService.setCurrentConversationId(conversationId);
       setIsFirstMessage(false);
       setShowConversations(false);
       toast.success("Conversation loaded");
@@ -116,10 +163,25 @@ export default function ChatPage() {
     
     // If deleting current conversation, start a new one
     if (conversationId === currentConversationId) {
+      StorageService.clearCurrentConversationId();
       startNewConversation();
     }
     
     toast.success("Conversation deleted");
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedTag(null);
+  };
+
+  const getAvailableTags = () => {
+    const allConversations = StorageService.getConversationList();
+    const allTags = new Set<string>();
+    allConversations.forEach(conv => {
+      conv.tags.forEach((tag: string) => allTags.add(tag));
+    });
+    return Array.from(allTags);
   };
 
   const addMessage = (type: 'user' | 'bot' | 'system', content: string, suggestedRecipe?: string) => {
@@ -143,11 +205,10 @@ export default function ChatPage() {
     try {
       const chatMessages: ChatMessage[] = [];
       
-      // Only add system message for the first user message
-      if (isFirstMessage) {
-        chatMessages.push({
-          role: "system",
-          content: `You are SafeLeafKitchen, a Moroccan-inspired cooking assistant.
+      // ALWAYS add system message to maintain strict recipe response behavior
+      chatMessages.push({
+        role: "system",
+        content: `You are SafeLeafKitchen, a Moroccan-inspired cooking assistant.
 
 CRITICAL: When users ask for recipes, you must respond with ONLY the exact recipe title from this list, nothing else:
 ${recipeTitles.map((title, index) => `${index + 1}. ${title}`).join('\n')}
@@ -156,19 +217,24 @@ RECIPE RESPONSE RULES:
 - If user asks for a recipe: respond with ONLY one exact title from the list above
 - Do NOT provide ingredients, instructions, or details
 - Do NOT add any extra text, explanations, or formatting
+- Do NOT provide long nutritional information or cooking advice
 - Just the title exactly as listed
 
-For non-recipe questions: Give short, helpful advice about leaves and nutrition with Moroccan flair.
+For non-recipe questions: Give short, helpful advice about leaves and nutrition with Moroccan flair (max 2 sentences).
 
 Examples:
 User: "I want a recipe with onion leaves"
 You: "Stuffed Msemen with Onion Leaves"
 
 User: "Give me an easy recipe"
-You: "Omelette with Onion Leaves"`
-        });
-        setIsFirstMessage(false);
-      }
+You: "Omelette with Onion Leaves"
+
+User: "What about another recipe?"
+You: "Barley Flatbread with Onion Leaves"
+
+User: "Tell me about nutrition"
+You: "Onion leaves are rich in antioxidants and vitamins. They provide excellent nutritional benefits for cooking."`
+      });
 
       // Add conversation history (excluding system messages from UI)
       const conversationHistory = messages
@@ -180,6 +246,9 @@ You: "Omelette with Onion Leaves"`
 
       chatMessages.push(...conversationHistory);
       chatMessages.push({ role: 'user', content: text });
+
+      console.log('Final chatMessages being sent:', chatMessages);
+      console.log('Total message count:', chatMessages.length);
 
       const response = await APIService.sendChatMessage(chatMessages);
       
@@ -207,7 +276,21 @@ You: "Omelette with Onion Leaves"`
       APIService.speak(response);
     } catch (error) {
       console.error("Chat error:", error);
-      addMessage('bot', "I'm sorry, I'm having trouble processing your request right now. Please try again.");
+      
+      // Provide a helpful fallback response
+      let fallbackResponse = "I'm having trouble connecting to my AI assistant right now. ";
+      
+      // If the user was asking for a recipe, suggest one anyway
+      if (text.toLowerCase().includes('recipe')) {
+        const randomRecipe = recipeTitles[Math.floor(Math.random() * recipeTitles.length)];
+        fallbackResponse += `Here's a recipe suggestion: ${randomRecipe}`;
+        addMessage('bot', fallbackResponse, randomRecipe);
+        StorageService.incrementRecipeSuggestions();
+      } else {
+        fallbackResponse += "Please check your API configuration and try again.";
+        addMessage('bot', fallbackResponse);
+      }
+      
       toast.error("Failed to send message");
     } finally {
       setIsLoading(false);
@@ -263,18 +346,19 @@ You: "Omelette with Onion Leaves"`
           role: "system" as const,
           content: `You are SafeLeafKitchen assistant. For detected ${leafType} leaves:
 
-RECIPE RESPONSE: If suggesting a recipe, respond with ONLY the exact title from this list:
+CRITICAL RECIPE RULE: If suggesting a recipe, respond with ONLY the exact title from this list:
 ${recipeTitles.map((title, index) => `${index + 1}. ${title}`).join('\n')}
 
-RULES:
-- If suggesting recipe: respond with ONLY one exact title from above
-- If providing info: give brief nutritional facts about ${leafType}
+STRICT RULES:
+- If suggesting recipe: respond with ONLY one exact title from above, nothing else
+- If providing info: give brief nutritional facts about ${leafType} (max 2 sentences)
 - Do NOT provide ingredients, instructions, or recipe details
+- Do NOT add extra text or explanations
 - Keep responses short and helpful
 
 Examples:
 - Recipe suggestion: "Stuffed Msemen with Onion Leaves"
-- Info response: "${leafType} leaves are rich in antioxidants and vitamins"`
+- Info response: "${leafType} leaves are rich in antioxidants and vitamins. They provide excellent nutritional benefits."`
         });
 
         chatMessages.push({
@@ -360,11 +444,73 @@ Examples:
 
       {/* Conversations Sidebar */}
       {showConversations && (
-        <div className="absolute top-16 left-0 right-0 z-30 glass border-b border-border max-h-96 overflow-y-auto">
+        <div className="absolute top-16 left-0 right-0 z-30 glass border-b border-border max-h-[80vh] overflow-y-auto">
           <div className="p-4">
-            <h3 className="text-lg font-semibold text-foreground mb-3">Recent Conversations</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Conversations</h3>
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                title="Advanced filters"
+              >
+                <Filter className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-background/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+              <div className="mb-4 p-3 bg-muted/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Tag className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Filter by tags:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {getAvailableTags().map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                      className={cn(
+                        "px-2 py-1 text-xs rounded-full transition-colors",
+                        selectedTag === tag
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+                {(searchQuery || selectedTag) && (
+                  <button
+                    onClick={clearFilters}
+                    className="mt-2 text-xs text-primary hover:underline"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Conversations List */}
             {conversations.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No saved conversations yet</p>
+              <div className="text-center py-8">
+                <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground text-sm">
+                  {searchQuery || selectedTag ? "No conversations match your filters" : "No saved conversations yet"}
+                </p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {conversations.map((conversation) => (
@@ -377,16 +523,34 @@ Examples:
                     )}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {conversation.title}
+                        </p>
+                        {conversation.hasRecipeSuggestions && (
+                          <ChefHat className="w-3 h-3 text-primary flex-shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate mb-1">
                         {conversation.preview}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">
                           {conversation.messageCount} messages
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {new Date(conversation.lastUpdated).toLocaleDateString()}
                         </span>
+                        <div className="flex gap-1">
+                          {conversation.tags.slice(0, 2).map((tag: string) => (
+                            <span
+                              key={tag}
+                              className="px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <button
@@ -451,7 +615,10 @@ Examples:
               )}
               
               <span className="text-xs opacity-70 block mt-1">
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {message.timestamp instanceof Date 
+                  ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }
               </span>
             </div>
           </div>
