@@ -202,4 +202,74 @@ export class StorageService {
     const stored = localStorage.getItem(key);
     return stored ? JSON.parse(stored) : {};
   }
+
+  static getRecipeSuggestions(): number {
+    return parseInt(localStorage.getItem(this.getStorageKey('recipe_suggestions')) || '0', 10);
+  }
+
+  static incrementRecipeSuggestions(): void {
+    const current = this.getRecipeSuggestions();
+    localStorage.setItem(this.getStorageKey('recipe_suggestions'), (current + 1).toString());
+  }
+
+  // Conversation cache management
+  static saveConversation(conversationId: string, messages: any[]): void {
+    const key = this.getStorageKey('conversation_' + conversationId);
+    localStorage.setItem(key, JSON.stringify({
+      id: conversationId,
+      messages,
+      lastUpdated: new Date().toISOString(),
+      messageCount: messages.length
+    }));
+    
+    // Update conversation list
+    const conversations = this.getConversationList();
+    const existingIndex = conversations.findIndex(c => c.id === conversationId);
+    const conversationInfo = {
+      id: conversationId,
+      lastUpdated: new Date().toISOString(),
+      messageCount: messages.length,
+      preview: messages.length > 1 ? messages[1].content.substring(0, 50) + '...' : 'New conversation'
+    };
+    
+    if (existingIndex >= 0) {
+      conversations[existingIndex] = conversationInfo;
+    } else {
+      conversations.unshift(conversationInfo);
+    }
+    
+    // Keep only last 10 conversations
+    const limitedConversations = conversations.slice(0, 10);
+    localStorage.setItem(this.getStorageKey('conversation_list'), JSON.stringify(limitedConversations));
+  }
+
+  static loadConversation(conversationId: string): any[] | null {
+    const key = this.getStorageKey('conversation_' + conversationId);
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const conversation = JSON.parse(stored);
+      return conversation.messages;
+    }
+    return null;
+  }
+
+  static getConversationList(): any[] {
+    const stored = localStorage.getItem(this.getStorageKey('conversation_list'));
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  static deleteConversation(conversationId: string): void {
+    // Remove conversation data
+    const key = this.getStorageKey('conversation_' + conversationId);
+    localStorage.removeItem(key);
+    
+    // Update conversation list
+    const conversations = this.getConversationList();
+    const filteredConversations = conversations.filter(c => c.id !== conversationId);
+    localStorage.setItem(this.getStorageKey('conversation_list'), JSON.stringify(filteredConversations));
+  }
+
+  static createNewConversationId(): string {
+    return 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
 }

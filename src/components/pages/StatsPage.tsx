@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award } from "lucide-react";
+import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap } from "lucide-react";
 import { StorageService } from "@/services/apiService";
+import { recipes } from "@/data/recipes";
 
 interface StatCard {
   title: string;
@@ -20,7 +21,9 @@ export default function StatsPage() {
   const [stats, setStats] = useState({
     totalScans: 0,
     totalChats: 0,
-    detectedLeaves: {} as Record<string, number>
+    detectedLeaves: {} as Record<string, number>,
+    recipeSuggestions: 0,
+    savedConversations: 0
   });
 
   useEffect(() => {
@@ -28,7 +31,9 @@ export default function StatsPage() {
       setStats({
         totalScans: StorageService.getScans(),
         totalChats: StorageService.getChats(),
-        detectedLeaves: StorageService.getDetectedLeaves()
+        detectedLeaves: StorageService.getDetectedLeaves(),
+        recipeSuggestions: StorageService.getRecipeSuggestions(),
+        savedConversations: StorageService.getConversationList().length
       });
     };
 
@@ -47,6 +52,16 @@ export default function StatsPage() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  // Calculate recipe-based metrics
+  const totalRecipes = recipes.length;
+  const avgProteins = recipes.reduce((sum, recipe) => sum + recipe.nutrition.proteins_g, 0) / totalRecipes;
+  const avgPolyphenols = recipes.reduce((sum, recipe) => sum + recipe.nutrition.polyphenols_mg, 0) / totalRecipes;
+  const avgFlavonoids = recipes.reduce((sum, recipe) => sum + recipe.nutrition.flavonoids_mg, 0) / totalRecipes;
+  const highAntioxidantRecipes = recipes.filter(recipe => 
+    recipe.nutrition.antioxidant_score.toLowerCase().includes('élevé') || 
+    recipe.nutrition.antioxidant_score.toLowerCase().includes('high')
+  ).length;
+
   const statCards: StatCard[] = [
     {
       title: "Total Scans",
@@ -63,47 +78,61 @@ export default function StatsPage() {
       change: "+8% this week"
     },
     {
-      title: "Unique Leaves",
-      value: Object.keys(stats.detectedLeaves).length.toString(),
-      icon: Leaf,
+      title: "Available Recipes",
+      value: totalRecipes.toString(),
+      icon: ChefHat,
       color: "bg-gradient-to-br from-secondary/30 to-secondary/20",
-      change: "3 new types"
+      change: "Moroccan inspired"
     },
     {
-      title: "Weekly Activity",
-      value: Math.floor(Math.random() * 20 + 15).toString() + "%",
-      icon: TrendingUp,
+      title: "High Antioxidant",
+      value: highAntioxidantRecipes.toString(),
+      icon: Zap,
       color: "bg-gradient-to-br from-primary/20 to-accent/10",
-      change: "+5% vs last week"
+      change: "recipes available"
+    },
+    {
+      title: "Recipe Suggestions",
+      value: stats.recipeSuggestions.toString(),
+      icon: ChefHat,
+      color: "bg-gradient-to-br from-accent/20 to-secondary/10",
+      change: "from chat"
+    },
+    {
+      title: "Saved Conversations",
+      value: stats.savedConversations.toString(),
+      icon: MessageCircle,
+      color: "bg-gradient-to-br from-secondary/20 to-accent/10",
+      change: "conversations stored"
     }
   ];
 
   const nutritionalInsights = [
     {
-      title: "Vitamin C Rich",
-      value: "85%",
-      description: "of scanned leaves",
+      title: "Avg Proteins",
+      value: `${avgProteins.toFixed(1)}g`,
+      description: "per recipe",
       color: "text-primary"
     },
     {
-      title: "High Fiber",
-      value: "92%",
-      description: "nutritional content",
+      title: "Avg Polyphenols",
+      value: `${avgPolyphenols.toFixed(0)}mg`,
+      description: "per recipe",
       color: "text-accent"
     },
     {
-      title: "Antioxidants",
-      value: "78%",
-      description: "average level",
+      title: "Avg Flavonoids",
+      value: `${avgFlavonoids.toFixed(1)}mg`,
+      description: "per recipe",
       color: "text-secondary"
     }
   ];
 
-  const seasonalTips = [
-    "🌱 Spring greens like spinach and arugula are at peak nutrition now",
-    "🥬 Kale varieties provide maximum vitamin K during cooler months",
-    "🌿 Fresh herbs retain more essential oils when harvested in morning",
-    "🍃 Dark leafy greens store best when kept slightly damp"
+  const recipeTips = [
+    "🍃 Onion leaves are rich in antioxidants and perfect for traditional Moroccan dishes",
+    "🥘 Msemen with onion leaves combines traditional flatbread with nutritious greens",
+    "🍳 Omelettes with fresh leaves provide a quick, protein-rich meal option",
+    "🌿 Dried leaf powder preserves nutrients and adds flavor to soups and sauces"
   ];
 
   return (
@@ -119,10 +148,35 @@ export default function StatsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4">
-        {statCards.map((card, index) => (
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        {statCards.slice(0, 4).map((card, index) => (
           <div
             key={index}
+            className={`glass rounded-2xl p-4 relative overflow-hidden ${card.color}`}
+          >
+            <div className="relative z-10">
+              <div className="flex items-start justify-between mb-2">
+                <div className={`p-2 rounded-xl bg-primary/10`}>
+                  <card.icon className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-foreground">{card.value}</p>
+                <p className="text-sm text-muted-foreground">{card.title}</p>
+                {card.change && (
+                  <p className="text-xs text-accent font-medium">{card.change}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Additional Stats Row */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {statCards.slice(4, 6).map((card, index) => (
+          <div
+            key={index + 4}
             className={`glass rounded-2xl p-4 relative overflow-hidden ${card.color}`}
           >
             <div className="relative z-10">
@@ -191,18 +245,44 @@ export default function StatsPage() {
         </div>
       </div>
 
-      {/* Seasonal Tips */}
+      {/* Recipe Tips */}
       <div className="glass rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Calendar className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Seasonal Tips</h3>
+          <ChefHat className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-semibold text-foreground">Recipe Insights</h3>
         </div>
         <div className="space-y-3">
-          {seasonalTips.map((tip, index) => (
+          {recipeTips.map((tip, index) => (
             <div key={index} className="flex items-start gap-3 p-3 bg-gradient-organic rounded-xl">
               <div className="text-sm text-foreground leading-relaxed">{tip}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Recipe Nutrition Summary */}
+      <div className="glass rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Leaf className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-semibold text-foreground">Recipe Nutrition Summary</h3>
+        </div>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Total Antioxidant Score</span>
+            <span className="font-medium text-foreground">Very High</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Average Proteins</span>
+            <span className="font-medium text-foreground">{avgProteins.toFixed(1)}g per recipe</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Total Polyphenols</span>
+            <span className="font-medium text-foreground">{avgPolyphenols.toFixed(0)}mg per recipe</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">High Antioxidant Recipes</span>
+            <span className="font-medium text-foreground">{highAntioxidantRecipes}/{totalRecipes}</span>
+          </div>
         </div>
       </div>
 
@@ -225,8 +305,12 @@ export default function StatsPage() {
             <span className="font-medium text-foreground">3m 24s</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Recipes Discovered</span>
-            <span className="font-medium text-foreground">{Math.floor(stats.totalChats * 0.6)}</span>
+            <span className="text-muted-foreground">Recipes Available</span>
+            <span className="font-medium text-foreground">{totalRecipes}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Avg Cooking Time</span>
+            <span className="font-medium text-foreground">30 min</span>
           </div>
         </div>
       </div>

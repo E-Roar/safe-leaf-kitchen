@@ -7,16 +7,30 @@ import AppLayout from "@/components/layout/AppLayout";
 import LandingPage from "@/components/pages/LandingPage";
 import ChatPage from "@/components/pages/ChatPage";
 import StatsPage from "@/components/pages/StatsPage";
+import RecipePage from "@/components/pages/RecipePage";
 import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import { registerServiceWorker } from "@/utils/pwaUtils";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats" | "recipes">("home");
+  const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
 
   useEffect(() => {
     registerServiceWorker();
+  }, []);
+
+  useEffect(() => {
+    const handleNavigateToRecipe = (event: CustomEvent) => {
+      setSelectedRecipeId(event.detail.recipeId);
+      setActiveTab("recipes");
+    };
+
+    window.addEventListener('navigateToRecipe', handleNavigateToRecipe as EventListener);
+    return () => {
+      window.removeEventListener('navigateToRecipe', handleNavigateToRecipe as EventListener);
+    };
   }, []);
 
   const renderCurrentPage = () => {
@@ -27,6 +41,8 @@ const App = () => {
         return <ChatPage />;
       case "stats":
         return <StatsPage />;
+      case "recipes":
+        return <RecipePage selectedRecipeId={selectedRecipeId} />;
       default:
         return <LandingPage onNavigateToChat={() => setActiveTab("chat")} />;
     }

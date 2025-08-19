@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Home, MessageCircle, BarChart3, Settings, ChevronUp, ChevronDown } from "lucide-react";
+import { Home, MessageCircle, BarChart3, ChefHat, Settings, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SettingsService } from "@/services/settingsService";
 import { toast } from "sonner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  activeTab: "home" | "chat" | "stats";
-  onTabChange: (tab: "home" | "chat" | "stats") => void;
+  activeTab: "home" | "chat" | "stats" | "recipes";
+  onTabChange: (tab: "home" | "chat" | "stats" | "recipes") => void;
 }
 
 export default function AppLayout({ children, activeTab, onTabChange }: AppLayoutProps) {
@@ -26,6 +26,7 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
     { id: "home" as const, icon: Home, label: "Home" },
     { id: "chat" as const, icon: MessageCircle, label: "Chat" },
     { id: "stats" as const, icon: BarChart3, label: "Insights" },
+    { id: "recipes" as const, icon: ChefHat, label: "Recipes" },
   ];
 
   const handleSettingsClick = () => {
