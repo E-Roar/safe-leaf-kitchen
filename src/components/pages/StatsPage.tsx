@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap } from "lucide-react";
+import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine } from "lucide-react";
 import { StorageService } from "@/services/apiService";
 import { recipes } from "@/data/recipes";
+import { ImpactService, ImpactMetrics } from "@/services/impactService";
 
 interface StatCard {
   title: string;
@@ -23,7 +24,8 @@ export default function StatsPage() {
     totalChats: 0,
     detectedLeaves: {} as Record<string, number>,
     recipeSuggestions: 0,
-    savedConversations: 0
+    savedConversations: 0,
+    impactMetrics: {} as ImpactMetrics
   });
 
   useEffect(() => {
@@ -33,7 +35,8 @@ export default function StatsPage() {
         totalChats: StorageService.getChats(),
         detectedLeaves: StorageService.getDetectedLeaves(),
         recipeSuggestions: StorageService.getRecipeSuggestions(),
-        savedConversations: StorageService.getConversationList().length
+        savedConversations: StorageService.getConversationList().length,
+        impactMetrics: ImpactService.getCumulativeImpact()
       });
     };
 
@@ -104,6 +107,20 @@ export default function StatsPage() {
       icon: MessageCircle,
       color: "bg-gradient-to-br from-secondary/20 to-accent/10",
       change: "conversations stored"
+    },
+    {
+      title: "Money Saved (MAD)",
+      value: `${stats.impactMetrics.price_saved_MAD || 0}`,
+      icon: Coins,
+      color: "bg-gradient-to-br from-green-500/20 to-green-600/10",
+      change: "from wild leaves"
+    },
+    {
+      title: "CO₂e Avoided (kg)",
+      value: `${stats.impactMetrics.co2e_kg_avoided || 0}`,
+      icon: TreePine,
+      color: "bg-gradient-to-br from-emerald-500/20 to-emerald-600/10",
+      change: "environmental impact"
     }
   ];
 
@@ -283,6 +300,71 @@ export default function StatsPage() {
             <span className="text-muted-foreground">High Antioxidant Recipes</span>
             <span className="font-medium text-foreground">{highAntioxidantRecipes}/{totalRecipes}</span>
           </div>
+        </div>
+      </div>
+
+      {/* Impact Summary */}
+      <div className="glass rounded-2xl p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Leaf className="w-5 h-5 text-green-500" />
+          Environmental & Economic Impact
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+              <div className="flex items-center gap-3">
+                <Coins className="w-6 h-6 text-green-600" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Money Saved</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.impactMetrics.price_saved_MAD || 0} MAD
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex items-center gap-3">
+                <TreePine className="w-6 h-6 text-emerald-600" />
+                <div>
+                  <p className="text-sm text-muted-foreground">CO₂e Avoided</p>
+                  <p className="text-2xl font-bold text-emerald-600">
+                    {stats.impactMetrics.co2e_kg_avoided || 0} kg
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <div className="flex items-center gap-3 mb-3">
+                <Leaf className="w-5 h-5 text-blue-600" />
+                <p className="text-sm font-medium text-blue-600">Total Leaves Used</p>
+              </div>
+              <p className="text-3xl font-bold text-blue-600">
+                {stats.impactMetrics.amount_g || 0} g
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Wild leaves harvested instead of bought
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+              <div className="flex items-center gap-3 mb-3">
+                <Zap className="w-5 h-5 text-purple-600" />
+                <p className="text-sm font-medium text-purple-600">Polyphenols Gained</p>
+              </div>
+              <p className="text-3xl font-bold text-purple-600">
+                {stats.impactMetrics.polyphenols_mg || 0} mg
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Antioxidant compounds consumed
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
+          <p className="text-sm text-muted-foreground text-center">
+            💚 Every wild leaf you use saves money, reduces environmental impact, and boosts your nutrition!
+          </p>
         </div>
       </div>
 
