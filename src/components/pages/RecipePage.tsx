@@ -149,9 +149,9 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
     <div className="min-h-screen flex">
       {/* Sidebar */}
       <div className={cn(
-        "w-80 bg-background border-r border-border flex flex-col transition-transform duration-300 ease-in-out",
+        "fixed inset-y-0 left-0 z-40 w-80 bg-background/95 backdrop-blur-xl border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-        "lg:translate-x-0 lg:static lg:inset-0"
+        "lg:relative lg:translate-x-0 lg:border-r lg:border-border"
       )}>
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
@@ -220,7 +220,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-0">
         {/* Mobile Header */}
         <div className="lg:hidden p-4 border-b border-border">
           <div className="flex items-center justify-between">
