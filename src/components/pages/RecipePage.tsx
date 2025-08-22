@@ -15,6 +15,12 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
   const [expandedRecipe, setExpandedRecipe] = useState<number | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [favorites, setFavorites] = useState<number[]>([]);
+
+  // Load favorites on component mount
+  useEffect(() => {
+    setFavorites(StorageService.getFavoriteRecipes());
+  }, []);
 
   const toggleRecipe = (recipeId: number) => {
     setExpandedRecipe(expandedRecipe === recipeId ? null : recipeId);
@@ -70,6 +76,18 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
     
     // Show success message
     alert(`Recipe used! Added ${leafTypes.length} leaf types to your impact calculations.`);
+  };
+
+  // Handle favorite toggle with state update
+  const handleToggleFavorite = (recipeId: number) => {
+    const newFavorited = StorageService.toggleFavoriteRecipe(recipeId);
+    
+    // Update local state
+    if (newFavorited) {
+      setFavorites(prev => [...prev, recipeId]);
+    } else {
+      setFavorites(prev => prev.filter(id => id !== recipeId));
+    }
   };
 
   // Extract leaf types from recipe ingredients
@@ -159,12 +177,19 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
               key={recipe.id}
               onClick={() => handleRecipeSelect(recipe)}
               className={cn(
-                "w-full p-4 rounded-2xl text-left transition-all duration-300 hover:shadow-lg",
+                "w-full p-4 rounded-2xl text-left transition-all duration-300 hover:shadow-lg relative",
                 selectedRecipe?.id === recipe.id
                   ? "glass bg-primary/10 border border-primary/20"
                   : "glass hover:bg-muted/30"
               )}
             >
+              {/* Favorite Star Indicator */}
+              <div className="absolute top-2 right-2">
+                {favorites.includes(recipe.id) && (
+                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                )}
+              </div>
+              
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-organic flex items-center justify-center">
                   <img
@@ -418,22 +443,20 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                           </button>
                           
                           <button
-                            onClick={() => {
-                              const nowFav = StorageService.toggleFavoriteRecipe(selectedRecipe.id);
-                            }}
+                            onClick={() => handleToggleFavorite(selectedRecipe.id)}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted/60 transition-colors border border-muted"
                             aria-label="Toggle Favorite"
                           >
                             <Star
                               className={cn(
                                 "w-5 h-5",
-                                StorageService.isRecipeFavorited(selectedRecipe.id)
+                                favorites.includes(selectedRecipe.id)
                                   ? "text-yellow-400 fill-current"
                                   : "text-muted-foreground"
                               )}
                             />
                             <span className="text-sm text-muted-foreground">
-                              {StorageService.isRecipeFavorited(selectedRecipe.id) ? "Favorited" : "Add to favorites"}
+                              {favorites.includes(selectedRecipe.id) ? "Favorited" : "Add to favorites"}
                             </span>
                           </button>
                         </div>
