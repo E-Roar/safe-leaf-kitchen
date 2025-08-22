@@ -1444,6 +1444,8 @@ and use these facts for onions :
     "Recommandations": "Profil nutritionnel à améliorer | Riche en protéines"
   }
    and answer with exact expressions from this json text when needed
+   allways in english
+   never say the word json, instead say the word data when needed
 
 "`
       });
