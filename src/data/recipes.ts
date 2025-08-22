@@ -53,12 +53,12 @@ export const recipes: Recipe[] = [
       "ar": ["تحضير عجينة لينة بالسميد والدقيق والماء والملح.", "اتركها ترتاح 30 دقيقة.", "تفرد وتحشى بورق البصل المفروم.", "تطوى وتطهى فوق مقلاة ساخنة بقليل من الزيت."]
     },
     "nutrition": {
-      "proteins_g": 14.78,
-      "fats_g": 0.67,
-      "ash_g": 13.91,
-      "moisture_percent": 91.2,
-      "polyphenols_mg": 160.94,
-      "flavonoids_mg": 67.4,
+      "proteins_g": 12.5,
+      "fats_g": 8.2,
+      "ash_g": 2.1,
+      "moisture_percent": 35.8,
+      "polyphenols_mg": 145.6,
+      "flavonoids_mg": 58.3,
       "antioxidant_score": "Très élevé"
     }
   },
@@ -80,13 +80,13 @@ export const recipes: Recipe[] = [
       "ar": ["مزج سميد الشعير والدقيق والملح والماء.", "إضافة ورق البصل المفروم.", "تشكل كخبزة وتطهى فوق مقلاة ساخنة."]
     },
     "nutrition": {
-      "proteins_g": 14.78,
-      "fats_g": 0.67,
-      "ash_g": 13.91,
-      "moisture_percent": 91.2,
-      "polyphenols_mg": 160.94,
-      "flavonoids_mg": 67.4,
-      "antioxidant_score": "Très élevé"
+      "proteins_g": 14.8,
+      "fats_g": 2.3,
+      "ash_g": 1.8,
+      "moisture_percent": 42.1,
+      "polyphenols_mg": 132.4,
+      "flavonoids_mg": 45.7,
+      "antioxidant_score": "Élevé"
     }
   },
   {
@@ -107,12 +107,12 @@ export const recipes: Recipe[] = [
       "ar": ["خفق البيض مع الملح والفلفل.", "إضافة ورق البصل المفروم.", "يطبخ في مقلاة مع زيت الزيتون."]
     },
     "nutrition": {
-      "proteins_g": 14.78,
-      "fats_g": 0.67,
-      "ash_g": 13.91,
-      "moisture_percent": 91.2,
-      "polyphenols_mg": 160.94,
-      "flavonoids_mg": 67.4,
+      "proteins_g": 28.4,
+      "fats_g": 18.7,
+      "ash_g": 3.2,
+      "moisture_percent": 48.9,
+      "polyphenols_mg": 168.9,
+      "flavonoids_mg": 72.1,
       "antioxidant_score": "Très élevé"
     }
   },
@@ -134,12 +134,12 @@ export const recipes: Recipe[] = [
       "ar": ["غسل وتجفيف ورق البصل.", "تجفيفه في الشمس أو في فرن معتدل.", "يطحن حتى يصبح مسحوقاً.", "يستعمل في الحساء أو الصلصات."]
     },
     "nutrition": {
-      "proteins_g": 14.78,
-      "fats_g": 0.67,
-      "ash_g": 13.91,
-      "moisture_percent": 91.2,
-      "polyphenols_mg": 160.94,
-      "flavonoids_mg": 67.4,
+      "proteins_g": 18.6,
+      "fats_g": 1.2,
+      "ash_g": 8.4,
+      "moisture_percent": 12.3,
+      "polyphenols_mg": 245.7,
+      "flavonoids_mg": 98.5,
       "antioxidant_score": "Très élevé"
     }
   }

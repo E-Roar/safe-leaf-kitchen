@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine } from "lucide-react";
+import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, Plus, RefreshCw } from "lucide-react";
 import { StorageService } from "@/services/apiService";
 import { recipes } from "@/data/recipes";
 import { ImpactService, ImpactMetrics } from "@/services/impactService";
@@ -28,42 +28,108 @@ export default function StatsPage() {
     impactMetrics: {} as ImpactMetrics
   });
 
+  const [debugInfo, setDebugInfo] = useState({
+    detectedLeavesRaw: '',
+    impactCalculation: '',
+    storageKeys: [] as string[]
+  });
+
   useEffect(() => {
     const loadStats = () => {
+      const detectedLeaves = StorageService.getDetectedLeaves();
+      const impactMetrics = ImpactService.getCumulativeImpact();
+      
       setStats({
         totalScans: StorageService.getScans(),
         totalChats: StorageService.getChats(),
-        detectedLeaves: StorageService.getDetectedLeaves(),
+        detectedLeaves,
         recipeSuggestions: StorageService.getRecipeSuggestions(),
         savedConversations: StorageService.getConversationList().length,
-        impactMetrics: ImpactService.getCumulativeImpact()
+        impactMetrics
+      });
+
+      // Debug information
+      setDebugInfo({
+        detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
+        impactCalculation: JSON.stringify(impactMetrics, null, 2),
+        storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf'))
       });
     };
 
     loadStats();
     // Refresh stats when component becomes visible
-    const interval = setInterval(loadStats, 1000);
+    const interval = setInterval(loadStats, 2000);
     return () => clearInterval(interval);
   }, []);
 
+  // Add demo data for testing
+  const addDemoData = () => {
+    // Add some demo leaf detections
+    StorageService.addDetectedLeaf('onion');
+    StorageService.addDetectedLeaf('onion');
+    StorageService.addDetectedLeaf('garlic');
+    StorageService.addDetectedLeaf('leek');
+    StorageService.addDetectedLeaf('chive');
+    StorageService.addDetectedLeaf('onion');
+    StorageService.addDetectedLeaf('wild garlic');
+    
+    // Increment scans
+    StorageService.incrementScans();
+    StorageService.incrementScans();
+    StorageService.incrementScans();
+    
+    // Force refresh
+    window.location.reload();
+  };
+
+  // Clear all data
+  const clearAllData = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
+  // Fixed percentage calculation with proper error handling
+  const totalLeafCount = Object.values(stats.detectedLeaves).reduce((a, b) => a + b, 0);
   const topLeaves: LeafData[] = Object.entries(stats.detectedLeaves)
     .map(([name, count]) => ({
       name,
       count,
-      percentage: (count / Math.max(1, Object.values(stats.detectedLeaves).reduce((a, b) => a + b, 0))) * 100
+      percentage: totalLeafCount > 0 ? (count / totalLeafCount) * 100 : 0
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
-  // Calculate recipe-based metrics
+  // Calculate recipe-based metrics with proper error handling
   const totalRecipes = recipes.length;
-  const avgProteins = recipes.reduce((sum, recipe) => sum + recipe.nutrition.proteins_g, 0) / totalRecipes;
-  const avgPolyphenols = recipes.reduce((sum, recipe) => sum + recipe.nutrition.polyphenols_mg, 0) / totalRecipes;
-  const avgFlavonoids = recipes.reduce((sum, recipe) => sum + recipe.nutrition.flavonoids_mg, 0) / totalRecipes;
-  const highAntioxidantRecipes = recipes.filter(recipe => 
-    recipe.nutrition.antioxidant_score.toLowerCase().includes('élevé') || 
-    recipe.nutrition.antioxidant_score.toLowerCase().includes('high')
-  ).length;
+  
+  // Calculate averages only if there are recipes
+  const avgProteins = totalRecipes > 0 
+    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.proteins_g || 0), 0) / totalRecipes 
+    : 0;
+  
+  const avgPolyphenols = totalRecipes > 0 
+    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.polyphenols_mg || 0), 0) / totalRecipes 
+    : 0;
+  
+  const avgFlavonoids = totalRecipes > 0 
+    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.flavonoids_mg || 0), 0) / totalRecipes 
+    : 0;
+  
+  const highAntioxidantRecipes = recipes.filter(recipe => {
+    const score = recipe.nutrition.antioxidant_score?.toLowerCase() || '';
+    return score.includes('élevé') || score.includes('high') || score.includes('très élevé') || score.includes('very high');
+  }).length;
+
+  // Calculate total nutrition values across all recipes
+  const totalProteins = recipes.reduce((sum, recipe) => sum + (recipe.nutrition.proteins_g || 0), 0);
+  const totalPolyphenols = recipes.reduce((sum, recipe) => sum + (recipe.nutrition.polyphenols_mg || 0), 0);
+  const totalFlavonoids = recipes.reduce((sum, recipe) => sum + (recipe.nutrition.flavonoids_mg || 0), 0);
+
+  // Enhanced impact calculations with proper formatting
+  const moneySaved = stats.impactMetrics.price_saved_MAD || 0;
+  const co2Avoided = stats.impactMetrics.co2e_kg_avoided || 0;
+  const totalLeavesUsed = stats.impactMetrics.amount_g || 0;
+  const polyphenolsGained = stats.impactMetrics.polyphenols_mg || 0;
 
   const statCards: StatCard[] = [
     {
@@ -110,14 +176,14 @@ export default function StatsPage() {
     },
     {
       title: "Money Saved (MAD)",
-      value: `${stats.impactMetrics.price_saved_MAD || 0}`,
+      value: moneySaved.toFixed(2),
       icon: Coins,
       color: "bg-gradient-to-br from-green-500/20 to-green-600/10",
       change: "from wild leaves"
     },
     {
       title: "CO₂e Avoided (kg)",
-      value: `${stats.impactMetrics.co2e_kg_avoided || 0}`,
+      value: co2Avoided.toFixed(2),
       icon: TreePine,
       color: "bg-gradient-to-br from-emerald-500/20 to-emerald-600/10",
       change: "environmental impact"
@@ -162,6 +228,32 @@ export default function StatsPage() {
         <p className="text-muted-foreground">
           Track your discoveries and insights
         </p>
+      </div>
+
+      {/* Demo Data Controls */}
+      <div className="glass rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground">Demo Controls</h3>
+          <div className="flex gap-2">
+            <button
+              onClick={addDemoData}
+              className="flex items-center gap-2 px-3 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add Demo Data
+            </button>
+            <button
+              onClick={clearAllData}
+              className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Clear All
+            </button>
+          </div>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Total Leaf Scans: {totalLeafCount} | Money Saved: {moneySaved.toFixed(2)} MAD | CO₂ Avoided: {co2Avoided.toFixed(2)} kg
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -300,6 +392,14 @@ export default function StatsPage() {
             <span className="text-muted-foreground">High Antioxidant Recipes</span>
             <span className="font-medium text-foreground">{highAntioxidantRecipes}/{totalRecipes}</span>
           </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Total Proteins (All Recipes)</span>
+            <span className="font-medium text-foreground">{totalProteins.toFixed(1)}g</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Total Polyphenols (All Recipes)</span>
+            <span className="font-medium text-foreground">{totalPolyphenols.toFixed(0)}mg</span>
+          </div>
         </div>
       </div>
 
@@ -317,7 +417,7 @@ export default function StatsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Money Saved</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {stats.impactMetrics.price_saved_MAD || 0} MAD
+                    {moneySaved.toFixed(2)} MAD
                   </p>
                 </div>
               </div>
@@ -328,7 +428,7 @@ export default function StatsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">CO₂e Avoided</p>
                   <p className="text-2xl font-bold text-emerald-600">
-                    {stats.impactMetrics.co2e_kg_avoided || 0} kg
+                    {co2Avoided.toFixed(2)} kg
                   </p>
                 </div>
               </div>
@@ -341,7 +441,7 @@ export default function StatsPage() {
                 <p className="text-sm font-medium text-blue-600">Total Leaves Used</p>
               </div>
               <p className="text-3xl font-bold text-blue-600">
-                {stats.impactMetrics.amount_g || 0} g
+                {totalLeavesUsed.toFixed(1)} g
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Wild leaves harvested instead of bought
@@ -353,7 +453,7 @@ export default function StatsPage() {
                 <p className="text-sm font-medium text-purple-600">Polyphenols Gained</p>
               </div>
               <p className="text-3xl font-bold text-purple-600">
-                {stats.impactMetrics.polyphenols_mg || 0} mg
+                {polyphenolsGained.toFixed(1)} mg
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Antioxidant compounds consumed
@@ -394,8 +494,37 @@ export default function StatsPage() {
             <span className="text-muted-foreground">Avg Cooking Time</span>
             <span className="font-medium text-foreground">30 min</span>
           </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Total Leaf Scans</span>
+            <span className="font-medium text-foreground">{totalLeafCount}</span>
+          </div>
         </div>
       </div>
+
+      {/* Debug Information (hidden by default) */}
+      {process.env.NODE_ENV === 'development' && (
+        <details className="glass rounded-2xl p-4">
+          <summary className="cursor-pointer text-sm font-medium text-muted-foreground">Debug Information</summary>
+          <div className="mt-4 space-y-4 text-xs">
+            <div>
+              <strong>Detected Leaves:</strong>
+              <pre className="mt-2 p-2 bg-gray-100 rounded overflow-auto max-h-32">{debugInfo.detectedLeavesRaw}</pre>
+            </div>
+            <div>
+              <strong>Impact Calculation:</strong>
+              <pre className="mt-2 p-2 bg-gray-100 rounded overflow-auto max-h-32">{debugInfo.impactCalculation}</pre>
+            </div>
+            <div>
+              <strong>Storage Keys:</strong>
+              <div className="mt-2 p-2 bg-gray-100 rounded">
+                {debugInfo.storageKeys.map(key => (
+                  <div key={key} className="text-xs">{key}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </details>
+      )}
     </div>
   );
 }
