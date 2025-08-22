@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, Plus, RefreshCw } from "lucide-react";
+import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw } from "lucide-react";
 import { StorageService } from "@/services/apiService";
 import { recipes } from "@/data/recipes";
 import { ImpactService, ImpactMetrics } from "@/services/impactService";
@@ -31,7 +31,9 @@ export default function StatsPage() {
   const [debugInfo, setDebugInfo] = useState({
     detectedLeavesRaw: '',
     impactCalculation: '',
-    storageKeys: [] as string[]
+    storageKeys: [] as string[],
+    recipesReceived: 0,
+    favoritesCount: 0
   });
 
   useEffect(() => {
@@ -52,7 +54,9 @@ export default function StatsPage() {
       setDebugInfo({
         detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
         impactCalculation: JSON.stringify(impactMetrics, null, 2),
-        storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf'))
+        storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
+        recipesReceived: StorageService.getRecipeReceivedCount(),
+        favoritesCount: StorageService.getFavoriteRecipes().length
       });
     };
 
@@ -61,26 +65,6 @@ export default function StatsPage() {
     const interval = setInterval(loadStats, 2000);
     return () => clearInterval(interval);
   }, []);
-
-  // Add demo data for testing
-  const addDemoData = () => {
-    // Add some demo leaf detections
-    StorageService.addDetectedLeaf('onion');
-    StorageService.addDetectedLeaf('onion');
-    StorageService.addDetectedLeaf('garlic');
-    StorageService.addDetectedLeaf('leek');
-    StorageService.addDetectedLeaf('chive');
-    StorageService.addDetectedLeaf('onion');
-    StorageService.addDetectedLeaf('wild garlic');
-    
-    // Increment scans
-    StorageService.incrementScans();
-    StorageService.incrementScans();
-    StorageService.incrementScans();
-    
-    // Force refresh
-    window.location.reload();
-  };
 
   // Clear all data
   const clearAllData = () => {
@@ -161,11 +145,18 @@ export default function StatsPage() {
       change: "recipes available"
     },
     {
-      title: "Recipe Suggestions",
-      value: stats.recipeSuggestions.toString(),
+      title: "Recipes Viewed",
+      value: debugInfo.recipesReceived.toString(),
       icon: ChefHat,
       color: "bg-gradient-to-br from-accent/20 to-secondary/10",
-      change: "from chat"
+      change: "from recipes"
+    },
+    {
+      title: "Favorites",
+      value: debugInfo.favoritesCount.toString(),
+      icon: ChefHat,
+      color: "bg-gradient-to-br from-secondary/20 to-accent/10",
+      change: "saved recipes"
     },
     {
       title: "Saved Conversations",
@@ -230,29 +221,20 @@ export default function StatsPage() {
         </p>
       </div>
 
-      {/* Demo Data Controls */}
+      {/* Data Controls */}
       <div className="glass rounded-2xl p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Demo Controls</h3>
-          <div className="flex gap-2">
-            <button
-              onClick={addDemoData}
-              className="flex items-center gap-2 px-3 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Add Demo Data
-            </button>
-            <button
-              onClick={clearAllData}
-              className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Clear All
-            </button>
-          </div>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold text-foreground">Controls</h3>
+          <button
+            onClick={clearAllData}
+            className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Reset All Data
+          </button>
         </div>
         <div className="text-xs text-muted-foreground">
-          Total Leaf Scans: {totalLeafCount} | Money Saved: {moneySaved.toFixed(2)} MAD | CO₂ Avoided: {co2Avoided.toFixed(2)} kg
+          Viewed recipes: {debugInfo.recipesReceived} • Favorites: {debugInfo.favoritesCount}
         </div>
       </div>
 

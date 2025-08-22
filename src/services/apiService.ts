@@ -244,6 +244,47 @@ export class StorageService {
     localStorage.setItem(this.getStorageKey('recipe_suggestions'), (current + 1).toString());
   }
 
+  // Recipe interactions: views (received) and favorites
+  static markRecipeReceived(recipeId: number): void {
+    const key = this.getStorageKey('recipes_received');
+    const stored = localStorage.getItem(key);
+    const entries: number[] = stored ? JSON.parse(stored) : [];
+    entries.push(recipeId);
+    localStorage.setItem(key, JSON.stringify(entries.slice(-200))); // keep last 200 views
+  }
+
+  static getRecipeReceivedCount(): number {
+    const stored = localStorage.getItem(this.getStorageKey('recipes_received'));
+    const arr: unknown = stored ? JSON.parse(stored) : [];
+    return Array.isArray(arr) ? arr.length : 0;
+  }
+
+  static getFavoriteRecipes(): number[] {
+    const stored = localStorage.getItem(this.getStorageKey('favorite_recipes'));
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  static isRecipeFavorited(recipeId: number): boolean {
+    const favorites = this.getFavoriteRecipes();
+    return favorites.includes(recipeId);
+  }
+
+  static toggleFavoriteRecipe(recipeId: number): boolean {
+    const key = this.getStorageKey('favorite_recipes');
+    const favorites = this.getFavoriteRecipes();
+    const index = favorites.indexOf(recipeId);
+    let isNowFavorited = false;
+    if (index >= 0) {
+      favorites.splice(index, 1);
+      isNowFavorited = false;
+    } else {
+      favorites.push(recipeId);
+      isNowFavorited = true;
+    }
+    localStorage.setItem(key, JSON.stringify(favorites));
+    return isNowFavorited;
+  }
+
   // Conversation cache management
   static saveConversation(conversationId: string, messages: any[]): void {
     const key = this.getStorageKey('conversation_' + conversationId);
