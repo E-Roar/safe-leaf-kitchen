@@ -21,6 +21,8 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
   const [roboflowEndpoint, setRoboflowEndpoint] = useState(initialSettings.roboflowEndpoint);
   const [openrouterApiKey, setOpenrouterApiKey] = useState(initialSettings.openrouterApiKey);
   const [openrouterEndpoint, setOpenrouterEndpoint] = useState(initialSettings.openrouterEndpoint);
+  const [n8nWebhookUrl, setN8nWebhookUrl] = useState(initialSettings.n8nWebhookUrl);
+  const [chatProvider, setChatProvider] = useState(initialSettings.chatProvider);
 
   const tabs = [
     { id: "home" as const, icon: Home, label: "Home" },
@@ -50,6 +52,8 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
       roboflowEndpoint,
       openrouterApiKey,
       openrouterEndpoint,
+      n8nWebhookUrl,
+      chatProvider,
     });
     toast.success("Settings saved. Changes apply immediately for this session.");
   };
@@ -165,6 +169,30 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
                   onChange={(e) => setOpenrouterEndpoint(e.target.value)}
                   className="input-organic w-full p-3 text-foreground"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  N8N Webhook URL
+                </label>
+                <input
+                  type="text"
+                  value={n8nWebhookUrl}
+                  onChange={(e) => setN8nWebhookUrl(e.target.value)}
+                  className="input-organic w-full p-3 text-foreground"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Chat Provider
+                </label>
+                <select
+                  value={chatProvider}
+                  onChange={(e) => setChatProvider(e.target.value as "openrouter" | "n8n")}
+                  className="input-organic w-full p-3 text-foreground"
+                >
+                  <option value="openrouter">OpenRouter</option>
+                  <option value="n8n">N8N Webhook</option>
+                </select>
               </div>
               <div className="flex gap-3 mt-2">
                 <button onClick={handleSaveSettings} className="btn-organic px-4 py-2 font-medium">

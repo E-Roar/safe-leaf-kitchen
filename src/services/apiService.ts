@@ -59,6 +59,22 @@ export class APIService {
 
   static async sendChatMessage(messages: ChatMessage[]): Promise<string> {
     try {
+      const settings = SettingsService.getSettings();
+      
+      // Choose provider based on settings
+      if (settings.chatProvider === 'n8n') {
+        return this.sendChatMessageToN8N(messages);
+      } else {
+        return this.sendChatMessageToOpenRouter(messages);
+      }
+    } catch (error) {
+      console.error("Chat API error:", error);
+      throw error;
+    }
+  }
+
+  static async sendChatMessageToOpenRouter(messages: ChatMessage[]): Promise<string> {
+    try {
       const requestBody = {
         model: "meta-llama/llama-3.1-8b-instruct",
         messages: messages,
@@ -109,8 +125,96 @@ export class APIService {
         }
       }
       
-      throw new Error("Failed to get response from chat assistant");
+      throw new Error("Failed to get response from OpenRouter");
     }
+  }
+
+  static async sendChatMessageToN8N(messages: ChatMessage[]): Promise<string> {
+    try {
+      const { n8nWebhookUrl } = SettingsService.getSettings();
+      
+      if (!n8nWebhookUrl) {
+        throw new Error("N8N webhook URL not configured");
+      }
+
+      // Prepare the request payload for N8N
+      const requestBody = {
+        messages: messages,
+        timestamp: new Date().toISOString(),
+        sessionId: this.generateSessionId(),
+        metadata: {
+          source: "safeleafkitchen",
+          version: "1.0.0"
+        }
+      };
+
+      console.log("Sending request to N8N webhook:", { 
+        webhookUrl: n8nWebhookUrl, 
+        messages: messages.length,
+        sessionId: requestBody.sessionId 
+      });
+      
+      const response = await axios.post(n8nWebhookUrl, requestBody, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        timeout: 30000 // 30 second timeout for N8N processing
+      });
+
+      console.log("N8N webhook response:", response.data);
+
+      // Validate N8N response structure
+      if (!response.data) {
+        throw new Error("No data received from N8N webhook");
+      }
+
+      // N8N can return different response formats, handle both
+      let responseText = "";
+      
+      if (typeof response.data === 'string') {
+        // Direct text response
+        responseText = response.data;
+      } else if (response.data.response) {
+        // Structured response with response field
+        responseText = response.data.response;
+      } else if (response.data.message) {
+        // Structured response with message field
+        responseText = response.data.message;
+      } else if (response.data.content) {
+        // Structured response with content field
+        responseText = response.data.content;
+      } else {
+        // Try to stringify the response
+        responseText = JSON.stringify(response.data);
+      }
+
+      if (!responseText || responseText.trim() === '') {
+        throw new Error("Empty response from N8N webhook");
+      }
+
+      return responseText.trim();
+    } catch (error) {
+      console.error("N8N webhook error:", error);
+      
+      // More specific error handling
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("N8N Response Error:", error.response.status, error.response.data);
+          throw new Error(`N8N webhook error: ${error.response.status} - ${error.response.statusText}`);
+        } else if (error.request) {
+          console.error("Network Error:", error.request);
+          throw new Error("Network error: Unable to reach N8N webhook");
+        } else if (error.code === 'ECONNABORTED') {
+          throw new Error("N8N webhook timeout: Request took too long to process");
+        }
+      }
+      
+      throw new Error("Failed to get response from N8N webhook");
+    }
+  }
+
+  private static generateSessionId(): string {
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   static async generateNutritionInsight(leafType: string, chatMessages?: ChatMessage[]): Promise<string> {
@@ -133,10 +237,13 @@ export class APIService {
   }
 
   // Text-to-Speech using Web Speech API with feminine voice
-  static speak(text: string): void {
-    if (this.isMuted) {
-      return; // Don't speak if muted
+  static speak(text: string, forceSpeak: boolean = false, onStart?: () => void, onEnd?: () => void): void {
+    if (this.isMuted && !forceSpeak) {
+      return; // Don't speak if muted (unless forced)
     }
+
+    // Stop any current speech
+    speechSynthesis.cancel();
     
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text);
@@ -164,8 +271,28 @@ export class APIService {
           utterance.voice = availableVoices[0];
         }
       }
+
+      // Add event listeners
+      utterance.onstart = () => {
+        if (onStart) onStart();
+      };
+      
+      utterance.onend = () => {
+        if (onEnd) onEnd();
+      };
+
+      utterance.onerror = () => {
+        if (onEnd) onEnd(); // Call onEnd on error too
+      };
       
       speechSynthesis.speak(utterance);
+    }
+  }
+
+  // Stop current speech
+  static stopSpeech(): void {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
     }
   }
 
