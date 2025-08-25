@@ -37,6 +37,20 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        // Ensure metadata is loaded so videoWidth/videoHeight are available
+        await new Promise<void>((resolve) => {
+          const video = videoRef.current!;
+          const handler = () => {
+            video.removeEventListener('loadedmetadata', handler);
+            resolve();
+          };
+          if (video.readyState >= 1) {
+            resolve();
+          } else {
+            video.addEventListener('loadedmetadata', handler);
+          }
+        });
+        try { await videoRef.current.play(); } catch {}
       }
     } catch (error) {
       console.error("Camera access error:", error);
@@ -67,6 +81,16 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
       }
 
       // Set canvas dimensions to match video
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        // Wait briefly for camera to be ready
+        await new Promise(r => setTimeout(r, 200));
+      }
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        toast.dismiss();
+        toast.error("Camera not ready. Please try again.");
+        console.warn("CameraScanner: video dimensions are 0");
+        return;
+      }
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
@@ -79,6 +103,7 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
 
       // Send to Roboflow API
       const result = await APIService.detectLeaf(base64Image);
+      console.debug("Roboflow response:", result);
       
       toast.dismiss();
       

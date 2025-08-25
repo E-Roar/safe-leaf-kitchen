@@ -3,6 +3,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes wobble {
+  0% { transform: rotate(0deg) scale(1); }
+  15% { transform: rotate(-8deg) scale(1.04); }
+  30% { transform: rotate(6deg) scale(1.04); }
+  45% { transform: rotate(-4deg) scale(1.03); }
+  60% { transform: rotate(3deg) scale(1.02); }
+  75% { transform: rotate(-2deg) scale(1.01); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.animate-wobble {
+  animation: wobble 450ms ease-in-out;
+}
+
 /* SafeLeafKitchen Design System - Dark Modern Theme */
 
 @layer base {

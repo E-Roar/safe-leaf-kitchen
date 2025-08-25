@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { Home, MessageCircle, BarChart3, ChefHat, Settings, ChevronUp, ChevronDown } from "lucide-react";
+import { Home, MessageCircle, BarChart3, ChefHat, Settings, Leaf, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SettingsService } from "@/services/settingsService";
 import { toast } from "sonner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  activeTab: "home" | "chat" | "stats" | "recipes";
-  onTabChange: (tab: "home" | "chat" | "stats" | "recipes") => void;
+  activeTab: "home" | "chat" | "stats" | "recipes" | "leaves";
+  onTabChange: (tab: "home" | "chat" | "stats" | "recipes" | "leaves") => void;
 }
 
 export default function AppLayout({ children, activeTab, onTabChange }: AppLayoutProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [settingsPassword, setSettingsPassword] = useState("");
   const [isSettingsUnlocked, setIsSettingsUnlocked] = useState(false);
-  const [isNavExpanded, setIsNavExpanded] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const initialSettings = SettingsService.getSettings();
   const [roboflowApiKey, setRoboflowApiKey] = useState(initialSettings.roboflowApiKey);
@@ -29,6 +29,7 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
     { id: "chat" as const, icon: MessageCircle, label: "Chat" },
     { id: "stats" as const, icon: BarChart3, label: "Insights" },
     { id: "recipes" as const, icon: ChefHat, label: "Recipes" },
+    { id: "leaves" as const, icon: Leaf, label: "Leaves" },
   ];
 
   const handleSettingsClick = () => {
@@ -209,55 +210,65 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
 
       {/* Main content */}
       <main className={cn(
-        "min-h-screen transition-all duration-300 ease-in-out",
-        isNavExpanded ? "pb-24" : "pb-12"
+        "min-h-screen transition-all duration-300 ease-in-out pb-16"
       )}>
         <div className="h-full">
           {children}
         </div>
       </main>
 
-      {/* Bottom navigation */}
-      <nav className={cn(
-        "fixed bottom-0 left-0 right-0 glass border-t border-border transition-all duration-300 ease-in-out",
-        isNavExpanded ? "h-24" : "h-12"
-      )}>
-        {/* Toggle button */}
-        <div className="flex justify-center -mt-3 mb-2">
+      {/* Corner Menu (FAB) */}
+      <div className={cn("fixed right-5 z-50", activeTab === 'chat' ? "bottom-24" : "bottom-5")}>
+        <div className="relative w-14 h-14">
+          {/* Circular items */}
+          {tabs.map(({ id, icon: Icon, label }, index) => {
+            const total = tabs.length;
+            const startDeg = 180; // arc up-left from bottom-right corner
+            const endDeg = 260;
+            const step = total > 1 ? (endDeg - startDeg) / (total - 1) : 0;
+            const angle = (startDeg + step * index) * Math.PI / 180;
+            const radius = isMenuOpen ? 170 : 0; // px (increased spacing)
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            return (
+              <button
+                key={id}
+                onClick={() => { onTabChange(id); setIsMenuOpen(false); }}
+                className={cn(
+                  "absolute flex items-center gap-2 px-3 py-2 rounded-full shadow-lg backdrop-blur-md transition-all duration-300",
+                  isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-0",
+                  activeTab === id ? "bg-primary text-primary-foreground" : "glass text-foreground hover:bg-muted/60"
+                )}
+                style={{ left: '50%', top: '50%', transform: `translate(-50%, -50%) translate(${x}px, ${y}px)` }}
+                aria-label={label}
+              >
+                <span className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center",
+                  activeTab === id ? "bg-primary-foreground/20" : "bg-background/70"
+                )}>
+                  <Icon className={cn("w-4 h-4", activeTab === id ? "text-primary-foreground" : "text-foreground")} />
+                </span>
+                <span className="text-xs font-medium whitespace-nowrap">
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+
+          {/* Main FAB */}
           <button
-            onClick={() => setIsNavExpanded(!isNavExpanded)}
-            className="p-2 bg-background/80 backdrop-blur-sm rounded-full border border-border hover:bg-background/90 transition-all duration-300"
-          >
-            {isNavExpanded ? (
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            ) : (
-              <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={cn(
+              "w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform duration-300",
+              isMenuOpen ? "animate-wobble bg-primary text-primary-foreground" : "bg-primary text-primary-foreground hover:scale-105"
             )}
+            aria-label="Menu"
+            style={{ position: 'absolute', left: 0, top: 0 }}
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
           </button>
         </div>
-
-        {/* Navigation tabs - only visible when expanded */}
-        <div className={cn(
-          "flex items-center justify-around transition-all duration-300 ease-in-out",
-          isNavExpanded ? "p-3 opacity-100 h-16" : "p-0 opacity-0 pointer-events-none h-0 overflow-hidden"
-        )}>
-          {tabs.map(({ id, icon: Icon, label }) => (
-            <button
-              key={id}
-              onClick={() => onTabChange(id)}
-              className={cn(
-                "flex flex-col items-center gap-1 p-2 rounded-full transition-all duration-300 min-w-[60px]",
-                activeTab === id
-                  ? "text-primary bg-primary/20 scale-110 shadow-lg"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-105"
-              )}
-            >
-              <Icon className="w-4 h-4" />
-              <span className="text-xs font-medium">{label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
+      </div>
     </div>
   );
 }

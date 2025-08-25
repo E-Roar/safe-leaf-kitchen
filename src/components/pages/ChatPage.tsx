@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic, Camera, MicOff, Volume2, VolumeX, ChefHat, Plus, MessageSquare, Trash2, Search, Tag, Filter, Pause } from "lucide-react";
+import { Send, Mic, Camera, MicOff, Volume2, VolumeX, ChefHat, Plus, MessageSquare, Trash2, Search, Tag, Filter, Pause, Leaf as LeafIcon } from "lucide-react";
 import { APIService, StorageService, ChatMessage } from "@/services/apiService";
 import CameraScanner from "@/components/features/CameraScanner";
 import { recipes } from "@/data/recipes";
@@ -13,6 +13,8 @@ interface Message {
   content: string;
   timestamp: Date;
   suggestedRecipe?: string;
+  suggestedLeafId?: number;
+  suggestedLeafName?: string;
 }
 
 export default function ChatPage() {
@@ -52,6 +54,13 @@ export default function ChatPage() {
     }
   };
 
+  // Function to navigate to a specific leaf profile
+  const navigateToLeaf = (leafId: number) => {
+    window.dispatchEvent(new CustomEvent('navigateToLeaf', {
+      detail: { leafId }
+    }));
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -62,6 +71,9 @@ export default function ChatPage() {
 
   // Load conversations on component mount
   useEffect(() => {
+    const handleOpenCamera = () => setShowCamera(true);
+    window.addEventListener('openCameraScan', handleOpenCamera as EventListener);
+
     const loadConversations = () => {
       const conversationList = StorageService.getConversationList();
       setConversations(conversationList);
@@ -100,6 +112,10 @@ export default function ChatPage() {
     };
     
     loadConversations();
+
+    return () => {
+      window.removeEventListener('openCameraScan', handleOpenCamera as EventListener);
+    };
   }, []);
 
   // Filter conversations based on search and tags
@@ -185,13 +201,21 @@ export default function ChatPage() {
     return Array.from(allTags);
   };
 
-  const addMessage = (type: 'user' | 'bot' | 'system', content: string, suggestedRecipe?: string) => {
+  const addMessage = (
+    type: 'user' | 'bot' | 'system', 
+    content: string, 
+    suggestedRecipe?: string,
+    suggestedLeafId?: number,
+    suggestedLeafName?: string
+  ) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       type,
       content,
       timestamp: new Date(),
-      suggestedRecipe
+      suggestedRecipe,
+      suggestedLeafId,
+      suggestedLeafName
     };
     setMessages(prev => [...prev, newMessage]);
   };
@@ -1588,6 +1612,27 @@ Examples:
         );
         
         addMessage('bot', insight, suggestedRecipe);
+
+        // Offer navigation to leaf profile when a known leaf is detected
+        const leafMap: Record<string, { id: number; name: string }> = {
+          'onion': { id: 1, name: 'Onion' },
+          'green onion': { id: 1, name: 'Onion' },
+          'scallion': { id: 1, name: 'Onion' },
+          'fennel': { id: 2, name: 'Fennel' },
+          'carrot': { id: 3, name: 'Carrot' },
+          'kohlrabi': { id: 4, name: 'Kohlrabi' },
+          'beet': { id: 5, name: 'Beet' },
+          'radish': { id: 6, name: 'Radish' },
+          'leek': { id: 7, name: 'Leek' },
+          'turnip': { id: 8, name: 'Turnip' },
+          'artichoke': { id: 9, name: 'Artichoke' },
+        };
+
+        const normalized = (leafType || '').toString().trim().toLowerCase();
+        const matched = leafMap[normalized as keyof typeof leafMap];
+        if (matched) {
+          addMessage('bot', `Open ${matched.name} leaf profile`, undefined, matched.id, matched.name);
+        }
         StorageService.addDetectedLeaf(leafType);
         StorageService.incrementScans();
         
@@ -1856,6 +1901,19 @@ Examples:
                   </button>
                 </div>
               )}
+
+              {/* Leaf Suggestion Button */}
+              {message.type === 'bot' && message.suggestedLeafId && (
+                <div className="mt-3">
+                  <button
+                    onClick={() => navigateToLeaf(message.suggestedLeafId!)}
+                    className="btn-organic px-4 py-2 text-sm font-medium text-primary-foreground flex items-center gap-2 hover:scale-105 transition-all duration-300"
+                  >
+                    <LeafIcon className="w-4 h-4" />
+                    {message.suggestedLeafName ? `View ${message.suggestedLeafName}` : 'View Leaf'}
+                  </button>
+                </div>
+              )}
               
               {message.type === 'bot' && (
                 <button
@@ -1906,7 +1964,7 @@ Examples:
           </div>
         )}
         
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} data-messages-end />
       </div>
 
       {/* Input area */}
