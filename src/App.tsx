@@ -18,10 +18,21 @@ const App = () => {
   const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats" | "recipes" | "leaves">("home");
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
   const [selectedLeafId, setSelectedLeafId] = useState<number | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') as 'light' | 'dark') || 'dark');
 
   useEffect(() => {
     registerServiceWorker();
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const handleNavigateToRecipe = (event: CustomEvent) => {
@@ -49,6 +60,7 @@ const App = () => {
             onNavigateToChat={() => setActiveTab("chat")}
             onNavigateToRecipes={() => setActiveTab("recipes")}
             onNavigateToLeaves={() => setActiveTab("leaves")}
+            onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
             onNavigateToScan={() => {
               setActiveTab("chat");
               // Defer event to ensure ChatPage is mounted
@@ -72,6 +84,7 @@ const App = () => {
             onNavigateToChat={() => setActiveTab("chat")}
             onNavigateToRecipes={() => setActiveTab("recipes")}
             onNavigateToLeaves={() => setActiveTab("leaves")}
+            onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
             onNavigateToScan={() => {
               setActiveTab("chat");
               setTimeout(() => {

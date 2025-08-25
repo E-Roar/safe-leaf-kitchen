@@ -1,15 +1,25 @@
-import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight } from "lucide-react";
+import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon } from "lucide-react";
 
 interface LandingPageProps {
   onNavigateToChat: () => void;
   onNavigateToRecipes?: () => void;
   onNavigateToScan?: () => void;
   onNavigateToLeaves?: () => void;
+  onToggleTheme?: () => void;
 }
 
-export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves }: LandingPageProps) {
+export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves, onToggleTheme }: LandingPageProps) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-12 relative">
+      {/* Theme Toggle */}
+      <button
+        onClick={onToggleTheme}
+        className="absolute top-4 left-4 z-20 p-2 rounded-full border border-border bg-background/70 backdrop-blur-sm hover:bg-muted transition-colors"
+        title="Toggle light/dark"
+      >
+        <Sun className="w-4 h-4 hidden dark:block" />
+        <Moon className="w-4 h-4 dark:hidden" />
+      </button>
       {/* Hero */}
       <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 items-center mb-14">
         <div className="order-2 md:order-1">

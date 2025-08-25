@@ -147,6 +147,14 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
     l.aliases.some(a => a.toLowerCase().includes(query.toLowerCase()))
   );
 
+  const getLeafImage = (leafEn: string) => {
+    const filename = leafEn
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '-');
+    return `/images/leaves/${filename}.png`;
+  };
+
   const Card = ({ leaf }: { leaf: LeafInfo }) => (
     <button
       onClick={() => { setSelectedLeaf(leaf); setIsSidebarOpen(false); }}
@@ -159,8 +167,18 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
         <Star className="w-4 h-4 text-yellow-400 opacity-0" />
       </div>
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-xl bg-gradient-organic flex items-center justify-center">
-          <Leaf className="w-8 h-8 text-primary" />
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-organic flex items-center justify-center">
+          <img
+            src={getLeafImage(leaf.name.en)}
+            alt={leaf.name.en}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              (target.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+            }}
+          />
+          <Leaf className="w-8 h-8 text-primary hidden" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-foreground text-sm line-clamp-2">
@@ -175,12 +193,12 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
   );
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
       {/* Sidebar */}
       <div className={cn(
         "fixed inset-y-0 left-0 z-40 w-80 bg-background/95 backdrop-blur-xl border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-        "lg:relative lg:translate-x-0 lg:border-r lg:border-border"
+        "lg:translate-x-0 lg:border-r lg:border-border"
       )}>
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
@@ -214,7 +232,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:ml-0">
+      <div className="flex-1 flex flex-col lg:pl-80">
         {/* Mobile Header */}
         <div className="lg:hidden p-4 border-b border-border">
           <div className="flex items-center justify-between">
@@ -230,7 +248,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-4 lg:p-6">
+        <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
           {selectedLeaf ? (
             <div className="max-w-4xl mx-auto space-y-6">
               {/* Header */}
@@ -243,6 +261,17 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 <h1 className="text-3xl font-bold text-foreground mb-2">
                   {selectedLeaf.name[selectedLanguage]}
                 </h1>
+                <div className="mx-auto mb-4 w-full max-w-xl aspect-video rounded-3xl overflow-hidden bg-gradient-organic">
+                  <img
+                    src={getLeafImage(selectedLeaf.name.en)}
+                    alt={selectedLeaf.name.en}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
                 <p className="text-muted-foreground">
                   {selectedLeaf.aliases.join(' • ')}
                 </p>

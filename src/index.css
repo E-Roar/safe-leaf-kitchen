@@ -21,61 +21,61 @@
 
 @layer base {
   :root {
-    /* Base colors - Nature-inspired dark theme */
-    --background: 160 15% 8%;
-    --foreground: 160 15% 95%;
+    /* Light mode derived from reference palette (soft greens, white cards) */
+    --background: 150 30% 98%;
+    --foreground: 150 20% 15%;
 
-    /* Cards with subtle depth */
-    --card: 160 15% 12%;
-    --card-foreground: 160 15% 95%;
+    /* Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 150 20% 15%;
 
     /* Popovers */
-    --popover: 160 15% 10%;
-    --popover-foreground: 160 15% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 20% 15%;
 
-    /* Primary - Vibrant green */
-    --primary: 142 76% 36%;
-    --primary-foreground: 160 15% 8%;
-    --primary-glow: 142 90% 45%;
+    /* Primary - leafy green */
+    --primary: 142 45% 35%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 142 50% 45%;
 
-    /* Secondary - Deep forest */
-    --secondary: 160 25% 18%;
-    --secondary-foreground: 160 15% 85%;
+    /* Secondary - soft sage */
+    --secondary: 140 25% 90%;
+    --secondary-foreground: 150 20% 20%;
 
-    /* Muted - Dark forest grays */
-    --muted: 160 20% 15%;
-    --muted-foreground: 160 10% 65%;
+    /* Muted */
+    --muted: 150 20% 92%;
+    --muted-foreground: 150 8% 40%;
 
-    /* Accent - Sage green */
-    --accent: 120 40% 50%;
-    --accent-foreground: 160 15% 8%;
+    /* Accent */
+    --accent: 120 35% 45%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Destructive - Modern red */
-    --destructive: 0 75% 60%;
-    --destructive-foreground: 160 15% 95%;
+    /* Destructive */
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 160 25% 22%;
-    --input: 160 25% 18%;
-    --ring: 142 76% 36%;
+    --border: 150 15% 86%;
+    --input: 150 15% 96%;
+    --ring: 142 45% 35%;
 
     /* Enhanced radius for modern feel */
     --radius: 0.75rem;
 
     /* Custom design tokens - Nature-inspired gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(120 60% 40%));
-    --gradient-hero: linear-gradient(135deg, hsl(160 25% 10%), hsl(160 20% 15%), hsl(160 15% 8%));
-    --gradient-organic: linear-gradient(180deg, hsl(160 20% 15%), hsl(160 15% 12%));
-    --gradient-glow: radial-gradient(circle, hsl(142 76% 36% / 0.3), transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(142 45% 35%), hsl(120 40% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(150 40% 98%), hsl(150 35% 96%), hsl(150 30% 94%));
+    --gradient-organic: linear-gradient(180deg, hsl(150 30% 98%), hsl(150 28% 96%));
+    --gradient-glow: radial-gradient(circle, hsl(142 45% 35% / 0.2), transparent 70%);
     
     /* Shadows with nature depth */
     --shadow-organic: 0 10px 30px -10px hsl(160 25% 5% / 0.5);
     --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.4);
     --shadow-leaf: 0 20px 50px -15px hsl(160 25% 5% / 0.6);
     
-    /* Glass effects - Nature dark glass */
-    --glass-bg: hsl(160 15% 12% / 0.8);
-    --glass-border: hsl(160 20% 25% / 0.4);
+    /* Glass effects - Light mode glass */
+    --glass-bg: hsl(0 0% 100% / 0.75);
+    --glass-border: hsl(150 15% 86% / 0.8);
     
     /* Animations */
     --transition-organic: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -92,7 +92,7 @@
   }
 
   .dark {
-    /* Same as root since we're going full dark */
+    /* Dark mode from previous palette */
     --background: 160 15% 8%;
     --foreground: 160 15% 95%;
 
@@ -152,6 +152,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: var(--shadow-organic);
+    color: hsl(var(--foreground));
   }
 
   /* Modern button styles */
@@ -161,6 +162,7 @@
     border-radius: 1rem;
     box-shadow: var(--shadow-organic);
     border: 1px solid var(--glass-border);
+    color: hsl(var(--primary-foreground));
   }
 
   .btn-organic:hover {
@@ -205,11 +207,12 @@
 
   /* Modern input styling */
   .input-organic {
-    background: var(--glass-bg);
-    border: 2px solid var(--glass-border);
+    background: hsl(var(--card));
+    border: 2px solid hsl(var(--border));
     border-radius: 1rem;
     transition: var(--transition-organic);
     backdrop-filter: blur(10px);
+    color: hsl(var(--foreground));
   }
 
   .input-organic:focus {

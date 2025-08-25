@@ -146,12 +146,12 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
   }, [selectedRecipeId]);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
       {/* Sidebar */}
       <div className={cn(
         "fixed inset-y-0 left-0 z-40 w-80 bg-background/95 backdrop-blur-xl border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-        "lg:relative lg:translate-x-0 lg:border-r lg:border-border"
+        "lg:translate-x-0 lg:border-r lg:border-border"
       )}>
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
@@ -220,7 +220,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:ml-0">
+      <div className="flex-1 flex flex-col lg:pl-80">
         {/* Mobile Header */}
         <div className="lg:hidden p-4 border-b border-border">
           <div className="flex items-center justify-between">
@@ -236,7 +236,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-4 lg:p-6">
+        <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
           {selectedRecipe ? (
             <div className="space-y-6">
               {/* Recipe Header */}
