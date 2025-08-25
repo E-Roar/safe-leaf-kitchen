@@ -79,8 +79,10 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
             <div className="relative w-14 h-14">
               {tabs.map(({ id, icon: Icon, label }, index) => {
                 const total = tabs.length;
-                const startDeg = 0; // rightwards
-                const endDeg = 90; // downwards
+                const isRtl = lang === 'AR';
+                // RTL: expand left-down (90°→180°), LTR: right-down (0°→90°)
+                const startDeg = isRtl ? 90 : 0;
+                const endDeg = isRtl ? 180 : 90;
                 const step = total > 1 ? (endDeg - startDeg) / (total - 1) : 0;
                 const angle = (startDeg + step * index) * Math.PI / 180;
                 const radius = isTopMenuOpen ? 170 : 0;
