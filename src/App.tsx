@@ -48,6 +48,7 @@ const App = () => {
           <LandingPage
             onNavigateToChat={() => setActiveTab("chat")}
             onNavigateToRecipes={() => setActiveTab("recipes")}
+            onNavigateToLeaves={() => setActiveTab("leaves")}
             onNavigateToScan={() => {
               setActiveTab("chat");
               // Defer event to ensure ChatPage is mounted
@@ -70,6 +71,7 @@ const App = () => {
           <LandingPage
             onNavigateToChat={() => setActiveTab("chat")}
             onNavigateToRecipes={() => setActiveTab("recipes")}
+            onNavigateToLeaves={() => setActiveTab("leaves")}
             onNavigateToScan={() => {
               setActiveTab("chat");
               setTimeout(() => {

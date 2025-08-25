@@ -1,7 +1,46 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { X, Menu, Leaf, Search, Star } from "lucide-react";
 import { leaves, LeafInfo } from "@/data/leaves";
 import { cn } from "@/lib/utils";
+import nutritionRaw from "../../../tableau_nutritionnel 9 feuilles.json";
+import bioactivesRaw from "../../../tableau_composes_bioactifs 9 feuilles.json";
+import bioActivitiesRaw from "../../../vertopal.com_Activités biologiques et molécules bioactives présentes dans les feuilles d.json";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
+} from "recharts";
+
+// Lightweight bubbles simulation for compounds
+function CompoundsBubbleSimulation({ compounds }: { compounds: string[] }) {
+  return (
+    <div className="w-full rounded-2xl bg-background/30 border border-border p-3">
+      <div className="flex flex-wrap gap-2">
+        {compounds.map((label, idx) => (
+          <span
+            key={idx}
+            className="px-2 py-1 rounded-full text-xs bg-primary/10 text-primary border border-primary/20"
+          >
+            {label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 type Language = 'en' | 'fr';
 
@@ -14,6 +53,78 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
   const [selectedLeaf, setSelectedLeaf] = useState<LeafInfo | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [query, setQuery] = useState("");
+
+  // Build lookup maps (by French leaf name as in datasets)
+  const nutritionByFr: Record<string, any> = useMemo(() => {
+    const map: Record<string, any> = {};
+    (nutritionRaw as any[]).forEach((row) => {
+      map[(row["Feuille de"] || "").toString().toLowerCase()] = row;
+    });
+    return map;
+  }, []);
+
+  const bioactivesByFr: Record<string, any> = useMemo(() => {
+    const map: Record<string, any> = {};
+    (bioactivesRaw as any[]).forEach((row) => {
+      map[(row["Feuille de"] || "").toString().toLowerCase()] = row;
+    });
+    return map;
+  }, []);
+
+  // Parse loose bioactivities text file (currently contains onion/"oignon" section)
+  const extraBioByFr: Record<string, { classes: string[]; molecules: string[]; activities: string[] }> = useMemo(() => {
+    const out: Record<string, { classes: string[]; molecules: string[]; activities: string[] }> = {};
+    try {
+      const keys = Object.keys(bioActivitiesRaw as any);
+      if (keys.length > 0) {
+        const text = keys[0].toLowerCase();
+        if (text.includes("feuilles d’oignon") || text.includes("feuilles d'oignon") || text.includes("oignon")) {
+          out['oignon'] = {
+            classes: [
+              "Flavonoïdes & polyphénols",
+              "Composés organosulfurés",
+              "Anthocyanines",
+            ],
+            molecules: [
+              "Quercétine", "Isorhamnétine", "Kaempférol", "Lutéoline",
+              "Acides phénoliques (gallique, férulique, syringique, protocatéchique, chlorogénique, vanillique, coumarique, cinnamique, benzoïque)",
+              "Cystéine sulfoxyde", "Onionin A", "Thiosulfinates", "Cépaènes", "Sulfones",
+              "Cyanidine 3-glucosides", "Péonidine glucosides", "Pétunidine glucoside", "Carboxypyranocyanidine",
+            ],
+            activities: [
+              "Antioxydante", "Anti-inflammatoire", "Antidiabétique", "Neuroprotecteur",
+              "Antimicrobien", "Antithrombotique", "Cardioprotecteur", "Anticancéreuse",
+            ],
+          };
+        }
+      }
+    } catch {}
+    return out;
+  }, []);
+
+  const parseNum = (val: any): number | null => {
+    if (val === undefined || val === null || val === "") return null;
+    const n = Number(val);
+    return isNaN(n) ? null : n;
+  };
+
+  // Deterministic mapping by leaf id → French dataset key
+  const getFrKeyForLeaf = (leaf: LeafInfo | null): string | null => {
+    if (!leaf) return null;
+    const mapById: Record<number, string> = {
+      1: 'oignon',
+      2: 'fenouil',
+      3: 'carotte',
+      4: 'chou rave',
+      5: 'betterave rouge',
+      6: 'radis',
+      7: 'poireau',
+      8: 'navet',
+      9: 'artichaut',
+    };
+    const key = mapById[leaf.id];
+    return key || null;
+  };
 
   useEffect(() => {
     if (!selectedLeaf && leaves.length > 0) {
@@ -157,6 +268,113 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 </div>
               </div>
 
+              {/* Charts Section */}
+              {(() => {
+                const frKey = getFrKeyForLeaf(selectedLeaf);
+                const nut = frKey ? nutritionByFr[frKey] : null;
+                const bio = frKey ? bioactivesByFr[frKey] : null;
+                const barData = [
+                  {
+                    metric: "Proteins (%)",
+                    value: parseNum(nut?.["Protéines (%)"]) ?? 0,
+                  },
+                  {
+                    metric: "Calcium mg/100g",
+                    value: parseNum(nut?.["Calcium (mg/100g)"]) ?? 0,
+                  },
+                  {
+                    metric: "Potassium mg/100g",
+                    value: parseNum(nut?.["Potassium (mg/100g)"]) ?? 0,
+                  },
+                  {
+                    metric: "Magnesium mg/100g",
+                    value: parseNum(nut?.["Magnésium (mg/100g)"]) ?? 0,
+                  },
+                ];
+
+                const radarData = [
+                  {
+                    name: "Polyphenols",
+                    score: parseNum(bio?.["Polyphénols_Totaux_mg_100g"]) ?? 0,
+                  },
+                  {
+                    name: "Flavonoids",
+                    score: parseNum(bio?.["Flavonoïdes_Totaux_mg_100g"]) ?? 0,
+                  },
+                  {
+                    name: "Bioactives",
+                    score:
+                      parseNum(bio?.["Composés_Bioactifs_Totaux"]) ??
+                      parseNum(bio?.["Composés_Bioactifs_Totaux_mg_100g"]) ??
+                      0,
+                  },
+                ];
+
+                return (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Bar Chart */}
+                    <div className="glass rounded-3xl p-4">
+                      <h4 className="font-semibold mb-2 text-foreground">Key nutrients</h4>
+                      <ChartContainer
+                        config={{
+                          value: { label: "Value", color: "hsl(var(--primary))" },
+                        }}
+                        className="h-64"
+                      >
+                        <BarChart data={barData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="metric" hide />
+                          <YAxis hide />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar
+                            dataKey="value"
+                            fill="var(--color-value)"
+                            radius={[8, 8, 8, 8]}
+                            isAnimationActive
+                          />
+                        </BarChart>
+                      </ChartContainer>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        {barData.map((d) => (
+                          <span key={d.metric} className="px-2 py-1 bg-background/50 rounded-md">
+                            {d.metric}: <span className="text-foreground font-medium">{d.value}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Radar Chart */}
+                    <div className="glass rounded-3xl p-4">
+                      <h4 className="font-semibold mb-2 text-foreground">Bioactive density</h4>
+                      <ChartContainer
+                        config={{
+                          score: { label: "Score", color: "hsl(var(--accent))" },
+                        }}
+                        className="h-64"
+                      >
+                        <RadarChart data={radarData} outerRadius={90}>
+                          <PolarGrid />
+                          <PolarAngleAxis dataKey="name" />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Radar
+                            name="score"
+                            dataKey="score"
+                            stroke="var(--color-score)"
+                            fill="var(--color-score)"
+                            fillOpacity={0.4}
+                            isAnimationActive
+                          />
+                        </RadarChart>
+                      </ChartContainer>
+                      {(bio?.["Classification_Antioxydante_CORRIGÉ"] || bio?.["Classification_Antioxydante_y"]) && (
+                        <div className="text-xs mt-2 text-muted-foreground">
+                          Antioxidant class: <span className="text-foreground font-medium">{bio["Classification_Antioxydante_CORRIGÉ"] || bio["Classification_Antioxydante_y"]}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {selectedLeaf.highlights.proteins_percent !== undefined && (
@@ -208,16 +426,37 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
               </div>
 
               {/* Compounds */}
-              {selectedLeaf.compounds && selectedLeaf.compounds.length > 0 && (
-                <div className="glass rounded-3xl p-5">
-                  <h4 className="font-semibold mb-2 text-foreground">Key compounds</h4>
-                  <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                    {selectedLeaf.compounds.map((c, i) => (
-                      <li key={i}>{c}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {(() => {
+                const frKey = getFrKeyForLeaf(selectedLeaf);
+                const extra = frKey ? extraBioByFr[frKey] : null;
+                const compounds = selectedLeaf.compounds || [];
+                const moleculeList = extra?.molecules?.length ? extra.molecules : compounds;
+                return moleculeList && moleculeList.length > 0 ? (
+                  <div className="glass rounded-3xl p-5">
+                    <h4 className="font-semibold mb-3 text-foreground">Key compounds</h4>
+                    <CompoundsBubbleSimulation compounds={moleculeList} />
+                  </div>
+                ) : null;
+              })()}
+
+              {/* Activities mind-map style chips */}
+              {(() => {
+                const frKey = getFrKeyForLeaf(selectedLeaf);
+                const extra = frKey ? extraBioByFr[frKey] : null;
+                if (!extra?.activities?.length) return null;
+                return (
+                  <div className="glass rounded-3xl p-5">
+                    <h4 className="font-semibold mb-3 text-foreground">Main bioactivities</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {extra.activities.map((a, i) => (
+                        <span key={i} className="px-2 py-1 rounded-full text-xs bg-accent/10 text-accent">
+                          {a}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Safety */}
               {selectedLeaf.safety && (

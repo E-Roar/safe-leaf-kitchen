@@ -4,9 +4,10 @@ interface LandingPageProps {
   onNavigateToChat: () => void;
   onNavigateToRecipes?: () => void;
   onNavigateToScan?: () => void;
+  onNavigateToLeaves?: () => void;
 }
 
-export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan }: LandingPageProps) {
+export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves }: LandingPageProps) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-12 relative">
       {/* Hero */}
@@ -127,6 +128,9 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           </button>
           <button onClick={onNavigateToRecipes} className="px-5 py-3 rounded-xl border border-border text-sm hover:bg-muted/50 transition-colors">
             Explore Recipes
+          </button>
+          <button onClick={onNavigateToLeaves} className="px-5 py-3 rounded-xl border border-border text-sm hover:bg-muted/50 transition-colors">
+            Leaves Encyclopedia
           </button>
         </div>
       </div>

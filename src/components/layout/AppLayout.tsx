@@ -29,7 +29,6 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
     { id: "chat" as const, icon: MessageCircle, label: "Chat" },
     { id: "stats" as const, icon: BarChart3, label: "Insights" },
     { id: "recipes" as const, icon: ChefHat, label: "Recipes" },
-    { id: "leaves" as const, icon: Leaf, label: "Leaves" },
   ];
 
   const handleSettingsClick = () => {
