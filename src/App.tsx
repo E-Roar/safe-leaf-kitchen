@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,17 +11,72 @@ import RecipePage from "@/components/pages/RecipePage";
 import LeavesPage from "@/components/pages/LeavesPage";
 import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import { registerServiceWorker } from "@/utils/pwaUtils";
+import { safeStorage } from "@/lib/safeStorage";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { logger } from "@/lib/logger";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (garbage collection time)
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => {
   const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats" | "recipes" | "leaves">("home");
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
   const [selectedLeafId, setSelectedLeafId] = useState<number | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') as 'light' | 'dark') || 'dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const savedTheme = safeStorage.get('theme') as 'light' | 'dark';
+    return savedTheme === 'dark' ? 'dark' : 'light';
+  });
+
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleToggleTheme = useCallback(() => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
+
+  const handleNavigateToRecipe = useCallback((event: CustomEvent) => {
+    setSelectedRecipeId(event.detail.recipeId);
+    setActiveTab("recipes");
+  }, []);
+
+  const handleNavigateToLeaf = useCallback((event: CustomEvent) => {
+    setSelectedLeafId(event.detail.leafId);
+    setActiveTab("leaves");
+  }, []);
+
+  const handleNavigateToChat = useCallback(() => {
+    setActiveTab("chat");
+  }, []);
+
+  const handleNavigateToRecipes = useCallback(() => {
+    setActiveTab("recipes");
+  }, []);
+
+  const handleNavigateToLeaves = useCallback(() => {
+    setActiveTab("leaves");
+  }, []);
+
+  const handleNavigateToScan = useCallback(() => {
+    setActiveTab("chat");
+    // Defer event to ensure ChatPage is mounted
+    const timeoutId = setTimeout(() => {
+      window.dispatchEvent(new Event('openCameraScan'));
+    }, 0);
+    
+    // Cleanup timeout if component unmounts
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   useEffect(() => {
-    registerServiceWorker();
+    registerServiceWorker().catch(error => {
+      logger.error('Failed to register service worker', error);
+    });
   }, []);
 
   useEffect(() => {
@@ -31,49 +86,38 @@ const App = () => {
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('theme', theme);
+    
+    if (!safeStorage.set('theme', theme)) {
+      logger.warn('Failed to save theme preference to localStorage');
+    }
   }, [theme]);
 
   useEffect(() => {
-    const handleToggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
     window.addEventListener('toggleTheme', handleToggleTheme as EventListener);
     return () => window.removeEventListener('toggleTheme', handleToggleTheme as EventListener);
-  }, []);
+  }, [handleToggleTheme]);
 
   useEffect(() => {
-    const handleNavigateToRecipe = (event: CustomEvent) => {
-      setSelectedRecipeId(event.detail.recipeId);
-      setActiveTab("recipes");
-    };
-    const handleNavigateToLeaf = (event: CustomEvent) => {
-      setSelectedLeafId(event.detail.leafId);
-      setActiveTab("leaves");
-    };
-
     window.addEventListener('navigateToRecipe', handleNavigateToRecipe as EventListener);
     window.addEventListener('navigateToLeaf', handleNavigateToLeaf as EventListener);
+    
     return () => {
       window.removeEventListener('navigateToRecipe', handleNavigateToRecipe as EventListener);
       window.removeEventListener('navigateToLeaf', handleNavigateToLeaf as EventListener);
     };
-  }, []);
+  }, [handleNavigateToRecipe, handleNavigateToLeaf]);
 
-  const renderCurrentPage = () => {
+  // Memoized page rendering to prevent unnecessary re-renders
+  const renderCurrentPage = useMemo(() => {
     switch (activeTab) {
       case "home":
         return (
           <LandingPage
-            onNavigateToChat={() => setActiveTab("chat")}
-            onNavigateToRecipes={() => setActiveTab("recipes")}
-            onNavigateToLeaves={() => setActiveTab("leaves")}
-            onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
-            onNavigateToScan={() => {
-              setActiveTab("chat");
-              // Defer event to ensure ChatPage is mounted
-              setTimeout(() => {
-                window.dispatchEvent(new Event('openCameraScan'));
-              }, 0);
-            }}
+            onNavigateToChat={handleNavigateToChat}
+            onNavigateToRecipes={handleNavigateToRecipes}
+            onNavigateToLeaves={handleNavigateToLeaves}
+            onToggleTheme={handleToggleTheme}
+            onNavigateToScan={handleNavigateToScan}
           />
         );
       case "chat":
@@ -87,32 +131,29 @@ const App = () => {
       default:
         return (
           <LandingPage
-            onNavigateToChat={() => setActiveTab("chat")}
-            onNavigateToRecipes={() => setActiveTab("recipes")}
-            onNavigateToLeaves={() => setActiveTab("leaves")}
-            onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
-            onNavigateToScan={() => {
-              setActiveTab("chat");
-              setTimeout(() => {
-                window.dispatchEvent(new Event('openCameraScan'));
-              }, 0);
-            }}
+            onNavigateToChat={handleNavigateToChat}
+            onNavigateToRecipes={handleNavigateToRecipes}
+            onNavigateToLeaves={handleNavigateToLeaves}
+            onToggleTheme={handleToggleTheme}
+            onNavigateToScan={handleNavigateToScan}
           />
         );
     }
-  };
+  }, [activeTab, selectedRecipeId, selectedLeafId, handleNavigateToChat, handleNavigateToRecipes, handleNavigateToLeaves, handleToggleTheme, handleNavigateToScan]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
-          {renderCurrentPage()}
-        </AppLayout>
-        <PWAInstallPrompt />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
+            {renderCurrentPage}
+          </AppLayout>
+          <PWAInstallPrompt />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

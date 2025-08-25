@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw } from "lucide-react";
-import { StorageService } from "@/services/apiService";
+import { APIService } from "@/services/apiService";
 import { recipes } from "@/data/recipes";
 import { ImpactService, ImpactMetrics } from "@/services/impactService";
 
@@ -40,15 +40,24 @@ export default function StatsPage() {
 
   useEffect(() => {
     const loadStats = () => {
-      const detectedLeaves = StorageService.getDetectedLeaves();
+      const detectedLeaves = APIService.getDetectedLeaves();
       const impactMetrics = ImpactService.getCumulativeImpact();
       
+      // Convert detected leaves to the expected format
+      const detectedLeavesRecord: Record<string, number> = {};
+      detectedLeaves.forEach((detection, index) => {
+        detection.leaves.forEach(leaf => {
+          const leafType = leaf.class;
+          detectedLeavesRecord[leafType] = (detectedLeavesRecord[leafType] || 0) + 1;
+        });
+      });
+
       setStats({
-        totalScans: StorageService.getScans(),
-        totalChats: StorageService.getChats(),
-        detectedLeaves,
-        recipeSuggestions: StorageService.getRecipeSuggestions(),
-        savedConversations: StorageService.getConversationList().length,
+        totalScans: APIService.getScans(),
+        totalChats: APIService.getChats(),
+        detectedLeaves: detectedLeavesRecord,
+        recipeSuggestions: APIService.getRecipeSuggestions(),
+        savedConversations: APIService.getConversationList().length,
         impactMetrics
       });
 
@@ -57,8 +66,8 @@ export default function StatsPage() {
         detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
         impactCalculation: JSON.stringify(impactMetrics, null, 2),
         storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
-        recipesReceived: StorageService.getRecipeReceivedCount(),
-        favoritesCount: StorageService.getFavoriteRecipes().length
+        recipesReceived: APIService.getRecipeViews().length,
+        favoritesCount: APIService.getFavoriteRecipes().length
       });
     };
 

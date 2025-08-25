@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { ChevronDown, ChevronUp, ChefHat, Clock, Users, Leaf, Zap, BookOpen, Star, Menu, X, Play } from "lucide-react";
 import { recipes, Recipe } from "@/data/recipes";
-import { StorageService } from "@/services/apiService";
+import { APIService } from "@/services/apiService";
 import { cn } from "@/lib/utils";
 
 type Language = 'en' | 'fr' | 'ar';
@@ -21,7 +21,8 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
 
   // Load favorites on component mount
   useEffect(() => {
-    setFavorites(StorageService.getFavoriteRecipes());
+    const favorites = APIService.getFavoriteRecipes();
+    setFavorites(favorites.map(fav => fav.id));
   }, []);
 
   const toggleRecipe = (recipeId: number) => {
@@ -58,31 +59,32 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
     setExpandedRecipe(recipe.id);
     setIsSidebarOpen(false);
     // Count as received/viewed recipe
-    StorageService.markRecipeReceived(recipe.id);
+    APIService.saveRecipeView(recipe.id);
   };
 
-  // Extract leaf ingredients from recipe and add to detected leaves
   const handleUseRecipe = (recipe: Recipe) => {
-    // Extract leaf types from recipe ingredients
-    const leafTypes = extractLeafTypesFromRecipe(recipe);
-    
+    setIsSidebarOpen(false);
+    // Count as received/viewed recipe
+    APIService.saveRecipeView(recipe.id);
+  };
+
+  const handleLeafDetection = (leafTypes: string[]) => {
     // Add each leaf type to detected leaves
     leafTypes.forEach(leafType => {
-      StorageService.addDetectedLeaf(leafType);
+      // Save detected leaves data - create a mock detection result
+      const mockDetection = { class: leafType, confidence: 1, x: 0, y: 0, width: 100, height: 100 };
+      APIService.saveDetectedLeaves([mockDetection]);
     });
     
     // Increment scans for each leaf type used
     for (let i = 0; i < leafTypes.length; i++) {
-      StorageService.incrementScans();
+      APIService.incrementScans();
     }
-    
-    // Show success message
-    alert(`Recipe used! Added ${leafTypes.length} leaf types to your impact calculations.`);
   };
 
   // Handle favorite toggle with state update
   const handleToggleFavorite = (recipeId: number) => {
-    const newFavorited = StorageService.toggleFavoriteRecipe(recipeId);
+    const newFavorited = APIService.toggleFavoriteRecipe(recipeId);
     
     // Update local state
     if (newFavorited) {

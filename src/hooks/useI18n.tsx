@@ -1,4 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { safeStorage } from "@/lib/safeStorage";
+import { logger } from "@/lib/logger";
 
 type SupportedLang = 'EN' | 'FR' | 'AR';
 
@@ -102,7 +104,7 @@ const defaultTranslations: Translations = {
   'stats.card.recipesViewed': { EN: 'Recipes Viewed', FR: 'Recettes vues', AR: 'وصفات تم عرضها' },
   'stats.card.favorites': { EN: 'Favorites', FR: 'Favoris', AR: 'المفضلة' },
   'stats.card.savedConversations': { EN: 'Saved Conversations', FR: 'Conversations enregistrées', AR: 'محادثات محفوظة' },
-  'stats.card.moneySaved': { EN: 'Money Saved (MAD)', FR: 'Argent économisé (MAD)', AR: 'المال المُوفَّر (درهم)' },
+  'stats.card.moneySaved': { EN: 'Money Saved (MAD)', FR: 'Argent économisé (MAD)', AR: 'المال المُوفَّر (درهم)' },
   'stats.card.co2Avoided': { EN: 'CO₂e Avoided (kg)', FR: 'CO₂e évité (kg)', AR: 'الانبعاثات المتجنبة (كغ)' },
   'stats.card.suffix.moroccanInspired': { EN: 'Moroccan inspired', FR: 'Inspiration marocaine', AR: 'مستوحاة من المغرب' },
   'stats.card.suffix.recipesAvailable': { EN: 'recipes available', FR: 'recettes disponibles', AR: 'وصفات متاحة' },
@@ -128,13 +130,13 @@ const defaultTranslations: Translations = {
 
   // Stats: impact section
   'stats.impact.header': { EN: 'Environmental & Economic Impact', FR: 'Impact environnemental et économique', AR: 'الأثر البيئي والاقتصادي' },
-  'stats.impact.totalMoneySaved': { EN: 'Total Money Saved', FR: 'Argent total économisé', AR: 'إجمالي المال المُوفَّر' },
-  'stats.impact.co2eAvoided': { EN: 'CO₂e Avoided', FR: 'CO₂e évité', AR: 'الانبعاثات المتجنبة' },
-  'stats.impact.totalLeavesUsed': { EN: 'Total Leaves Used', FR: 'Total des feuilles utilisées', AR: 'إجمالي الأوراق المستخدمة' },
-  'stats.impact.wildLeavesNote': { EN: 'Wild leaves harvested instead of bought', FR: 'Feuilles sauvages récoltées au lieu d’être achetées', AR: 'أوراق برية جُمعت بدلًا من شرائها' },
-  'stats.impact.polyphenolsGained': { EN: 'Polyphenols Gained', FR: 'Polyphénols gagnés', AR: 'البوليفينولات المكتسبة' },
-  'stats.impact.antioxidantCompoundsConsumed': { EN: 'Antioxidant compounds consumed', FR: 'Composés antioxydants consommés', AR: 'مركبات مضادة للأكسدة مستهلكة' },
-  'stats.impact.bottomNote': { EN: 'Every wild leaf you use saves money, reduces environmental impact, and boosts your nutrition!', FR: 'Chaque feuille sauvage utilisée permet d’économiser de l’argent, de réduire l’impact environnemental et d’améliorer votre nutrition !', AR: 'كل ورقة برية تستخدمها توفّر المال، وتقلل الأثر البيئي، وتعزز تغذيتك!' },
+  'stats.impact.totalMoneySaved': { EN: 'Total Money Saved', FR: 'Argent total economise', AR: 'إجمالي المال المُوفَّر' },
+  'stats.impact.co2eAvoided': { EN: 'CO₂e Avoided', FR: 'CO₂e evite', AR: 'الانبعاثات المتجنبة' },
+  'stats.impact.totalLeavesUsed': { EN: 'Total Leaves Used', FR: 'Total des feuilles utilisees', AR: 'إجمالي الأوراق المستخدمة' },
+  'stats.impact.wildLeavesNote': { EN: 'Wild leaves harvested instead of bought', FR: 'Feuilles sauvages recoltees au lieu d\'etre achetees', AR: 'أوراق برية جُمعت بدلًا من شرائها' },
+  'stats.impact.polyphenolsGained': { EN: 'Polyphenols Gained', FR: 'Polyphenols gagnes', AR: 'البوليفينولات المكتسبة' },
+  'stats.impact.antioxidantCompoundsConsumed': { EN: 'Antioxidant compounds consumed', FR: 'Composes antioxydants consommes', AR: 'مركبات مضادة للأكسدة مستهلكة' },
+  'stats.impact.bottomNote': { EN: 'Every wild leaf you use saves money, reduces environmental impact, and boosts your nutrition!', FR: 'Chaque feuille sauvage utilisee permet d\'economiser l\'argent, de reduire l\'impact environnemental et d\'ameliorer votre nutrition !', AR: 'كل ورقة برية تستخدمها توفّر المال، وتقلل الأثر البيئي، وتعزز تغذيتك!' },
 
   // Stats: weekly summary
   'stats.week.mostActiveDay': { EN: 'Most Active Day', FR: 'Jour le plus actif', AR: 'أكثر الأيام نشاطًا' },
@@ -156,25 +158,34 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 export function I18nProvider({ children, translations }: { children: React.ReactNode; translations?: Translations }) {
-  const [lang, setLang] = useState<SupportedLang>(() => (localStorage.getItem('lang') as SupportedLang) || 'EN');
+  const [lang, setLang] = useState<SupportedLang>(() => {
+    const savedLang = safeStorage.get('lang') as SupportedLang;
+    return savedLang || 'EN';
+  });
 
   const dictionary = useMemo(() => ({ ...defaultTranslations, ...(translations || {}) }), [translations]);
 
   const setLanguage = useCallback((next: SupportedLang) => {
     setLang(next);
-    localStorage.setItem('lang', next);
+    if (!safeStorage.set('lang', next)) {
+      logger.warn('Failed to save language preference to localStorage');
+    }
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: next } }));
   }, []);
 
   const t = useCallback((key: string) => {
     const entry = dictionary[key];
-    if (!entry) return key;
+    if (!entry) {
+      logger.warn(`Translation key not found: ${key}`);
+      return key;
+    }
     return entry[lang] ?? entry['EN'] ?? key;
   }, [dictionary, lang]);
 
   useEffect(() => {
-    const handler = (e: any) => {
-      const next = e?.detail?.lang as SupportedLang | undefined;
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const next = customEvent?.detail?.lang as SupportedLang | undefined;
       if (next) setLang(next);
     };
     window.addEventListener('languageChanged', handler as EventListener);

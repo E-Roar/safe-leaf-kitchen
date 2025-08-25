@@ -1,7 +1,6 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Send, Mic, Camera, MicOff, Volume2, VolumeX, ChefHat, Plus, MessageSquare, Trash2, Search, Tag, Filter, Pause, Leaf as LeafIcon } from "lucide-react";
-import { APIService, StorageService, ChatMessage } from "@/services/apiService";
+import { APIService, ChatMessage } from "@/services/apiService";
 import { leaves as leavesData } from "@/data/leaves";
 import CameraScanner from "@/components/features/CameraScanner";
 import { recipes } from "@/data/recipes";
@@ -77,15 +76,26 @@ export default function ChatPage() {
     window.addEventListener('openCameraScan', handleOpenCamera as EventListener);
 
     const loadConversations = () => {
-      const conversationList = StorageService.getConversationList();
+      const conversationList = APIService.getConversationList();
       setConversations(conversationList);
       
       // Try to restore the last active conversation
-      const lastConversationId = StorageService.getCurrentConversationId();
+      const lastConversationId = APIService.getCurrentConversation();
       if (lastConversationId && conversationList.find(c => c.id === lastConversationId)) {
-        const savedMessages = StorageService.loadConversation(lastConversationId);
+        const savedMessages = APIService.loadConversation(lastConversationId);
         if (savedMessages) {
-          setMessages(savedMessages);
+          // Convert ChatMessage[] to Message[]
+          const convertedMessages: Message[] = savedMessages.map((msg, index) => ({
+            id: `${lastConversationId}_${index}`,
+            type: msg.role === 'user' ? 'user' : 'bot',
+            content: msg.content,
+            timestamp: new Date(),
+            suggestedRecipe: undefined,
+            suggestedLeafId: undefined,
+            suggestedLeafName: undefined,
+            suggestedLeaves: undefined
+          }));
+          setMessages(convertedMessages);
           setCurrentConversationId(lastConversationId);
           setIsFirstMessage(false);
           console.log('Restored last active conversation:', lastConversationId);
@@ -96,23 +106,34 @@ export default function ChatPage() {
       // Try to load the most recent conversation if no last active conversation
       if (!currentConversationId && conversationList.length > 0) {
         const mostRecentConversation = conversationList[0];
-        const savedMessages = StorageService.loadConversation(mostRecentConversation.id);
+        const savedMessages = APIService.loadConversation(mostRecentConversation.id);
         if (savedMessages) {
-          setMessages(savedMessages);
+          // Convert ChatMessage[] to Message[]
+          const convertedMessages: Message[] = savedMessages.map((msg, index) => ({
+            id: `${mostRecentConversation.id}_${index}`,
+            type: msg.role === 'user' ? 'user' : 'bot',
+            content: msg.content,
+            timestamp: new Date(),
+            suggestedRecipe: undefined,
+            suggestedLeafId: undefined,
+            suggestedLeafName: undefined,
+            suggestedLeaves: undefined
+          }));
+          setMessages(convertedMessages);
           setCurrentConversationId(mostRecentConversation.id);
           setIsFirstMessage(false);
-          StorageService.setCurrentConversationId(mostRecentConversation.id);
+          APIService.setCurrentConversation(mostRecentConversation.id);
           console.log('Loaded most recent conversation:', mostRecentConversation.id);
           return;
         }
       }
       
-      // Only start new conversation if no conversations exist
-      if (!currentConversationId && conversationList.length === 0) {
+      // If no conversations exist, start a new one
+      if (conversationList.length === 0) {
         startNewConversation();
       }
     };
-    
+
     loadConversations();
 
     return () => {
@@ -122,79 +143,95 @@ export default function ChatPage() {
 
   // Filter conversations based on search and tags
   useEffect(() => {
-    let filteredConversations = StorageService.getConversationList();
+    let filteredConversations = APIService.getConversationList();
     
     if (searchQuery.trim()) {
-      filteredConversations = StorageService.searchConversations(searchQuery);
+      filteredConversations = APIService.searchConversations(searchQuery);
     }
     
     if (selectedTag) {
-      filteredConversations = filteredConversations.filter(c => c.tags.includes(selectedTag));
+      filteredConversations = APIService.getConversationsByTag(selectedTag);
     }
     
     setConversations(filteredConversations);
   }, [searchQuery, selectedTag]);
 
-  // Save conversation whenever messages change
+  // Save conversation when messages change
   useEffect(() => {
     if (currentConversationId && messages.length > 0) {
-      StorageService.saveConversation(currentConversationId, messages);
+      // Convert Message[] to ChatMessage[]
+      const chatMessages: ChatMessage[] = messages.map(msg => ({
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }));
+      APIService.saveConversation(currentConversationId, chatMessages);
       // Refresh conversation list
-      const conversationList = StorageService.getConversationList();
+      const conversationList = APIService.getConversationList();
       setConversations(conversationList);
     }
   }, [messages, currentConversationId]);
 
   const startNewConversation = () => {
-    const newConversationId = StorageService.createNewConversationId();
+    const newConversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     setCurrentConversationId(newConversationId);
-    StorageService.setCurrentConversationId(newConversationId);
+    APIService.setCurrentConversation(newConversationId);
     const initialMessages: Message[] = [
       {
-        id: '1',
-        type: 'bot',
-        content: "Hello! I'm your SafeLeafKitchen assistant. I can help you identify leaves, provide nutritional information, and suggest delicious Moroccan recipes. What would you like to know about?",
-        timestamp: new Date()
-      },
-      {
-        id: '2',
-        type: 'bot',
-        content: 'Quick access to leaf profiles:',
+        id: `${newConversationId}_0`,
+        type: 'system',
+        content: `Welcome to SafeLeafKitchen! I'm your AI cooking assistant specializing in Moroccan cuisine and vegetable leaves. I can help you with:
+
+• Recipe suggestions and cooking tips
+• Nutritional information about leaves
+• Leaf identification and safety
+• Traditional Moroccan cooking techniques
+
+What would you like to know today?`,
         timestamp: new Date(),
-        suggestedLeaves: leavesData.map(l => ({ id: l.id, name: l.name.en }))
+        suggestedRecipe: undefined,
+        suggestedLeafId: undefined,
+        suggestedLeafName: undefined,
+        suggestedLeaves: undefined
       }
     ];
     setMessages(initialMessages);
     setIsFirstMessage(true);
     setShowConversations(false);
-          // Removed toast notification
   };
 
   const loadConversation = (conversationId: string) => {
-    const savedMessages = StorageService.loadConversation(conversationId);
+    const savedMessages = APIService.loadConversation(conversationId);
     if (savedMessages) {
-      setMessages(savedMessages);
+      // Convert ChatMessage[] to Message[]
+      const convertedMessages: Message[] = savedMessages.map((msg, index) => ({
+        id: `${conversationId}_${index}`,
+        type: msg.role === 'user' ? 'user' : 'bot',
+        content: msg.content,
+        timestamp: new Date(),
+        suggestedRecipe: undefined,
+        suggestedLeafId: undefined,
+        suggestedLeafName: undefined,
+        suggestedLeaves: undefined
+      }));
+      setMessages(convertedMessages);
       setCurrentConversationId(conversationId);
-      StorageService.setCurrentConversationId(conversationId);
+      APIService.setCurrentConversation(conversationId);
       setIsFirstMessage(false);
       setShowConversations(false);
-      // Removed toast notification
     }
   };
 
   const deleteConversation = (conversationId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    StorageService.deleteConversation(conversationId);
-    const updatedConversations = StorageService.getConversationList();
+    APIService.deleteConversation(conversationId);
+    const updatedConversations = APIService.getConversationList();
     setConversations(updatedConversations);
     
     // If deleting current conversation, start a new one
     if (conversationId === currentConversationId) {
-      StorageService.clearCurrentConversationId();
+      APIService.clearCurrentConversation();
       startNewConversation();
     }
-    
-          // Removed toast notification
   };
 
   const clearFilters = () => {
@@ -203,10 +240,10 @@ export default function ChatPage() {
   };
 
   const getAvailableTags = () => {
-    const allConversations = StorageService.getConversationList();
+    const allConversations = APIService.getConversationList();
     const allTags = new Set<string>();
     allConversations.forEach(conv => {
-      conv.tags.forEach((tag: string) => allTags.add(tag));
+      conv.tags?.forEach((tag: string) => allTags.add(tag));
     });
     return Array.from(allTags);
   };
@@ -273,7 +310,7 @@ User: "Tell me about nutrition"
 You: "Onion leaves are rich in antioxidants and vitamins. They provide excellent nutritional benefits for cooking.
 and use these facts for onions :
 {
-    "Plante": "Feuilles d’oignon",
+    "Plante": "Feuilles d'oignon",
     "Classes_de_composés": [
         {
             "Classe": "Flavonoïdes & polyphénols",
@@ -1515,15 +1552,15 @@ and use these facts for onions :
       console.log('Found recipe:', suggestedRecipe);
       
       addMessage('bot', response, suggestedRecipe);
-      StorageService.incrementChats();
+      APIService.incrementChats();
       
       // If a recipe was suggested, increment recipe suggestions metric
       if (suggestedRecipe) {
-        StorageService.incrementRecipeSuggestions();
+        APIService.incrementRecipeSuggestions();
       }
       
-      // Speak the response with feminine voice
-      APIService.speak(response);
+      // Remove TTS functionality for now since it's not in the new API
+      // APIService.speak(response);
     } catch (error) {
       console.error("Chat error:", error);
       
@@ -1535,7 +1572,7 @@ and use these facts for onions :
         const randomRecipe = recipeTitles[Math.floor(Math.random() * recipeTitles.length)];
         fallbackResponse += `Here's a recipe suggestion: ${randomRecipe}`;
         addMessage('bot', fallbackResponse, randomRecipe);
-        StorageService.incrementRecipeSuggestions();
+        APIService.incrementRecipeSuggestions();
       } else {
         fallbackResponse += "Please check your API configuration and try again.";
         addMessage('bot', fallbackResponse);
@@ -1567,11 +1604,18 @@ and use these facts for onions :
       setIsListening(false);
     } else {
       try {
-        const stopFn = APIService.startListening((transcript) => {
-          setInputText(transcript);
-          setIsListening(false);
-          stopListeningRef.current = null;
-        });
+        const stopFn = APIService.startSpeechRecognition(
+          (transcript: string) => {
+            setInputText(transcript);
+            setIsListening(false);
+            stopListeningRef.current = null;
+          },
+          (error: string) => {
+            console.error('Speech recognition error:', error);
+            setIsListening(false);
+            stopListeningRef.current = null;
+          }
+        );
         stopListeningRef.current = stopFn;
         setIsListening(true);
       } catch (error) {
@@ -1616,7 +1660,7 @@ Examples:
           content: `I've detected ${leafType} leaves. Please provide detailed nutritional information, health benefits, cooking suggestions, and any safety considerations for this plant.`
         });
 
-        const insight = await APIService.generateNutritionInsight(leafType, chatMessages);
+        const insight = await APIService.sendChatMessage(chatMessages);
         
         // Check if the response is a recipe title
         const suggestedRecipe = recipeTitles.find(title => 
@@ -1637,12 +1681,13 @@ Examples:
         if (matched) {
           addMessage('bot', `Open ${matched.name} leaf profile`, undefined, matched.id, matched.name);
         }
-        StorageService.addDetectedLeaf(leafType);
-        StorageService.incrementScans();
+        // Save detected leaves data
+        APIService.saveDetectedLeaves(detections);
+        APIService.incrementScans();
         
         // If a recipe was suggested, increment recipe suggestions metric
         if (suggestedRecipe) {
-          StorageService.incrementRecipeSuggestions();
+          APIService.incrementRecipeSuggestions();
         }
         
         // Removed toast notification
@@ -1659,7 +1704,8 @@ Examples:
 
   const speakMessage = (content: string) => {
     // Always allow speaking individual messages, even if global TTS is muted
-    APIService.speak(content, true); // Force speak even when muted
+            // Remove TTS functionality for now since it's not in the new API
+        // APIService.speak(content, true); // Force speak even when muted
   };
 
   const toggleTTSMute = () => {
@@ -1669,7 +1715,8 @@ Examples:
     
     // If muting, stop any current speech
     if (newMutedState) {
-      APIService.stopSpeech();
+      // Remove TTS functionality for now since it's not in the new API
+      // APIService.stopSpeech();
       setPlayingMessages(new Set()); // Clear all playing states
     }
   };
@@ -1680,7 +1727,8 @@ Examples:
     
     if (playingMessages.has(messageId)) {
       // Stop speaking this message
-      APIService.stopSpeech();
+      // Remove TTS functionality for now since it's not in the new API
+      // APIService.stopSpeech();
       setPlayingMessages(prev => {
         const newSet = new Set(prev);
         newSet.delete(messageId);
@@ -1690,22 +1738,22 @@ Examples:
       // Start speaking this message
       setPlayingMessages(prev => new Set([messageId])); // Only one message can play at a time
       
-      APIService.speak(
-        content, 
-        true, // Force speak even when muted
-        () => {
-          // On speech start
-          setPlayingMessages(prev => new Set([messageId]));
-        },
-        () => {
-          // On speech end
-          setPlayingMessages(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(messageId);
-            return newSet;
-          });
-        }
-      );
+      // Remove TTS functionality for now since it's not in the new API
+      // APIService.speak(
+      //   content, 
+      //   true, // Force speak even when muted
+      //   () => {
+      //     // On speech start
+      //     setPlayingMessages(prev => new Set([messageId]));
+      //   },
+      //   () => {
+      //     // On speech end
+      //     setPlayingMessages(prev => {
+      //       const newSet = new Set(prev);
+      //       newSet.delete(messageId);
+      //       return newSet;
+      //   });
+      // });
     }
   };
 

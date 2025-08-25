@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { X, RotateCcw } from "lucide-react";
-import { APIService } from "@/services/apiService";
+import { APIService, DetectionResult } from "@/services/apiService";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface CameraScannerProps {
   onClose: () => void;
-  onDetection: (detections: any[]) => void;
+  onDetection: (detections: DetectionResult[]) => void;
 }
 
 export default function CameraScanner({ onClose, onDetection }: CameraScannerProps) {
@@ -17,14 +18,7 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    startCamera();
-    return () => {
-      stopCamera();
-    };
-  }, [facingMode]);
-
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -50,20 +44,31 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
             video.addEventListener('loadedmetadata', handler);
           }
         });
-        try { await videoRef.current.play(); } catch {}
+        try { 
+          await videoRef.current.play(); 
+        } catch (error) {
+          logger.warn('Failed to play video', error);
+        }
       }
     } catch (error) {
-      console.error("Camera access error:", error);
+      logger.error("Camera access error:", error);
       toast.error("Unable to access camera");
     }
-  };
+  }, [facingMode]);
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       setStream(null);
     }
-  };
+  }, [stream]);
+
+  useEffect(() => {
+    startCamera();
+    return () => {
+      stopCamera();
+    };
+  }, [startCamera, stopCamera]);
 
   const captureAndAnalyze = async () => {
     if (!videoRef.current || !canvasRef.current || isScanning) return;
@@ -83,12 +88,12 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
       // Set canvas dimensions to match video
       if (video.videoWidth === 0 || video.videoHeight === 0) {
         // Wait briefly for camera to be ready
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       if (video.videoWidth === 0 || video.videoHeight === 0) {
         toast.dismiss();
         toast.error("Camera not ready. Please try again.");
-        console.warn("CameraScanner: video dimensions are 0");
+        logger.warn("CameraScanner: video dimensions are 0");
         return;
       }
       canvas.width = video.videoWidth;
@@ -103,7 +108,7 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
 
       // Send to Roboflow API
       const result = await APIService.detectLeaf(base64Image);
-      console.debug("Roboflow response:", result);
+      logger.debug("Roboflow response:", result);
       
       toast.dismiss();
       
@@ -111,33 +116,32 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
         onDetection(result.predictions);
         toast.success("Leaf detected successfully!");
         // Automatically close camera when leaf is detected
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           onClose();
         }, 1000); // Small delay to show success message
+        
+        // Cleanup timeout if component unmounts
+        return () => clearTimeout(timeoutId);
       } else {
         onDetection([]);
-        toast.error("No leaves detected in image");
+        toast.error("No leaves detected. Try a different angle or lighting.");
       }
     } catch (error) {
-      console.error("Detection error:", error);
-      toast.dismiss();
-      toast.error("Failed to analyze image");
+      logger.error("Detection error:", error);
+      toast.error("Detection failed. Please try again.");
     } finally {
       setIsScanning(false);
     }
   };
 
-  const toggleCamera = () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
-  };
-
   const handleLongPressStart = () => {
-    if (isScanning) return;
-    
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
     longPressTimerRef.current = setTimeout(() => {
       setLongPressActive(true);
       captureAndAnalyze();
-    }, 800); // 800ms for long press
+    }, 500);
   };
 
   const handleLongPressEnd = () => {
@@ -148,77 +152,94 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
     setLongPressActive(false);
   };
 
+  const handleFlipCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      {/* Floating Header Buttons */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
-        <button
-          onClick={onClose}
-          className="p-2 text-white hover:bg-white/10 rounded-full transition-colors bg-black/20 backdrop-blur-sm pointer-events-auto"
-        >
-          <X className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-        
-        <button
-          onClick={toggleCamera}
-          className="p-2 text-white hover:bg-white/10 rounded-full transition-colors bg-black/20 backdrop-blur-sm pointer-events-auto"
-        >
-          <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-      </div>
-
-      {/* Camera view */}
-      <div className="flex-1 relative">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-full object-cover"
-        />
-        
-        {/* Scanning overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div 
-            className="relative w-48 h-48 sm:w-64 sm:h-64 cursor-pointer select-none"
-            onMouseDown={handleLongPressStart}
-            onMouseUp={handleLongPressEnd}
-            onMouseLeave={handleLongPressEnd}
-            onTouchStart={handleLongPressStart}
-            onTouchEnd={handleLongPressEnd}
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div className="relative w-full max-w-2xl">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-white">Camera Scanner</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
           >
-            {/* Scanning frame */}
-            <div className={`absolute inset-0 border-2 rounded-3xl transition-all duration-300 ${
-              longPressActive ? 'border-white scale-105' : 'border-primary'
-            }`}>
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-3xl"></div>
-              <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-3xl"></div>
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-3xl"></div>
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-3xl"></div>
-            </div>
-            
-            {/* Scanning animation */}
-            {isScanning && (
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/30 to-transparent animate-pulse rounded-3xl"></div>
-            )}
+            <X className="w-6 h-6 text-white" />
+          </button>
+        </div>
 
-            {/* Long press indicator */}
-            {longPressActive && !isScanning && (
-              <div className="absolute inset-0 bg-white/20 rounded-3xl animate-pulse"></div>
-            )}
+        {/* Video Container */}
+        <div className="relative bg-black rounded-2xl overflow-hidden">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-auto"
+          />
+          
+          {/* Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-64 h-64 border-2 border-white/50 rounded-2xl flex items-center justify-center">
+              <div className="text-white/70 text-center">
+                <div className="text-2xl mb-2">📱</div>
+                <div className="text-sm">Position leaf in frame</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+            <button
+              onClick={handleFlipCamera}
+              className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+            >
+              <RotateCcw className="w-6 h-6 text-white" />
+            </button>
+            
+            <button
+              onMouseDown={handleLongPressStart}
+              onMouseUp={handleLongPressEnd}
+              onMouseLeave={handleLongPressEnd}
+              onTouchStart={handleLongPressStart}
+              onTouchEnd={handleLongPressEnd}
+              disabled={isScanning}
+              className={`
+                w-16 h-16 rounded-full flex items-center justify-center transition-all
+                ${isScanning 
+                  ? 'bg-gray-500 cursor-not-allowed' 
+                  : longPressActive 
+                    ? 'bg-red-500 scale-110' 
+                    : 'bg-white hover:bg-gray-100'
+                }
+              `}
+            >
+              <div className="w-8 h-8 rounded-full border-4 border-gray-800"></div>
+            </button>
           </div>
         </div>
 
         {/* Instructions */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-24 sm:translate-y-32 text-center">
-          <p className="text-white/80 text-xs sm:text-sm px-4">
-            Position the leaf within the frame and long press to scan
+        <div className="mt-4 text-center text-white/80">
+          <p className="text-sm">
+            {isScanning 
+              ? "Analyzing..." 
+              : "Hold the button to scan for leaves"
+            }
           </p>
         </div>
       </div>
-
-      {/* Hidden canvas for image processing */}
-      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }

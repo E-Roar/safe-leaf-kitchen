@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from '@/lib/logger';
 
 // Settings are managed via SettingsService (with hardcoded defaults)
 import { SettingsService } from "@/services/settingsService";
@@ -23,6 +24,24 @@ export interface RoboflowResponse {
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
+}
+
+export interface ConversationData {
+  id: string;
+  title: string;
+  timestamp: Date;
+  messageCount: number;
+  tags: string[];
+}
+
+export interface RecipeView {
+  id: number;
+  timestamp: Date;
+}
+
+export interface FavoriteRecipe {
+  id: number;
+  timestamp: Date;
 }
 
 export class APIService {
@@ -52,7 +71,7 @@ export class APIService {
 
       return response.data;
     } catch (error) {
-      console.error("Roboflow API error:", error);
+      logger.error("Roboflow API error:", error);
       throw new Error("Failed to detect leaf in image");
     }
   }
@@ -68,7 +87,7 @@ export class APIService {
         return this.sendChatMessageToOpenRouter(messages);
       }
     } catch (error) {
-      console.error("Chat API error:", error);
+      logger.error("Chat API error:", error);
       throw error;
     }
   }
@@ -84,7 +103,7 @@ export class APIService {
 
       const { openrouterEndpoint, openrouterApiKey } = SettingsService.getSettings();
       
-      console.log("Sending request to OpenRouter:", { endpoint: openrouterEndpoint, messages: messages.length });
+      logger.debug("Sending request to OpenRouter:", { endpoint: openrouterEndpoint, messages: messages.length });
       
       const response = await axios.post(openrouterEndpoint, requestBody, {
         headers: {
@@ -93,39 +112,38 @@ export class APIService {
         }
       });
 
-      console.log("OpenRouter response:", response.data);
+      logger.debug("OpenRouter response:", response.data);
 
       // Validate response structure
       if (!response.data) {
         throw new Error("No data received from OpenRouter API");
       }
 
-      if (!response.data.choices || !Array.isArray(response.data.choices) || response.data.choices.length === 0) {
-        console.error("Invalid response structure:", response.data);
-        throw new Error("Invalid response format from OpenRouter API");
+      if (!response.data.choices || !Array.isArray(response.data.choices)) {
+        logger.error("Invalid response structure:", response.data);
+        throw new Error("Invalid response structure from OpenRouter API");
       }
 
-      if (!response.data.choices[0].message || !response.data.choices[0].message.content) {
-        console.error("No message content in response:", response.data.choices[0]);
-        throw new Error("No message content in API response");
+      if (!response.data.choices[0] || !response.data.choices[0].message) {
+        logger.error("No message content in response:", response.data.choices[0]);
+        throw new Error("No message content in OpenRouter API response");
       }
 
       return response.data.choices[0].message.content;
     } catch (error) {
-      console.error("OpenRouter API error:", error);
+      logger.error("OpenRouter API error:", error);
       
-      // More specific error handling
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          console.error("API Response Error:", error.response.status, error.response.data);
-          throw new Error(`OpenRouter API error: ${error.response.status} - ${error.response.statusText}`);
+          logger.error("API Response Error:", error.response.status, error.response.data);
+          throw new Error(`API Error: ${error.response.status} - ${error.response.data?.error || 'Unknown error'}`);
         } else if (error.request) {
-          console.error("Network Error:", error.request);
-          throw new Error("Network error: Unable to reach OpenRouter API");
+          logger.error("Network Error:", error.request);
+          throw new Error("Network error: Unable to reach the API");
         }
       }
       
-      throw new Error("Failed to get response from OpenRouter");
+      throw new Error("Failed to send chat message");
     }
   }
 
@@ -137,425 +155,372 @@ export class APIService {
         throw new Error("N8N webhook URL not configured");
       }
 
-      // Prepare the request payload for N8N
       const requestBody = {
         messages: messages,
-        timestamp: new Date().toISOString(),
-        sessionId: this.generateSessionId(),
-        metadata: {
-          source: "safeleafkitchen",
-          version: "1.0.0"
-        }
+        timestamp: new Date().toISOString()
       };
 
-      console.log("Sending request to N8N webhook:", { 
-        webhookUrl: n8nWebhookUrl, 
-        messages: messages.length,
-        sessionId: requestBody.sessionId 
+      logger.debug("Sending request to N8N webhook:", {
+        url: n8nWebhookUrl,
+        messageCount: messages.length
       });
-      
+
       const response = await axios.post(n8nWebhookUrl, requestBody, {
         headers: {
           "Content-Type": "application/json"
         },
-        timeout: 30000 // 30 second timeout for N8N processing
+        timeout: 30000 // 30 second timeout
       });
 
-      console.log("N8N webhook response:", response.data);
+      logger.debug("N8N webhook response:", response.data);
 
-      // Validate N8N response structure
-      if (!response.data) {
-        throw new Error("No data received from N8N webhook");
+      if (!response.data || typeof response.data.response !== 'string') {
+        throw new Error("Invalid response from N8N webhook");
       }
 
-      // N8N can return different response formats, handle both
-      let responseText = "";
-      
-      if (typeof response.data === 'string') {
-        // Direct text response
-        responseText = response.data;
-      } else if (response.data.response) {
-        // Structured response with response field
-        responseText = response.data.response;
-      } else if (response.data.message) {
-        // Structured response with message field
-        responseText = response.data.message;
-      } else if (response.data.content) {
-        // Structured response with content field
-        responseText = response.data.content;
-      } else {
-        // Try to stringify the response
-        responseText = JSON.stringify(response.data);
-      }
-
-      if (!responseText || responseText.trim() === '') {
-        throw new Error("Empty response from N8N webhook");
-      }
-
-      return responseText.trim();
+      return response.data.response;
     } catch (error) {
-      console.error("N8N webhook error:", error);
+      logger.error("N8N webhook error:", error);
       
-      // More specific error handling
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          console.error("N8N Response Error:", error.response.status, error.response.data);
-          throw new Error(`N8N webhook error: ${error.response.status} - ${error.response.statusText}`);
+          logger.error("N8N Response Error:", error.response.status, error.response.data);
+          throw new Error(`N8N Error: ${error.response.status} - ${error.response.data?.error || 'Unknown error'}`);
         } else if (error.request) {
-          console.error("Network Error:", error.request);
+          logger.error("Network Error:", error.request);
           throw new Error("Network error: Unable to reach N8N webhook");
-        } else if (error.code === 'ECONNABORTED') {
-          throw new Error("N8N webhook timeout: Request took too long to process");
         }
       }
       
-      throw new Error("Failed to get response from N8N webhook");
+      throw new Error("Failed to send chat message via N8N");
     }
   }
 
-  private static generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  static async generateNutritionInsight(leafType: string, chatMessages?: ChatMessage[]): Promise<string> {
-    if (chatMessages) {
-      return this.sendChatMessage(chatMessages);
+  // Speech recognition
+  static startSpeechRecognition(onResult: (text: string) => void, onError: (error: string) => void): () => void {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      onError("Speech recognition not supported in this browser");
+      return () => {};
     }
 
-    const messages: ChatMessage[] = [
-      {
-        role: "system",
-        content: `You are SafeLeafKitchen, a knowledgeable cooking and nutrition assistant specializing in vegetable leaves and herbs. Provide comprehensive information including nutritional data, cooking methods, health benefits, and safety considerations.`
-      },
-      {
-        role: "user",
-        content: `I've detected ${leafType} leaves. Please provide detailed nutritional information, health benefits, cooking suggestions, and any safety considerations for this plant.`
-      }
-    ];
-
-    return this.sendChatMessage(messages);
-  }
-
-  // Text-to-Speech using Web Speech API with feminine voice
-  static speak(text: string, forceSpeak: boolean = false, onStart?: () => void, onEnd?: () => void): void {
-    if (this.isMuted && !forceSpeak) {
-      return; // Don't speak if muted (unless forced)
-    }
-
-    // Stop any current speech
-    speechSynthesis.cancel();
-    
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1.2; // Higher pitch for more feminine sound
-      utterance.volume = 0.8;
-      
-      // Try to find a feminine voice
-      const voices = speechSynthesis.getVoices();
-      const feminineVoice = voices.find(voice => 
-        voice.name.toLowerCase().includes('female') ||
-        voice.name.toLowerCase().includes('woman') ||
-        voice.name.toLowerCase().includes('samantha') ||
-        voice.name.toLowerCase().includes('victoria') ||
-        voice.name.toLowerCase().includes('karen') ||
-        voice.name.toLowerCase().includes('susan')
-      );
-      
-      if (feminineVoice) {
-        utterance.voice = feminineVoice;
-      } else {
-        // Fallback: use first available voice with higher pitch
-        const availableVoices = voices.filter(voice => voice.lang.startsWith('en'));
-        if (availableVoices.length > 0) {
-          utterance.voice = availableVoices[0];
-        }
-      }
-
-      // Add event listeners
-      utterance.onstart = () => {
-        if (onStart) onStart();
-      };
-      
-      utterance.onend = () => {
-        if (onEnd) onEnd();
-      };
-
-      utterance.onerror = () => {
-        if (onEnd) onEnd(); // Call onEnd on error too
-      };
-      
-      speechSynthesis.speak(utterance);
-    }
-  }
-
-  // Stop current speech
-  static stopSpeech(): void {
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-    }
-  }
-
-  // Speech-to-Text using Web Speech API
-  static startListening(callback: (text: string) => void): () => void {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      throw new Error("Speech recognition not supported in this browser");
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
+
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
-      callback(transcript);
+      onResult(transcript);
     };
 
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
+    recognition.onerror = (event: any) => {
+      logger.error("Speech recognition error:", event.error);
+      onError(`Speech recognition error: ${event.error}`);
     };
 
     recognition.start();
-
     return () => recognition.stop();
   }
-}
 
-// Storage service for app statistics
-export class StorageService {
-  private static getStorageKey(key: string): string {
-    return `safeleafkitchen_${key}`;
+  // Statistics tracking
+  static incrementScans(): number {
+    const current = this.getScans();
+    const newCount = current + 1;
+    if (this.setScans(newCount)) {
+      return newCount;
+    }
+    return current;
   }
 
   static getScans(): number {
-    return parseInt(localStorage.getItem(this.getStorageKey('scans')) || '0', 10);
+    return this.getStat('scans');
   }
 
-  static incrementScans(): void {
-    const current = this.getScans();
-    localStorage.setItem(this.getStorageKey('scans'), (current + 1).toString());
+  private static setScans(count: number): boolean {
+    return this.setStat('scans', count);
+  }
+
+  static incrementChats(): number {
+    const current = this.getChats();
+    const newCount = current + 1;
+    if (this.setChats(newCount)) {
+      return newCount;
+    }
+    return current;
   }
 
   static getChats(): number {
-    return parseInt(localStorage.getItem(this.getStorageKey('chats')) || '0', 10);
+    return this.getStat('chats');
   }
 
-  static incrementChats(): void {
-    const current = this.getChats();
-    localStorage.setItem(this.getStorageKey('chats'), (current + 1).toString());
+  private static setChats(count: number): boolean {
+    return this.setStat('chats', count);
   }
 
-  static addDetectedLeaf(leafType: string): void {
+  // Detected leaves tracking
+  static saveDetectedLeaves(leaves: DetectionResult[]): boolean {
     const key = this.getStorageKey('detected_leaves');
-    const stored = localStorage.getItem(key);
-    const leaves: Record<string, number> = stored ? JSON.parse(stored) : {};
-    leaves[leafType] = (leaves[leafType] || 0) + 1;
-    localStorage.setItem(key, JSON.stringify(leaves));
+    let stored = this.getStorage(key);
+    const newEntry = {
+      timestamp: Date.now(),
+      leaves: leaves
+    };
+    
+    if (stored) {
+      stored.push(newEntry);
+      // Keep only last 100 detections
+      if (stored.length > 100) {
+        stored.splice(0, stored.length - 100);
+      }
+    } else {
+      stored = [newEntry];
+    }
+    
+    return this.setStorage(key, stored);
   }
 
-  static getDetectedLeaves(): Record<string, number> {
+  static getDetectedLeaves(): Array<{ timestamp: number; leaves: DetectionResult[] }> {
     const key = this.getStorageKey('detected_leaves');
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : {};
+    return this.getStorage(key) || [];
+  }
+
+  // Recipe suggestions tracking
+  static incrementRecipeSuggestions(): number {
+    const current = this.getRecipeSuggestions();
+    const newCount = current + 1;
+    if (this.setRecipeSuggestions(newCount)) {
+      return newCount;
+    }
+    return current;
   }
 
   static getRecipeSuggestions(): number {
-    return parseInt(localStorage.getItem(this.getStorageKey('recipe_suggestions')) || '0', 10);
+    return this.getStat('recipe_suggestions');
   }
 
-  static incrementRecipeSuggestions(): void {
-    const current = this.getRecipeSuggestions();
-    localStorage.setItem(this.getStorageKey('recipe_suggestions'), (current + 1).toString());
+  private static setRecipeSuggestions(count: number): boolean {
+    return this.setStat('recipe_suggestions', count);
   }
 
-  // Recipe interactions: views (received) and favorites
-  static markRecipeReceived(recipeId: number): void {
-    const key = this.getStorageKey('recipes_received');
-    const stored = localStorage.getItem(key);
-    const entries: number[] = stored ? JSON.parse(stored) : [];
-    entries.push(recipeId);
-    localStorage.setItem(key, JSON.stringify(entries.slice(-200))); // keep last 200 views
+  // Recipe views tracking
+  static saveRecipeView(recipeId: number): boolean {
+    const key = this.getStorageKey('recipe_views');
+    const stored = this.getStorage<RecipeView[]>(key) || [];
+    const newEntry = { id: recipeId, timestamp: Date.now() };
+    
+    stored.push(newEntry);
+    // Keep only last 200 views
+    if (stored.length > 200) {
+      stored.splice(0, stored.length - 200);
+    }
+    
+    return this.setStorage(key, stored);
   }
 
-  static getRecipeReceivedCount(): number {
-    const stored = localStorage.getItem(this.getStorageKey('recipes_received'));
-    const arr: unknown = stored ? JSON.parse(stored) : [];
-    return Array.isArray(arr) ? arr.length : 0;
+  static getRecipeViews(): RecipeView[] {
+    const key = this.getStorageKey('recipe_views');
+    return this.getStorage<RecipeView[]>(key) || [];
   }
 
-  static getFavoriteRecipes(): number[] {
-    const stored = localStorage.getItem(this.getStorageKey('favorite_recipes'));
-    return stored ? JSON.parse(stored) : [];
+  // Favorite recipes tracking
+  static toggleFavoriteRecipe(recipeId: number): boolean {
+    const key = this.getStorageKey('favorite_recipes');
+    const stored = this.getStorage<FavoriteRecipe[]>(key) || [];
+    const existingIndex = stored.findIndex(fav => fav.id === recipeId);
+    
+    if (existingIndex >= 0) {
+      stored.splice(existingIndex, 1);
+    } else {
+      stored.push({ id: recipeId, timestamp: Date.now() });
+    }
+    
+    return this.setStorage(key, stored);
+  }
+
+  static getFavoriteRecipes(): FavoriteRecipe[] {
+    const key = this.getStorageKey('favorite_recipes');
+    return this.getStorage<FavoriteRecipe[]>(key) || [];
   }
 
   static isRecipeFavorited(recipeId: number): boolean {
     const favorites = this.getFavoriteRecipes();
-    return favorites.includes(recipeId);
+    return favorites.some(fav => fav.id === recipeId);
   }
 
-  static toggleFavoriteRecipe(recipeId: number): boolean {
-    const key = this.getStorageKey('favorite_recipes');
-    const favorites = this.getFavoriteRecipes();
-    const index = favorites.indexOf(recipeId);
-    let isNowFavorited = false;
-    if (index >= 0) {
-      favorites.splice(index, 1);
-      isNowFavorited = false;
-    } else {
-      favorites.push(recipeId);
-      isNowFavorited = true;
-    }
-    localStorage.setItem(key, JSON.stringify(favorites));
-    return isNowFavorited;
-  }
-
-  // Conversation cache management
-  static saveConversation(conversationId: string, messages: any[]): void {
-    const key = this.getStorageKey('conversation_' + conversationId);
-    
-    // Create conversation metadata
+  // Conversation management
+  static saveConversation(conversationId: string, messages: ChatMessage[]): boolean {
+    const key = this.getStorageKey('conversation');
     const conversationData = {
       id: conversationId,
-      messages,
-      lastUpdated: new Date().toISOString(),
-      messageCount: messages.length,
-      title: this.generateConversationTitle(messages),
-      tags: this.extractConversationTags(messages),
-      hasRecipeSuggestions: messages.some(m => m.suggestedRecipe)
+      messages: messages,
+      timestamp: Date.now()
     };
     
-    localStorage.setItem(key, JSON.stringify(conversationData));
-    
+    if (!this.setStorage(key, conversationData)) {
+      return false;
+    }
+
     // Update conversation list
-    const conversations = this.getConversationList();
-    const existingIndex = conversations.findIndex(c => c.id === conversationId);
-    const conversationInfo = {
+    const listKey = this.getStorageKey('conversation_list');
+    const conversationList = this.getStorage<ConversationData[]>(listKey) || [];
+    
+    const existingIndex = conversationList.findIndex(conv => conv.id === conversationId);
+    const conversationInfo: ConversationData = {
       id: conversationId,
-      lastUpdated: new Date().toISOString(),
+      title: this.generateConversationTitle(messages),
+      timestamp: new Date(),
       messageCount: messages.length,
-      title: conversationData.title,
-      tags: conversationData.tags,
-      hasRecipeSuggestions: conversationData.hasRecipeSuggestions,
-      preview: messages.length > 1 ? messages[1].content.substring(0, 60) + '...' : 'New conversation'
+      tags: this.extractConversationTags(messages)
     };
-    
+
     if (existingIndex >= 0) {
-      conversations[existingIndex] = conversationInfo;
+      conversationList[existingIndex] = conversationInfo;
     } else {
-      conversations.unshift(conversationInfo);
+      conversationList.unshift(conversationInfo);
     }
+
+    // Keep only last 50 conversations
+    const limitedConversations = conversationList.slice(0, 50);
     
-    // Keep only last 15 conversations
-    const limitedConversations = conversations.slice(0, 15);
-    localStorage.setItem(this.getStorageKey('conversation_list'), JSON.stringify(limitedConversations));
+    return this.setStorage(listKey, limitedConversations);
   }
 
-  private static generateConversationTitle(messages: any[]): string {
-    if (messages.length <= 1) return 'New Conversation';
-    
-    // Find first user message
-    const firstUserMessage = messages.find(m => m.type === 'user');
-    if (firstUserMessage) {
-      const content = firstUserMessage.content;
-      if (content.length <= 30) return content;
-      return content.substring(0, 30) + '...';
-    }
-    
-    return 'Conversation';
+  static loadConversation(conversationId: string): ChatMessage[] | null {
+    const key = this.getStorageKey('conversation');
+    const conversationData = this.getStorage<{ messages: ChatMessage[] }>(key);
+    return conversationData?.messages || null;
   }
 
-  private static extractConversationTags(messages: any[]): string[] {
-    const tags = new Set<string>();
-    
-    messages.forEach(message => {
-      if (message.type === 'user') {
-        const content = message.content.toLowerCase();
-        if (content.includes('recipe')) tags.add('recipe');
-        if (content.includes('nutrition') || content.includes('health')) tags.add('nutrition');
-        if (content.includes('leaf') || content.includes('plant')) tags.add('identification');
-        if (content.includes('cook') || content.includes('cooking')) tags.add('cooking');
-        if (message.suggestedRecipe) tags.add('recipe-suggested');
-      }
-    });
-    
-    return Array.from(tags);
+  static getConversationList(): ConversationData[] {
+    const key = this.getStorageKey('conversation_list');
+    return this.getStorage<ConversationData[]>(key) || [];
   }
 
-  static loadConversation(conversationId: string): any[] | null {
-    const key = this.getStorageKey('conversation_' + conversationId);
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      const conversation = JSON.parse(stored);
-      const messages = conversation.messages || [];
-      
-      // Convert timestamp strings back to Date objects
-      return messages.map(message => ({
-        ...message,
-        timestamp: new Date(message.timestamp)
-      }));
-    }
-    return null;
-  }
-
-  static getConversationList(): any[] {
-    const stored = localStorage.getItem(this.getStorageKey('conversation_list'));
-    return stored ? JSON.parse(stored) : [];
-  }
-
-  static searchConversations(query: string): any[] {
+  static searchConversations(query: string): ConversationData[] {
     const conversations = this.getConversationList();
-    if (!query.trim()) return conversations;
+    const lowerQuery = query.toLowerCase();
     
-    const searchTerm = query.toLowerCase();
-    return conversations.filter(conversation => 
-      conversation.title.toLowerCase().includes(searchTerm) ||
-      conversation.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm)) ||
-      conversation.preview.toLowerCase().includes(searchTerm)
+    return conversations.filter(conv => 
+      conv.title.toLowerCase().includes(lowerQuery) ||
+      conv.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
     );
   }
 
-  static getConversationsByTag(tag: string): any[] {
+  static getConversationsByTag(tag: string): ConversationData[] {
     const conversations = this.getConversationList();
-    return conversations.filter(conversation => 
-      conversation.tags.includes(tag)
-    );
-  }
-
-  static getConversationsWithRecipes(): any[] {
-    const conversations = this.getConversationList();
-    return conversations.filter(conversation => 
-      conversation.hasRecipeSuggestions
-    );
-  }
-
-  static deleteConversation(conversationId: string): void {
-    // Remove conversation data
-    const key = this.getStorageKey('conversation_' + conversationId);
-    localStorage.removeItem(key);
+    const lowerTag = tag.toLowerCase();
     
-    // Update conversation list
+    return conversations.filter(conv => 
+      conv.tags.some(t => t.toLowerCase().includes(lowerTag))
+    );
+  }
+
+  static getConversationsWithRecipes(): ConversationData[] {
     const conversations = this.getConversationList();
-    const filteredConversations = conversations.filter(c => c.id !== conversationId);
-    localStorage.setItem(this.getStorageKey('conversation_list'), JSON.stringify(filteredConversations));
+    return conversations.filter(conv => conv.tags.includes('recipe'));
   }
 
-  static createNewConversationId(): string {
-    return 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  static deleteConversation(conversationId: string): boolean {
+    const key = this.getStorageKey('conversation');
+    if (!this.removeStorage(key)) {
+      return false;
+    }
+
+    // Remove from conversation list
+    const listKey = this.getStorageKey('conversation_list');
+    const conversationList = this.getConversationList();
+    const filteredConversations = conversationList.filter(conv => conv.id !== conversationId);
+    
+    return this.setStorage(listKey, filteredConversations);
   }
 
-  // Current conversation tracking
-  static setCurrentConversationId(conversationId: string): void {
-    localStorage.setItem(this.getStorageKey('current_conversation'), conversationId);
+  static setCurrentConversation(conversationId: string): boolean {
+    const key = this.getStorageKey('current_conversation');
+    return this.setStorage(key, conversationId);
   }
 
-  static getCurrentConversationId(): string | null {
-    return localStorage.getItem(this.getStorageKey('current_conversation'));
+  static getCurrentConversation(): string | null {
+    const key = this.getStorageKey('current_conversation');
+    return this.getStorage<string>(key);
   }
 
-  static clearCurrentConversationId(): void {
-    localStorage.removeItem(this.getStorageKey('current_conversation'));
+  static clearCurrentConversation(): boolean {
+    const key = this.getStorageKey('current_conversation');
+    return this.removeStorage(key);
+  }
+
+  // Utility methods
+  private static getStorageKey(suffix: string): string {
+    return `safeleafkitchen_${suffix}`;
+  }
+
+  private static getStat(key: string): number {
+    const stored = this.getStorage(key);
+    return stored || 0;
+  }
+
+  private static setStat(key: string, value: number): boolean {
+    return this.setStorage(key, value);
+  }
+
+  private static getStorage<T>(key: string): T | null {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch (error) {
+      logger.error(`Failed to read from localStorage: ${key}`, error);
+      return null;
+    }
+  }
+
+  private static setStorage<T>(key: string, value: T): boolean {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (error) {
+      logger.error(`Failed to write to localStorage: ${key}`, error);
+      return false;
+    }
+  }
+
+  private static removeStorage(key: string): boolean {
+    try {
+      localStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      logger.error(`Failed to remove from localStorage: ${key}`, error);
+      return false;
+    }
+  }
+
+  private static generateConversationTitle(messages: ChatMessage[]): string {
+    const userMessages = messages.filter(msg => msg.role === 'user');
+    if (userMessages.length === 0) return 'New Conversation';
+    
+    const firstUserMessage = userMessages[0].content;
+    if (firstUserMessage.length <= 50) {
+      return firstUserMessage;
+    }
+    
+    return firstUserMessage.substring(0, 50) + '...';
+  }
+
+  private static extractConversationTags(messages: ChatMessage[]): string[] {
+    const tags: string[] = [];
+    const content = messages.map(msg => msg.content).join(' ').toLowerCase();
+    
+    if (content.includes('recipe') || content.includes('cook') || content.includes('ingredient')) {
+      tags.push('recipe');
+    }
+    if (content.includes('leaf') || content.includes('scan') || content.includes('detect')) {
+      tags.push('leaf');
+    }
+    if (content.includes('nutrition') || content.includes('health') || content.includes('vitamin')) {
+      tags.push('nutrition');
+    }
+    
+    return tags;
   }
 }
