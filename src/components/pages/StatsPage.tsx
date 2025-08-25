@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw } from "lucide-react";
 import { StorageService } from "@/services/apiService";
 import { recipes } from "@/data/recipes";
@@ -19,6 +20,7 @@ interface LeafData {
 }
 
 export default function StatsPage() {
+  const { t } = useI18n();
   const [stats, setStats] = useState({
     totalScans: 0,
     totalChats: 0,
@@ -117,67 +119,67 @@ export default function StatsPage() {
 
   const statCards: StatCard[] = [
     {
-      title: "Total Scans",
+      title: t('stats.card.totalScans'),
       value: stats.totalScans.toString(),
       icon: Scan,
       color: "bg-gradient-to-br from-primary/20 to-primary/10",
-      change: "+12% this week"
+      change: "+12%"
     },
     {
-      title: "Chat Messages",
+      title: t('stats.card.chatMessages'),
       value: stats.totalChats.toString(),
       icon: MessageCircle,
       color: "bg-gradient-to-br from-accent/20 to-accent/10",
-      change: "+8% this week"
+      change: "+8%"
     },
     {
-      title: "Available Recipes",
+      title: t('stats.card.availableRecipes'),
       value: totalRecipes.toString(),
       icon: ChefHat,
       color: "bg-gradient-to-br from-secondary/30 to-secondary/20",
-      change: "Moroccan inspired"
+      change: t('stats.card.suffix.moroccanInspired')
     },
     {
-      title: "High Antioxidant",
+      title: t('stats.card.highAntioxidant'),
       value: highAntioxidantRecipes.toString(),
       icon: Zap,
       color: "bg-gradient-to-br from-primary/20 to-accent/10",
-      change: "recipes available"
+      change: t('stats.card.suffix.recipesAvailable')
     },
     {
-      title: "Recipes Viewed",
+      title: t('stats.card.recipesViewed'),
       value: debugInfo.recipesReceived.toString(),
       icon: ChefHat,
       color: "bg-gradient-to-br from-accent/20 to-secondary/10",
-      change: "from recipes"
+      change: t('stats.card.suffix.fromRecipes')
     },
     {
-      title: "Favorites",
+      title: t('stats.card.favorites'),
       value: debugInfo.favoritesCount.toString(),
       icon: ChefHat,
       color: "bg-gradient-to-br from-secondary/20 to-accent/10",
-      change: "saved recipes"
+      change: t('stats.card.suffix.savedRecipes')
     },
     {
-      title: "Saved Conversations",
+      title: t('stats.card.savedConversations'),
       value: stats.savedConversations.toString(),
       icon: MessageCircle,
       color: "bg-gradient-to-br from-secondary/20 to-accent/10",
-      change: "conversations stored"
+      change: t('stats.card.suffix.conversationsStored')
     },
     {
-      title: "Money Saved (MAD)",
+      title: t('stats.card.moneySaved'),
       value: moneySaved.toFixed(2),
       icon: Coins,
       color: "bg-gradient-to-br from-green-500/20 to-green-600/10",
-      change: "from wild leaves"
+      change: t('stats.card.suffix.fromWildLeaves')
     },
     {
-      title: "CO₂e Avoided (kg)",
+      title: t('stats.card.co2Avoided'),
       value: co2Avoided.toFixed(2),
       icon: TreePine,
       color: "bg-gradient-to-br from-emerald-500/20 to-emerald-600/10",
-      change: "environmental impact"
+      change: t('stats.card.suffix.environmentalImpact')
     }
   ];
 
@@ -214,23 +216,23 @@ export default function StatsPage() {
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-foreground mb-2">
-          Your Nutrition Journey
+          {t('stats.headerTitle')}
         </h1>
         <p className="text-muted-foreground">
-          Track your discoveries and insights
+          {t('stats.headerSubtitle')}
         </p>
       </div>
 
       {/* Data Controls */}
       <div className="glass rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-foreground">Controls</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('stats.controls')}</h3>
           <button
             onClick={clearAllData}
             className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            Reset All Data
+            {t('stats.resetAllData')}
           </button>
         </div>
         <div className="text-xs text-muted-foreground">
@@ -293,7 +295,7 @@ export default function StatsPage() {
         <div className="glass rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <Award className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold text-foreground">Most Scanned Leaves</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t('stats.mostScannedLeaves')}</h3>
           </div>
           <div className="space-y-3">
             {topLeaves.map((leaf, index) => (
@@ -324,7 +326,7 @@ export default function StatsPage() {
       <div className="glass rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Nutritional Insights</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('stats.nutritionalInsights')}</h3>
         </div>
         <div className="grid grid-cols-3 gap-4">
           {nutritionalInsights.map((insight, index) => (
@@ -340,7 +342,7 @@ export default function StatsPage() {
       <div className="glass rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <ChefHat className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Recipe Insights</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('stats.recipeInsights')}</h3>
         </div>
         <div className="space-y-3">
           {recipeTips.map((tip, index) => (
@@ -355,31 +357,31 @@ export default function StatsPage() {
       <div className="glass rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Leaf className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Recipe Nutrition Summary</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('stats.recipeNutritionSummary')}</h3>
         </div>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Total Antioxidant Score</span>
+            <span className="text-muted-foreground">{t('stats.summary.totalAntioxidantScore')}</span>
             <span className="font-medium text-foreground">Very High</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Average Proteins</span>
-            <span className="font-medium text-foreground">{avgProteins.toFixed(1)}g per recipe</span>
+            <span className="text-muted-foreground">{t('stats.summary.avgProteins')}</span>
+            <span className="font-medium text-foreground">{avgProteins.toFixed(1)}g {t('stats.insight.perRecipe')}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Total Polyphenols</span>
-            <span className="font-medium text-foreground">{avgPolyphenols.toFixed(0)}mg per recipe</span>
+            <span className="text-muted-foreground">{t('stats.summary.totalPolyphenols')}</span>
+            <span className="font-medium text-foreground">{avgPolyphenols.toFixed(0)}mg {t('stats.insight.perRecipe')}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">High Antioxidant Recipes</span>
+            <span className="text-muted-foreground">{t('stats.summary.highAntioxidantRecipes')}</span>
             <span className="font-medium text-foreground">{highAntioxidantRecipes}/{totalRecipes}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Total Proteins (All Recipes)</span>
+            <span className="text-muted-foreground">{t('stats.summary.totalProteinsAll')}</span>
             <span className="font-medium text-foreground">{totalProteins.toFixed(1)}g</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Total Polyphenols (All Recipes)</span>
+            <span className="text-muted-foreground">{t('stats.summary.totalPolyphenolsAll')}</span>
             <span className="font-medium text-foreground">{totalPolyphenols.toFixed(0)}mg</span>
           </div>
         </div>
@@ -389,7 +391,7 @@ export default function StatsPage() {
       <div className="glass rounded-2xl p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <Leaf className="w-5 h-5 text-green-500" />
-          Environmental & Economic Impact
+          {t('stats.impact.header')}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-4">
@@ -397,7 +399,7 @@ export default function StatsPage() {
               <div className="flex items-center gap-3">
                 <Coins className="w-6 h-6 text-green-600" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Money Saved</p>
+                  <p className="text-sm text-muted-foreground">{t('stats.impact.totalMoneySaved')}</p>
                   <p className="text-2xl font-bold text-green-600">
                     {moneySaved.toFixed(2)} MAD
                   </p>
@@ -408,7 +410,7 @@ export default function StatsPage() {
               <div className="flex items-center gap-3">
                 <TreePine className="w-6 h-6 text-emerald-600" />
                 <div>
-                  <p className="text-sm text-muted-foreground">CO₂e Avoided</p>
+                  <p className="text-sm text-muted-foreground">{t('stats.impact.co2eAvoided')}</p>
                   <p className="text-2xl font-bold text-emerald-600">
                     {co2Avoided.toFixed(2)} kg
                   </p>
@@ -420,64 +422,64 @@ export default function StatsPage() {
             <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
               <div className="flex items-center gap-3 mb-3">
                 <Leaf className="w-5 h-5 text-blue-600" />
-                <p className="text-sm font-medium text-blue-600">Total Leaves Used</p>
+                <p className="text-sm font-medium text-blue-600">{t('stats.impact.totalLeavesUsed')}</p>
               </div>
               <p className="text-3xl font-bold text-blue-600">
                 {totalLeavesUsed.toFixed(1)} g
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Wild leaves harvested instead of bought
+                {t('stats.impact.wildLeavesNote')}
               </p>
             </div>
             <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
               <div className="flex items-center gap-3 mb-3">
                 <Zap className="w-5 h-5 text-purple-600" />
-                <p className="text-sm font-medium text-purple-600">Polyphenols Gained</p>
+                <p className="text-sm font-medium text-purple-600">{t('stats.impact.polyphenolsGained')}</p>
               </div>
               <p className="text-3xl font-bold text-purple-600">
                 {polyphenolsGained.toFixed(1)} mg
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Antioxidant compounds consumed
+                {t('stats.impact.antioxidantCompoundsConsumed')}
               </p>
             </div>
           </div>
         </div>
         <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
           <p className="text-sm text-muted-foreground text-center">
-            💚 Every wild leaf you use saves money, reduces environmental impact, and boosts your nutrition!
+            💚 {t('stats.impact.bottomNote')}
           </p>
         </div>
       </div>
 
       {/* Weekly Summary */}
       <div className="glass rounded-2xl p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">This Week's Summary</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-4">{t('stats.thisWeekSummary')}</h3>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Most Active Day</span>
+            <span className="text-muted-foreground">{t('stats.week.mostActiveDay')}</span>
             <span className="font-medium text-foreground">Wednesday</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Favorite Leaf Type</span>
+            <span className="text-muted-foreground">{t('stats.week.favoriteLeafType')}</span>
             <span className="font-medium text-foreground capitalize">
-              {topLeaves[0]?.name || 'No data yet'}
+              {topLeaves[0]?.name || t('stats.week.noDataYet')}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Average Session Time</span>
+            <span className="text-muted-foreground">{t('stats.week.averageSessionTime')}</span>
             <span className="font-medium text-foreground">3m 24s</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Recipes Available</span>
+            <span className="text-muted-foreground">{t('stats.week.recipesAvailable')}</span>
             <span className="font-medium text-foreground">{totalRecipes}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Avg Cooking Time</span>
+            <span className="text-muted-foreground">{t('stats.week.avgCookingTime')}</span>
             <span className="font-medium text-foreground">30 min</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Total Leaf Scans</span>
+            <span className="text-muted-foreground">{t('stats.week.totalLeafScans')}</span>
             <span className="font-medium text-foreground">{totalLeafCount}</span>
           </div>
         </div>

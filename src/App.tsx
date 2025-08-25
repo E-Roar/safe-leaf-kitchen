@@ -35,6 +35,12 @@ const App = () => {
   }, [theme]);
 
   useEffect(() => {
+    const handleToggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+    window.addEventListener('toggleTheme', handleToggleTheme as EventListener);
+    return () => window.removeEventListener('toggleTheme', handleToggleTheme as EventListener);
+  }, []);
+
+  useEffect(() => {
     const handleNavigateToRecipe = (event: CustomEvent) => {
       setSelectedRecipeId(event.detail.recipeId);
       setActiveTab("recipes");

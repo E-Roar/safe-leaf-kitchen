@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import { X, Menu, Leaf, Search, Star } from "lucide-react";
 import { leaves, LeafInfo } from "@/data/leaves";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,7 @@ interface LeavesPageProps {
 }
 
 export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
+  const { t } = useI18n();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedLeaf, setSelectedLeaf] = useState<LeafInfo | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
@@ -203,7 +205,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-foreground">Leaves</h2>
+              <h2 className="text-lg font-bold text-foreground">{t('leaves.title')}</h2>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -217,7 +219,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search leaves..."
+              placeholder={t('leaves.searchPlaceholder')}
               className="w-full pl-9 pr-3 py-2 bg-background/50 border border-border rounded-xl text-sm focus:outline-none"
             />
           </div>
@@ -234,7 +236,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:pl-80">
         {/* Mobile Header */}
-        <div className="lg:hidden p-4 border-b border-border">
+        <div className="p-4 border-b border-border sticky top-12 z-20 bg-background/95 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -242,7 +244,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-lg font-bold text-foreground">Leaves</h1>
+            <h1 className="text-lg font-bold text-foreground">{t('leaves.title')}</h1>
             <div className="w-10"></div>
           </div>
         </div>
@@ -343,7 +345,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Bar Chart */}
                     <div className="glass rounded-3xl p-4">
-                      <h4 className="font-semibold mb-2 text-foreground">Key nutrients</h4>
+                      <h4 className="font-semibold mb-2 text-foreground">{t('leaves.keyNutrients')}</h4>
                       <ChartContainer
                         config={{
                           value: { label: "Value", color: "hsl(var(--primary))" },
@@ -373,7 +375,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                     </div>
                     {/* Radar Chart */}
                     <div className="glass rounded-3xl p-4">
-                      <h4 className="font-semibold mb-2 text-foreground">Bioactive density</h4>
+                      <h4 className="font-semibold mb-2 text-foreground">{t('leaves.bioactiveDensity')}</h4>
                       <ChartContainer
                         config={{
                           score: { label: "Score", color: "hsl(var(--accent))" },
@@ -396,7 +398,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                       </ChartContainer>
                       {(bio?.["Classification_Antioxydante_CORRIGÉ"] || bio?.["Classification_Antioxydante_y"]) && (
                         <div className="text-xs mt-2 text-muted-foreground">
-                          Antioxidant class: <span className="text-foreground font-medium">{bio["Classification_Antioxydante_CORRIGÉ"] || bio["Classification_Antioxydante_y"]}</span>
+                          {t('leaves.antioxidantClass')}: <span className="text-foreground font-medium">{bio["Classification_Antioxydante_CORRIGÉ"] || bio["Classification_Antioxydante_y"]}</span>
                         </div>
                       )}
                     </div>
@@ -411,7 +413,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                     <div className="text-lg font-bold text-primary">
                       {selectedLeaf.highlights.proteins_percent}%
                     </div>
-                    <div className="text-xs text-muted-foreground">Proteins</div>
+                    <div className="text-xs text-muted-foreground">{t('leaves.highlight.proteins')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.polyphenols_mg_per_100g !== undefined && (
@@ -419,7 +421,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                     <div className="text-lg font-bold text-accent">
                       {selectedLeaf.highlights.polyphenols_mg_per_100g} mg
                     </div>
-                    <div className="text-xs text-muted-foreground">Polyphenols / 100g</div>
+                    <div className="text-xs text-muted-foreground">{t('leaves.highlight.polyphenolsPer100g')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.flavonoids_mg_per_100g !== undefined && (
@@ -427,7 +429,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                     <div className="text-lg font-bold text-secondary">
                       {selectedLeaf.highlights.flavonoids_mg_per_100g} mg
                     </div>
-                    <div className="text-xs text-muted-foreground">Flavonoids / 100g</div>
+                    <div className="text-xs text-muted-foreground">{t('leaves.highlight.flavonoidsPer100g')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.calcium_mg_per_100g !== undefined && (
@@ -435,7 +437,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                     <div className="text-lg font-bold text-foreground">
                       {selectedLeaf.highlights.calcium_mg_per_100g} mg
                     </div>
-                    <div className="text-xs text-muted-foreground">Calcium / 100g</div>
+                    <div className="text-xs text-muted-foreground">{t('leaves.highlight.calciumPer100g')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.antioxidant_classification && (
@@ -450,7 +452,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
 
               {/* Summary */}
               <div className="glass rounded-3xl p-5">
-                <h4 className="font-semibold mb-2 text-foreground">Summary</h4>
+                <h4 className="font-semibold mb-2 text-foreground">{t('leaves.summary')}</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">{selectedLeaf.summary}</p>
               </div>
 
@@ -462,7 +464,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 const moleculeList = extra?.molecules?.length ? extra.molecules : compounds;
                 return moleculeList && moleculeList.length > 0 ? (
                   <div className="glass rounded-3xl p-5">
-                    <h4 className="font-semibold mb-3 text-foreground">Key compounds</h4>
+                    <h4 className="font-semibold mb-3 text-foreground">{t('leaves.keyCompounds')}</h4>
                     <CompoundsBubbleSimulation compounds={moleculeList} />
                   </div>
                 ) : null;
@@ -475,7 +477,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 if (!extra?.activities?.length) return null;
                 return (
                   <div className="glass rounded-3xl p-5">
-                    <h4 className="font-semibold mb-3 text-foreground">Main bioactivities</h4>
+                    <h4 className="font-semibold mb-3 text-foreground">{t('leaves.mainBioactivities')}</h4>
                     <div className="flex flex-wrap gap-2">
                       {extra.activities.map((a, i) => (
                         <span key={i} className="px-2 py-1 rounded-full text-xs bg-accent/10 text-accent">
@@ -490,7 +492,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
               {/* Safety */}
               {selectedLeaf.safety && (
                 <div className="glass rounded-3xl p-5">
-                  <h4 className="font-semibold mb-2 text-foreground">Safety</h4>
+                  <h4 className="font-semibold mb-2 text-foreground">{t('leaves.safety')}</h4>
                   <p className="text-sm text-muted-foreground">{selectedLeaf.safety}</p>
                 </div>
               )}
@@ -500,8 +502,8 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
               <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mb-6">
                 <Leaf className="w-12 h-12 text-primary-foreground" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Select a Leaf</h2>
-              <p className="text-muted-foreground max-w-md">Choose a leaf from the sidebar to view its nutritional and descriptive profile.</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">{t('leaves.selectLeaf')}</h2>
+              <p className="text-muted-foreground max-w-md">{t('leaves.selectLeafHint')}</p>
             </div>
           )}
         </div>

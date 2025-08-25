@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import { ChevronDown, ChevronUp, ChefHat, Clock, Users, Leaf, Zap, BookOpen, Star, Menu, X, Play } from "lucide-react";
 import { recipes, Recipe } from "@/data/recipes";
 import { StorageService } from "@/services/apiService";
@@ -11,6 +12,7 @@ interface RecipePageProps {
 }
 
 export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
+  const { t } = useI18n();
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [expandedRecipe, setExpandedRecipe] = useState<number | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -156,7 +158,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-foreground">Recipes</h2>
+              <h2 className="text-lg font-bold text-foreground">{t('recipes.title')}</h2>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -166,7 +168,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
             </button>
           </div>
           <p className="text-sm text-muted-foreground mt-2">
-            Select a recipe to view details
+            {t('recipes.selectHint')}
           </p>
         </div>
 
@@ -210,7 +212,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                     {recipe.title[selectedLanguage]}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {recipe.nutrition.antioxidant_score} • {recipe.ingredients[selectedLanguage].length} ingredients
+                    {recipe.nutrition.antioxidant_score} • {recipe.ingredients[selectedLanguage].length} {t('recipes.ingredientsCount')}
                   </p>
                 </div>
               </div>
@@ -222,7 +224,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:pl-80">
         {/* Mobile Header */}
-        <div className="lg:hidden p-4 border-b border-border">
+        <div className="p-4 border-b border-border sticky top-12 z-20 bg-background/95 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -230,7 +232,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-lg font-bold text-foreground">Recipes</h1>
+            <h1 className="text-lg font-bold text-foreground">{t('recipes.title')}</h1>
             <div className="w-10"></div>
           </div>
         </div>
@@ -250,7 +252,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                   {selectedRecipe.title[selectedLanguage]}
                 </h1>
                 <p className="text-muted-foreground max-w-md mx-auto">
-                  Traditional Moroccan recipe with fresh, nutritious leaves
+                  {t('recipes.traditionalSubtitle')}
                 </p>
               </div>
 
@@ -336,19 +338,19 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                             <div className="text-lg font-bold text-primary">
                               {selectedRecipe.nutrition.proteins_g}g
                             </div>
-                            <div className="text-xs text-muted-foreground">Proteins</div>
+                            <div className="text-xs text-muted-foreground">{t('recipes.card.proteins')}</div>
                           </div>
                           <div className="text-center p-3 bg-background/50 rounded-xl">
                             <div className="text-lg font-bold text-accent">
                               {selectedRecipe.nutrition.polyphenols_mg}mg
                             </div>
-                            <div className="text-xs text-muted-foreground">Polyphenols</div>
+                            <div className="text-xs text-muted-foreground">{t('recipes.card.polyphenols')}</div>
                           </div>
                           <div className="text-center p-3 bg-background/50 rounded-xl">
                             <div className="text-lg font-bold text-secondary">
                               {selectedRecipe.nutrition.flavonoids_mg}mg
                             </div>
-                            <div className="text-xs text-muted-foreground">Flavonoids</div>
+                            <div className="text-xs text-muted-foreground">{t('recipes.card.flavonoids')}</div>
                           </div>
                         </div>
                       </div>
@@ -359,7 +361,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                         <div>
                           <div className="flex items-center gap-2 mb-3">
                             <BookOpen className="w-5 h-5 text-primary" />
-                            <h4 className="font-semibold text-foreground">Ingredients</h4>
+                            <h4 className="font-semibold text-foreground">{t('recipes.ingredients')}</h4>
                           </div>
                           <div className="space-y-2">
                             {selectedRecipe.ingredients[selectedLanguage].map((ingredient, index) => (
@@ -380,7 +382,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                         <div>
                           <div className="flex items-center gap-2 mb-3">
                             <ChefHat className="w-5 h-5 text-primary" />
-                            <h4 className="font-semibold text-foreground">Instructions</h4>
+                            <h4 className="font-semibold text-foreground">{t('recipes.instructions')}</h4>
                           </div>
                           <div className="space-y-3">
                             {selectedRecipe.steps[selectedLanguage].map((step, index) => (
@@ -401,32 +403,32 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                         <div>
                           <div className="flex items-center gap-2 mb-3">
                             <Zap className="w-5 h-5 text-primary" />
-                            <h4 className="font-semibold text-foreground">Nutritional Profile</h4>
+                            <h4 className="font-semibold text-foreground">{t('recipes.nutritionalProfile')}</h4>
                           </div>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div className="text-center p-3 bg-background/50 rounded-xl">
                               <div className="text-sm font-semibold text-primary">
                                 {selectedRecipe.nutrition.proteins_g}g
                               </div>
-                              <div className="text-xs text-muted-foreground">Proteins</div>
+                              <div className="text-xs text-muted-foreground">{t('recipes.card.proteins')}</div>
                             </div>
                             <div className="text-center p-3 bg-background/50 rounded-xl">
                               <div className="text-sm font-semibold text-accent">
                                 {selectedRecipe.nutrition.fats_g}g
                               </div>
-                              <div className="text-xs text-muted-foreground">Fats</div>
+                              <div className="text-xs text-muted-foreground">{t('recipes.nutrition.fats')}</div>
                             </div>
                             <div className="text-center p-3 bg-background/50 rounded-xl">
                               <div className="text-sm font-semibold text-secondary">
                                 {selectedRecipe.nutrition.moisture_percent}%
                               </div>
-                              <div className="text-xs text-muted-foreground">Moisture</div>
+                              <div className="text-xs text-muted-foreground">{t('recipes.nutrition.moisture')}</div>
                             </div>
                             <div className="text-center p-3 bg-background/50 rounded-xl">
                               <div className="text-sm font-semibold text-primary">
                                 {selectedRecipe.nutrition.ash_g}g
                               </div>
-                              <div className="text-xs text-muted-foreground">Ash</div>
+                              <div className="text-xs text-muted-foreground">{t('recipes.nutrition.ash')}</div>
                             </div>
                           </div>
                         </div>
@@ -439,7 +441,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                             aria-label="Use Recipe"
                           >
                             <Play className="w-4 h-4" />
-                            <span className="text-sm font-medium">Use Recipe</span>
+                            <span className="text-sm font-medium">{t('recipes.useRecipe')}</span>
                           </button>
                           
                           <button
@@ -456,7 +458,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                               )}
                             />
                             <span className="text-sm text-muted-foreground">
-                              {favorites.includes(selectedRecipe.id) ? "Favorited" : "Add to favorites"}
+                              {favorites.includes(selectedRecipe.id) ? t('recipes.favorited') : t('recipes.addToFavorites')}
                             </span>
                           </button>
                         </div>
@@ -469,7 +471,7 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                       onClick={() => toggleRecipe(selectedRecipe.id)}
                       className="px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors"
                     >
-                      View Full Recipe
+                      {t('recipes.viewFull')}
                     </button>
                   </div>
                 )}
@@ -482,10 +484,10 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                 <ChefHat className="w-12 h-12 text-primary-foreground" />
               </div>
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Select a Recipe
+                {t('recipes.selectRecipe')}
               </h2>
               <p className="text-muted-foreground max-w-md">
-                Choose a recipe from the sidebar to view its details, ingredients, and cooking instructions.
+                {t('recipes.emptyHint')}
               </p>
             </div>
           )}
