@@ -13,18 +13,24 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
   const [isScanning, setIsScanning] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
-  const [longPressActive, setLongPressActive] = useState(false);
+  const [isCameraLoading, setIsCameraLoading] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const startCamera = useCallback(async () => {
     try {
+      setIsCameraLoading(true);
+      // Stop existing stream first if it exists
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 1920, min: 640 },
+          height: { ideal: 1080, min: 480 },
+          aspectRatio: { ideal: 16/9 }
         }
       });
       
@@ -36,9 +42,11 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
           const video = videoRef.current!;
           const handler = () => {
             video.removeEventListener('loadedmetadata', handler);
+            setIsCameraLoading(false); // Camera is ready
             resolve();
           };
           if (video.readyState >= 1) {
+            setIsCameraLoading(false);
             resolve();
           } else {
             video.addEventListener('loadedmetadata', handler);
@@ -48,13 +56,15 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
           await videoRef.current.play(); 
         } catch (error) {
           logger.warn('Failed to play video', error);
+          setIsCameraLoading(false);
         }
       }
     } catch (error) {
       logger.error("Camera access error:", error);
       toast.error("Unable to access camera");
+      setIsCameraLoading(false);
     }
-  }, [facingMode]);
+  }, [facingMode]); // Only depend on facingMode
 
   const stopCamera = useCallback(() => {
     if (stream) {
@@ -63,12 +73,19 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
     }
   }, [stream]);
 
+  // Start camera when component mounts or facing mode changes
   useEffect(() => {
     startCamera();
+  }, [facingMode]); // Only restart when facing mode changes
+  
+  // Cleanup camera on unmount
+  useEffect(() => {
     return () => {
-      stopCamera();
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
     };
-  }, [startCamera, stopCamera]);
+  }, [stream]);
 
   const captureAndAnalyze = async () => {
     if (!videoRef.current || !canvasRef.current || isScanning) return;
@@ -116,12 +133,9 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
         onDetection(result.predictions);
         toast.success("Leaf detected successfully!");
         // Automatically close camera when leaf is detected
-        const timeoutId = setTimeout(() => {
+        setTimeout(() => {
           onClose();
         }, 1000); // Small delay to show success message
-        
-        // Cleanup timeout if component unmounts
-        return () => clearTimeout(timeoutId);
       } else {
         onDetection([]);
         toast.error("No leaves detected. Try a different angle or lighting.");
@@ -134,112 +148,97 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
     }
   };
 
-  const handleLongPressStart = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-    }
-    longPressTimerRef.current = setTimeout(() => {
-      setLongPressActive(true);
-      captureAndAnalyze();
-    }, 500);
-  };
-
-  const handleLongPressEnd = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    setLongPressActive(false);
-  };
-
   const handleFlipCamera = () => {
+    setIsCameraLoading(true); // Show loading when switching cameras
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (longPressTimerRef.current) {
-        clearTimeout(longPressTimerRef.current);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [stream]);
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Camera Scanner</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-black z-50 flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm">
+        <h2 className="text-lg sm:text-xl font-semibold text-white">Camera Scanner</h2>
+        <button
+          onClick={onClose}
+          className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+        >
+          <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+        </button>
+      </div>
 
-        {/* Video Container */}
-        <div className="relative bg-black rounded-2xl overflow-hidden">
+        {/* Video Container - Responsive */}
+        <div className="relative flex-1 bg-black overflow-hidden">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="w-full h-auto"
+            className="w-full h-full object-cover"
           />
           
-          {/* Overlay */}
+          {/* Hidden canvas for image capture */}
+          <canvas
+            ref={canvasRef}
+            className="hidden"
+          />
+          
+          {/* Responsive square frame overlay */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-64 h-64 border-2 border-white/50 rounded-2xl flex items-center justify-center">
-              <div className="text-white/70 text-center">
-                <div className="text-2xl mb-2">📱</div>
-                <div className="text-sm">Position leaf in frame</div>
-              </div>
-            </div>
+            <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 border-2 border-white/70 rounded-lg"></div>
           </div>
 
-          {/* Controls */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+          {/* Responsive scan button */}
+          <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2">
             <button
-              onClick={handleFlipCamera}
-              className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-            >
-              <RotateCcw className="w-6 h-6 text-white" />
-            </button>
-            
-            <button
-              onMouseDown={handleLongPressStart}
-              onMouseUp={handleLongPressEnd}
-              onMouseLeave={handleLongPressEnd}
-              onTouchStart={handleLongPressStart}
-              onTouchEnd={handleLongPressEnd}
-              disabled={isScanning}
+              onClick={captureAndAnalyze}
+              disabled={isScanning || isCameraLoading}
               className={`
-                w-16 h-16 rounded-full flex items-center justify-center transition-all
-                ${isScanning 
-                  ? 'bg-gray-500 cursor-not-allowed' 
-                  : longPressActive 
-                    ? 'bg-red-500 scale-110' 
-                    : 'bg-white hover:bg-gray-100'
+                w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300
+                ${
+                  isScanning || isCameraLoading
+                    ? 'bg-gray-500 cursor-not-allowed' 
+                    : 'bg-white hover:bg-gray-100 hover:scale-105 active:scale-95'
                 }
               `}
             >
-              <div className="w-8 h-8 rounded-full border-4 border-gray-800"></div>
+              {isScanning ? (
+                <div className="animate-spin w-6 h-6 sm:w-8 sm:h-8 border-2 border-gray-800 border-t-transparent rounded-full"></div>
+              ) : (
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gray-800"></div>
+              )}
             </button>
           </div>
+
+          {/* Camera flip button - Responsive */}
+          <button
+            onClick={handleFlipCamera}
+            disabled={isScanning || isCameraLoading}
+            className="absolute top-4 right-4 p-2 sm:p-3 rounded-full bg-black/50 hover:bg-black/70 transition-colors disabled:opacity-50"
+          >
+            <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          </button>
         </div>
 
-        {/* Instructions */}
-        <div className="mt-4 text-center text-white/80">
-          <p className="text-sm">
-            {isScanning 
-              ? "Analyzing..." 
-              : "Hold the button to scan for leaves"
+        {/* Instructions - Responsive */}
+        <div className="p-4 sm:p-6 text-center text-white/80 bg-black/50 backdrop-blur-sm" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <p className="text-sm sm:text-base">
+            {isCameraLoading
+              ? "Initializing camera..."
+              : isScanning 
+                ? "Analyzing leaf..." 
+                : "Position the leaf in the square and tap to scan"
             }
           </p>
         </div>
-      </div>
     </div>
   );
 }

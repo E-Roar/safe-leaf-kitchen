@@ -1,0 +1,7 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#3b82f6" rx="20"/>
+  <polygon points="100,40 140,80 100,120 60,80" fill="white"/>
+  <circle cx="100" cy="80" r="8" fill="#3b82f6"/>
+  <text x="100" y="150" text-anchor="middle" fill="white" font-family="Arial" font-size="18" font-weight="bold">Innovation Hub</text>
+  <text x="100" y="170" text-anchor="middle" fill="white" font-family="Arial" font-size="12">Technology Accelerator</text>
+</svg>

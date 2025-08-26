@@ -14,6 +14,7 @@ import { registerServiceWorker } from "@/utils/pwaUtils";
 import { safeStorage } from "@/lib/safeStorage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { logger } from "@/lib/logger";
+import { VisualEffectsProvider } from "@/contexts/VisualEffectsContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -143,16 +144,18 @@ const App = () => {
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
-            {renderCurrentPage}
-          </AppLayout>
-          <PWAInstallPrompt />
-        </TooltipProvider>
-      </QueryClientProvider>
+      <VisualEffectsProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppLayout activeTab={activeTab} onTabChange={setActiveTab}>
+              {renderCurrentPage}
+            </AppLayout>
+            <PWAInstallPrompt />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </VisualEffectsProvider>
     </ErrorBoundary>
   );
 };

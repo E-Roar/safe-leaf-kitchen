@@ -155,6 +155,46 @@
     color: hsl(var(--foreground));
   }
 
+  /* Parallax layer effects for depth illusion */
+  .parallax-bg {
+    position: relative;
+    z-index: 1;
+    will-change: transform;
+  }
+
+  .parallax-mid {
+    position: relative;
+    z-index: 10;
+    will-change: transform;
+    box-shadow: 0 8px 32px -8px hsl(var(--foreground) / 0.15);
+  }
+
+  .parallax-front {
+    position: relative;
+    z-index: 20;
+    will-change: transform;
+    box-shadow: 0 16px 64px -12px hsl(var(--foreground) / 0.25);
+  }
+
+  .parallax-floating {
+    position: relative;
+    z-index: 30;
+    will-change: transform;
+    box-shadow: 0 24px 96px -16px hsl(var(--foreground) / 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Enhanced glass effects for parallax layers */
+  .glass-deep {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    box-shadow: 0 32px 128px -20px hsl(var(--foreground) / 0.4);
+    color: hsl(var(--foreground));
+  }
+
   /* Modern button styles */
   .btn-organic {
     background: var(--gradient-primary);

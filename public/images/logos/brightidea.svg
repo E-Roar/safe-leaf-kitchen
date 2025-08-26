@@ -1,0 +1,7 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#f59e0b" rx="20"/>
+  <circle cx="100" cy="80" r="30" fill="white"/>
+  <circle cx="100" cy="75" r="15" fill="#f59e0b"/>
+  <text x="100" y="140" text-anchor="middle" fill="white" font-family="Arial" font-size="20" font-weight="bold">BrightIdea</text>
+  <text x="100" y="165" text-anchor="middle" fill="white" font-family="Arial" font-size="12">Innovation Partner</text>
+</svg>

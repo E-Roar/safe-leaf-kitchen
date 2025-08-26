@@ -1,5 +1,9 @@
-import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon, Sparkles, Heart, TrendingUp, CheckCircle, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
+import { useMultiParallax } from "@/hooks/useParallax";
+import { useVisualEffects } from "@/contexts/VisualEffectsContext";
+import FloatingLeaves from "@/components/effects/FloatingLeaves";
 
 interface LandingPageProps {
   onNavigateToChat: () => void;
@@ -11,139 +15,922 @@ interface LandingPageProps {
 
 export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves, onToggleTheme }: LandingPageProps) {
   const { t } = useI18n();
+  const { settings, toggleParticles } = useVisualEffects();
+  
+  // Parallax configuration for different layers - Extremely subtle for better UX and stability
+  const parallaxOffsets = useMultiParallax([
+    { speed: 0.005, direction: 'down' }, // Background layer (barely perceptible)
+    { speed: 0.008, direction: 'down' }, // Mid background
+    { speed: 0.012, direction: 'down' }, // Content sections
+    { speed: 0.015, direction: 'down' }, // Floating elements
+    { speed: 0.018, direction: 'down' }  // Front floating elements
+  ]);
+  
+  // Team carousel state - responsive items per slide
+  const [currentTeamSlide, setCurrentTeamSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Check for mobile view
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  const teamMembers = [
+    {
+      name: "Prof. Rekia Belahsen",
+      role: "Directrice Scientifique",
+      specialty: "Nutrition & Santé Publique",
+      type: "onsite"
+    },
+    {
+      name: "Jamila El Biyad",
+      role: "Chercheuse",
+      specialty: "Analyses Nutritionnelles",
+      type: "onsite"
+    },
+    {
+      name: "Abdelghani Aboukhalaf",
+      role: "Coordinateur Projet",
+      specialty: "Développement Application",
+      type: "onsite"
+    },
+    {
+      name: "Manal Tbatou",
+      role: "Coordinatrice",
+      specialty: "Coopératives",
+      type: "onsite"
+    },
+    {
+      name: "Adil Kalili",
+      role: "Spécialiste",
+      specialty: "Valorisation Co-produits",
+      type: "onsite"
+    },
+    {
+      name: "Reda El Bakrauy",
+      role: "Lead Developer",
+      specialty: "Tech Stack Architect",
+      type: "onsite"
+    },
+    {
+      name: "Prof. Hamid Chamlal",
+      role: "Conseiller Académique",
+      specialty: "Participation en ligne",
+      type: "online"
+    }
+  ];
+  
+  // Responsive items per slide - calculate after teamMembers is defined
+  const itemsPerSlide = isMobile ? 1 : 3;
+  const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
+  
+  const nextSlide = () => {
+    setCurrentTeamSlide((prev) => (prev + 1) % totalSlides);
+  };
+  
+  const prevSlide = () => {
+    setCurrentTeamSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+  
+  const goToSlide = (index: number) => {
+    setCurrentTeamSlide(index);
+  };
+  
   return (
-    <div className="min-h-screen w-full flex flex-col items-center px-6 py-12 relative">
-      {/* Theme Toggle */}
-      <button
-        onClick={onToggleTheme}
-        className="absolute top-4 left-16 z-20 p-2 rounded-full border border-border bg-background/70 backdrop-blur-sm hover:bg-muted transition-colors"
-        title="Toggle light/dark"
+    <div className="min-h-screen w-full flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12 relative overflow-hidden">
+      {/* Floating Leaves Particle System */}
+      <FloatingLeaves 
+        enabled={settings.particlesEnabled} 
+        particleCount={20}
+        className="z-[1]"
+      />
+      {/* Enhanced background effects with parallax */}
+      <div 
+        className="absolute inset-0 overflow-hidden pointer-events-none z-0 parallax-bg"
+        style={{ transform: `translateY(${parallaxOffsets[0]}px)` }}
       >
-        <Sun className="w-4 h-4 hidden dark:block" />
-        <Moon className="w-4 h-4 dark:hidden" />
-      </button>
-      {/* Hero */}
-      <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 items-center mb-14">
-        <div className="order-2 md:order-1">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
-            SafeLeaf<span className="text-primary">Kitchen</span>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-glow rounded-full opacity-20 animate-leaf-float"></div>
+        <div className="absolute top-1/4 right-16 w-24 h-24 bg-gradient-glow rounded-full opacity-15 animate-leaf-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-20 h-20 bg-gradient-glow rounded-full opacity-25 animate-leaf-float" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-gradient-glow rounded-full opacity-30 animate-pulse-glow" style={{ animationDelay: '1s' }}></div>
+      </div>
+
+      {/* Additional mid-background layer */}
+      <div 
+        className="absolute inset-0 overflow-hidden pointer-events-none z-5 parallax-bg"
+        style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
+      >
+        <div className="absolute top-32 right-32 w-40 h-40 bg-primary/5 rounded-full blur-xl"></div>
+        <div className="absolute bottom-40 left-20 w-48 h-48 bg-primary/5 rounded-full blur-xl"></div>
+        <div className="absolute top-1/3 left-1/2 w-36 h-36 bg-primary/5 rounded-full blur-xl"></div>
+      </div>
+
+      {/* Theme Toggle and Particle Toggle */}
+      <div className="absolute top-4 left-16 z-20 flex gap-2">
+        <button
+          onClick={onToggleTheme}
+          className="p-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 group"
+          title="Toggle light/dark"
+        >
+          <Sun className="w-5 h-5 hidden dark:block text-primary group-hover:rotate-180 transition-transform duration-500" />
+          <Moon className="w-5 h-5 dark:hidden text-primary group-hover:-rotate-180 transition-transform duration-500" />
+        </button>
+        
+        <button
+          onClick={toggleParticles}
+          className={`p-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 group ${
+            settings.particlesEnabled ? 'bg-primary/20' : 'bg-muted/20'
+          }`}
+          title="Toggle floating leaves"
+        >
+          <Sparkles className={`w-5 h-5 transition-all duration-500 ${
+            settings.particlesEnabled 
+              ? 'text-primary group-hover:rotate-12' 
+              : 'text-muted-foreground group-hover:scale-110'
+          }`} />
+        </button>
+      </div>
+      {/* Enhanced Hero Section with Subtle Parallax */}
+      <div 
+        className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center mb-20 mt-8 relative z-10"
+        style={{ transform: `translateY(${parallaxOffsets[2]}px)` }}
+      >
+        <div className="order-2 lg:order-1 text-center lg:text-left">
+          {/* Badge with subtle floating effect */}
+          <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6 group cursor-default">
+            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+            <span className="text-sm font-medium text-foreground">{t('landing.hero.badge')}</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 tracking-tight leading-tight">
+            SafeLeaf<span className="text-primary bg-gradient-primary bg-clip-text text-transparent">Kitchen</span>
           </h1>
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed mb-4">
+          
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6 max-w-2xl">
             {t('landing.tagline')}
           </p>
-          <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-            {t('landing.fact')}
-          </p>
-          <div className="flex flex-wrap gap-3 mt-6">
+          
+          <div className="flex items-center gap-2 mb-8 justify-center lg:justify-start">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+              ))}
+            </div>
+            <span className="text-sm text-muted-foreground font-medium">{t('landing.hero.trusted')}</span>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center lg:justify-start">
             <button
               onClick={onNavigateToScan}
-              className="btn-organic px-6 py-3 text-base font-semibold text-primary-foreground flex items-center gap-2"
+              className="btn-organic px-8 py-4 text-lg font-semibold text-primary-foreground flex items-center gap-3 justify-center hover:scale-105 transition-all duration-300 shadow-glow group"
             >
-              <Scan className="w-5 h-5" />
+              <Scan className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
               {t('landing.scanNow')}
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </button>
             <button
               onClick={onNavigateToChat}
-              className="px-6 py-3 rounded-xl border border-border text-foreground hover:bg-muted/50 transition-colors flex items-center gap-2"
+              className="px-8 py-4 rounded-2xl border border-border text-foreground glass hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center group"
             >
-              <MessageCircle className="w-5 h-5" />
+              <MessageCircle className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
               {t('landing.askAssistant')}
             </button>
           </div>
-          <div className="mt-4 text-xs text-muted-foreground">
-            {t('landing.sources')}
-          </div>
-        </div>
-        <div className="order-1 md:order-2 flex justify-center">
-          <div className="relative">
-            <div className="w-28 h-28 md:w-36 md:h-36 bg-gradient-primary rounded-full flex items-center justify-center shadow-leaf animate-leaf-float">
-              <Leaf className="w-12 h-12 md:w-16 md:h-16 text-primary-foreground" />
+          
+          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground justify-center lg:justify-start">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span>{t('landing.hero.leafSpecies')}</span>
             </div>
-            <div className="absolute inset-0 bg-gradient-glow rounded-full opacity-60 animate-pulse-glow"></div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span>{t('landing.hero.scientificParams')}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span>{t('landing.hero.moroccanRecipes')}</span>
+            </div>
+          </div>
+        </div>
+        <div className="order-1 lg:order-2 flex justify-center relative">
+          <div className="relative group">
+            {/* Main leaf icon with subtle parallax */}
+            <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 bg-gradient-primary rounded-full flex items-center justify-center shadow-leaf animate-leaf-float group-hover:scale-110 transition-all duration-500">
+              <Leaf className="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 text-primary-foreground group-hover:rotate-12 transition-transform duration-500" />
+            </div>
+            
+            {/* Enhanced glow effect */}
+            <div className="absolute inset-0 bg-gradient-glow rounded-full opacity-60 animate-pulse-glow group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            {/* Floating mini icons with simple animations */}
+            <div className="absolute -top-4 -right-4 w-16 h-16 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '0.5s' }}>
+              <Scan className="w-8 h-8 text-primary" />
+            </div>
+            <div className="absolute -bottom-4 -left-4 w-16 h-16 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '1s' }}>
+              <ChefHat className="w-8 h-8 text-primary" />
+            </div>
+            <div className="absolute top-1/2 -left-8 w-14 h-14 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '1.5s' }}>
+              <Heart className="w-6 h-6 text-primary" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Value props with clickable shortcuts */}
-      <div className="w-full max-w-5xl grid grid-cols-3 gap-4 mb-12">
-        <button onClick={onNavigateToScan} className="text-center group">
-          <div className="w-14 h-14 md:w-16 md:h-16 bg-accent/20 rounded-2xl flex items-center justify-center mb-2 mx-auto group-hover:scale-105 transition-transform">
-            <Scan className="w-6 h-6 text-accent" />
+      {/* The Problem Section with Subtle Parallax */}
+      <div 
+        className="w-full max-w-6xl mb-20"
+        style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
+      >
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.problem.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{t('landing.problem.subtitle')}</p>
+        </div>
+        
+        <div className="grid md:grid-cols-4 gap-6">
+          <div className="text-center group">
+            <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+              <span className="text-3xl font-bold text-destructive">⅓</span>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.problem.foodWasted.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.problem.foodWasted.desc')}</p>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">{t('landing.smartScanning')}</p>
+          
+          <div className="text-center group">
+            <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+              <span className="text-2xl">🗑️</span>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.problem.leavesDiscarded.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.problem.leavesDiscarded.desc')}</p>
+          </div>
+          
+          <div className="text-center group">
+            <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+              <span className="text-2xl">💰</span>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.problem.moneyLost.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.problem.moneyLost.desc')}</p>
+          </div>
+          
+          <div className="text-center group">
+            <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+              <span className="text-2xl">❓</span>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.problem.unknownValue.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.problem.unknownValue.desc')}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Value Propositions with Subtle Parallax */}
+      <div 
+        className="w-full max-w-6xl grid md:grid-cols-3 gap-6 mb-20"
+        style={{ transform: `translateY(${parallaxOffsets[2]}px)` }}
+      >
+        <button onClick={onNavigateToScan} className="glass p-6 rounded-3xl text-center group hover:scale-105 hover:shadow-glow transition-all duration-300 border border-border/50">
+          <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:rotate-6 transition-transform duration-300 shadow-organic">
+            <Scan className="w-10 h-10 text-primary-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.smartScanning')}</h3>
+          <p className="text-sm text-muted-foreground">{t('landing.valueProps.scanning.desc')}</p>
         </button>
-        <button onClick={onNavigateToRecipes} className="text-center group">
-          <div className="w-14 h-14 md:w-16 md:h-16 bg-accent/20 rounded-2xl flex items-center justify-center mb-2 mx-auto group-hover:scale-105 transition-transform">
-            <ChefHat className="w-6 h-6 text-accent" />
+        
+        <button onClick={onNavigateToRecipes} className="glass p-6 rounded-3xl text-center group hover:scale-105 hover:shadow-glow transition-all duration-300 border border-border/50">
+          <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:rotate-6 transition-transform duration-300 shadow-organic">
+            <ChefHat className="w-10 h-10 text-primary-foreground" />
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">{t('landing.recipeIdeas')}</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.recipeIdeas')}</h3>
+          <p className="text-sm text-muted-foreground">{t('landing.valueProps.recipes.desc')}</p>
         </button>
-        <button onClick={onNavigateToChat} className="text-center group">
-          <div className="w-14 h-14 md:w-16 md:h-16 bg-accent/20 rounded-2xl flex items-center justify-center mb-2 mx-auto group-hover:scale-105 transition-transform">
-            <MessageCircle className="w-6 h-6 text-accent" />
+        
+        <button onClick={onNavigateToChat} className="glass p-6 rounded-3xl text-center group hover:scale-105 hover:shadow-glow transition-all duration-300 border border-border/50">
+          <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:rotate-6 transition-transform duration-300 shadow-organic">
+            <MessageCircle className="w-10 h-10 text-primary-foreground" />
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground">{t('landing.chatAndNutrition')}</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.chatAndNutrition')}</h3>
+          <p className="text-sm text-muted-foreground">{t('landing.valueProps.chat.desc')}</p>
         </button>
       </div>
 
-      {/* Moroccan context */}
-      <div className="w-full max-w-5xl grid md:grid-cols-3 gap-4 mb-12">
-        <div className="glass p-5 rounded-2xl">
-          <div className="flex items-center gap-2 mb-2 text-foreground font-semibold"><Users className="w-4 h-4" /> {t('landing.moroccanHouseholds')}</div>
-          <p className="text-sm text-muted-foreground">
+      {/* Enhanced Context Cards */}
+      <div className="w-full max-w-6xl grid md:grid-cols-3 gap-6 mb-20">
+        <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Users className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">{t('landing.moroccanHouseholds')}</h3>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {t('landing.moroccanBody')}
           </p>
         </div>
-        <div className="glass p-5 rounded-2xl">
-          <div className="flex items-center gap-2 mb-2 text-foreground font-semibold"><Globe2 className="w-4 h-4" /> {t('landing.globalImpact')}</div>
-          <p className="text-sm text-muted-foreground">
+        
+        <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Globe2 className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">{t('landing.globalImpact')}</h3>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {t('landing.globalBody')}
           </p>
         </div>
-        <div className="glass p-5 rounded-2xl">
-          <div className="flex items-center gap-2 mb-2 text-foreground font-semibold"><ShieldCheck className="w-4 h-4" /> {t('landing.scienceBacked')}</div>
-          <p className="text-sm text-muted-foreground">
+        
+        <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <ShieldCheck className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">{t('landing.scienceBacked')}</h3>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {t('landing.scienceBody')}
           </p>
         </div>
       </div>
 
-      {/* How it works */}
-      <div className="w-full max-w-5xl mb-12">
-        <h2 className="text-xl font-semibold mb-3">{t('landing.howItWorks')}</h2>
-        <div className="grid md:grid-cols-4 gap-3 text-sm text-muted-foreground">
-          <div className="glass p-4 rounded-xl">{t('landing.hiw.1')}</div>
-          <div className="glass p-4 rounded-xl">{t('landing.hiw.2')}</div>
-          <div className="glass p-4 rounded-xl">{t('landing.hiw.3')}</div>
-          <div className="glass p-4 rounded-xl">{t('landing.hiw.4')}</div>
+      {/* Success Metrics & Impact with Subtle Parallax */}
+      <div 
+        className="w-full max-w-6xl mb-20"
+        style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
+      >
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.metrics.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.metrics.subtitle')}</p>
         </div>
-      </div>
-
-      {/* Partners */}
-      <div className="w-full max-w-5xl mb-10">
-        <div className="glass p-5 rounded-2xl">
-          <div className="flex items-center gap-2 mb-3 font-semibold text-foreground"><Building2 className="w-4 h-4" /> {t('landing.partners')}</div>
-          <div className="text-sm text-muted-foreground">
-            {t('landing.partnersBody')}
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="text-center glass p-8 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <TrendingUp className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div className="text-3xl font-bold text-primary mb-2">2.1M</div>
+            <div className="text-sm text-muted-foreground mb-1">{t('landing.metrics.units.tonnesYear')}</div>
+            <h3 className="text-lg font-semibold text-foreground">{t('landing.metrics.coproducts.title')}</h3>
+            <p className="text-sm text-muted-foreground mt-2">{t('landing.metrics.coproducts.desc')}</p>
+          </div>
+          
+          <div className="text-center glass p-8 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <Heart className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div className="text-3xl font-bold text-primary mb-2">30.8%</div>
+            <div className="text-sm text-muted-foreground mb-1">{t('landing.metrics.units.proteinContent')}</div>
+            <h3 className="text-lg font-semibold text-foreground">{t('landing.metrics.nutritional.title')}</h3>
+            <p className="text-sm text-muted-foreground mt-2">{t('landing.metrics.nutritional.desc')}</p>
+          </div>
+          
+          <div className="text-center glass p-8 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <CheckCircle className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div className="text-3xl font-bold text-primary mb-2">120</div>
+            <div className="text-sm text-muted-foreground mb-1">{t('landing.metrics.units.madSavedPerKg')}</div>
+            <h3 className="text-lg font-semibold text-foreground">{t('landing.metrics.economic.title')}</h3>
+            <p className="text-sm text-muted-foreground mt-2">{t('landing.metrics.economic.desc')}</p>
           </div>
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div className="w-full max-w-5xl flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-        <p className="text-xs text-muted-foreground max-w-xl">
-          {t('landing.bottomCtaQuote')}
-        </p>
-        <div className="flex gap-3">
-          <button onClick={onNavigateToScan} className="btn-organic px-5 py-3 text-sm font-semibold text-primary-foreground flex items-center gap-2">
-            {t('landing.startScanning')} <ArrowRight className="w-4 h-4" />
+      {/* Enhanced How it Works */}
+      <div className="w-full max-w-6xl mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.howItWorks')}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.howItWorks.subtitle')}</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground group-hover:rotate-12 transition-transform duration-300">1</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.howItWorks.step1.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.hiw.1')}</p>
+          </div>
+          
+          <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground group-hover:rotate-12 transition-transform duration-300">2</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.howItWorks.step2.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.hiw.2')}</p>
+          </div>
+          
+          <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground group-hover:rotate-12 transition-transform duration-300">3</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.howItWorks.step3.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.hiw.3')}</p>
+          </div>
+          
+          <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
+            <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground group-hover:rotate-12 transition-transform duration-300">4</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.howItWorks.step4.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('landing.hiw.4')}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Target Audience */}
+      <div className="w-full max-w-6xl mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.audience.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.audience.subtitle')}</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="glass p-8 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-3">
+              <Star className="w-6 h-6 text-primary" />
+              {t('landing.audience.primary.title')}
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mt-0.5">
+                  <span className="text-xs font-bold text-primary">👩‍👧‍👦</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">{t('landing.audience.ecoFamilies.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('landing.audience.ecoFamilies.desc')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mt-0.5">
+                  <ChefHat className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">{t('landing.audience.homeCooks.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('landing.audience.homeCooks.desc')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mt-0.5">
+                  <Heart className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">{t('landing.audience.healthFocused.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('landing.audience.healthFocused.desc')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="glass p-8 rounded-3xl border border-border/50">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-3">
+              <Users className="w-6 h-6 text-accent" />
+              {t('landing.audience.secondary.title')}
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center mt-0.5">
+                  <span className="text-xs font-bold text-accent">🎓</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">{t('landing.audience.students.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('landing.audience.students.desc')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center mt-0.5">
+                  <Building2 className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">{t('landing.audience.restaurants.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('landing.audience.restaurants.desc')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center mt-0.5">
+                  <span className="text-xs font-bold text-accent">📱</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">{t('landing.audience.influencers.title')}</h4>
+                  <p className="text-sm text-muted-foreground">{t('landing.audience.influencers.desc')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Partners Section */}
+      <div className="w-full max-w-6xl mb-16">
+        <div className="glass p-8 rounded-3xl border border-border/50 text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground">{t('landing.partners')}</h3>
+          </div>
+          <p className="text-base text-muted-foreground leading-relaxed max-w-4xl mx-auto">
+            {t('landing.partnersBody')}
+          </p>
+        </div>
+      </div>
+
+      {/* Team Carousel Section */}
+      <div className="w-full max-w-6xl mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.team.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{t('landing.team.subtitle')}</p>
+        </div>
+        
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Buttons */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-primary/20 hover:bg-primary/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group hidden sm:flex"
+            aria-label="Previous team members"
+          >
+            <ChevronLeft className="w-6 h-6 text-primary group-hover:text-primary-foreground" />
           </button>
-          <button onClick={onNavigateToRecipes} className="px-5 py-3 rounded-xl border border-border text-sm hover:bg-muted/50 transition-colors">
-            {t('landing.exploreRecipes')}
+          
+          <button
+            onClick={nextSlide}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-primary/20 hover:bg-primary/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group hidden sm:flex"
+            aria-label="Next team members"
+          >
+            <ChevronRight className="w-6 h-6 text-primary group-hover:text-primary-foreground" />
           </button>
-          <button onClick={onNavigateToLeaves} className="px-5 py-3 rounded-xl border border-border text-sm hover:bg-muted/50 transition-colors">
-            {t('landing.leavesEncyclopedia')}
-          </button>
+          
+          {/* Carousel Track */}
+          <div 
+            className="overflow-hidden mx-0 sm:mx-14"
+            onTouchStart={(e) => {
+              const touchStart = e.touches[0].clientX;
+              const handleTouchEnd = (endEvent: TouchEvent) => {
+                const touchEnd = endEvent.changedTouches[0].clientX;
+                const diff = touchStart - touchEnd;
+                if (Math.abs(diff) > 50) { // minimum swipe distance
+                  if (diff > 0) {
+                    nextSlide();
+                  } else {
+                    prevSlide();
+                  }
+                }
+                document.removeEventListener('touchend', handleTouchEnd);
+              };
+              document.addEventListener('touchend', handleTouchEnd);
+            }}
+          >
+            <div 
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${currentTeamSlide * 100}%)` }}
+            >
+              {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                <div key={slideIndex} className="w-full flex-shrink-0">
+                  <div className={`grid gap-6 px-2 ${
+                    isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'
+                  }`}>
+                    {teamMembers.slice(slideIndex * itemsPerSlide, slideIndex * itemsPerSlide + itemsPerSlide).map((member, memberIndex) => (
+                      <div 
+                        key={member.name}
+                        className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105 hover:shadow-glow"
+                      >
+                        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold group-hover:scale-110 transition-transform duration-300 ${
+                          member.type === 'online' 
+                            ? 'bg-gradient-to-br from-accent to-accent/80 text-accent-foreground' 
+                            : 'bg-gradient-primary text-primary-foreground'
+                        }`}>
+                          {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <h4 className="text-lg font-bold text-foreground mb-1">{member.name}</h4>
+                        <p className={`text-sm font-semibold mb-2 ${
+                          member.type === 'online' ? 'text-accent' : 'text-primary'
+                        }`}>{member.role}</p>
+                        <p className="text-xs text-muted-foreground">{member.specialty}</p>
+                        {member.type === 'online' && (
+                          <div className="mt-3 inline-flex items-center gap-1 px-2 py-1 bg-accent/20 rounded-full">
+                            <Globe2 className="w-3 h-3 text-accent" />
+                            <span className="text-xs text-accent font-medium">{t('landing.team.online')}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Dot Indicators */}
+          <div className="flex justify-center mt-8 gap-2">
+            {Array.from({ length: totalSlides }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 ${
+                  currentTeamSlide === index 
+                    ? 'bg-primary shadow-glow' 
+                    : 'bg-border hover:bg-primary/50'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Acknowledgments Section */}
+      <div className="w-full max-w-6xl mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.acknowledgments.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{t('landing.acknowledgments.subtitle')}</p>
+        </div>
+        
+        {/* Organizers & Sponsors */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-foreground mb-8 text-center">{t('landing.acknowledgments.organizers')}</h3>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
+              <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                <img 
+                  src="/images/logos/fao.svg" 
+                  alt="FAO Logo" 
+                  className="w-full h-full object-contain rounded-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="hidden w-full h-full bg-gradient-primary rounded-full flex items-center justify-center">
+                  <Globe2 className="w-8 h-8 text-primary-foreground" />
+                </div>
+              </div>
+              <h4 className="text-lg font-bold text-foreground mb-2">FAO</h4>
+              <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.fao.desc')}</p>
+            </div>
+            
+            <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
+              <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                <img 
+                  src="/images/logos/brightidea.svg" 
+                  alt="BrightIdea Logo" 
+                  className="w-full h-full object-contain rounded-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="hidden w-full h-full bg-gradient-primary rounded-full flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-primary-foreground" />
+                </div>
+              </div>
+              <h4 className="text-lg font-bold text-foreground mb-2">BrightIdea</h4>
+              <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.brightidea.desc')}</p>
+            </div>
+            
+            <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
+              <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                <img 
+                  src="/images/logos/innovation-hub.svg" 
+                  alt="Innovation Hub Logo" 
+                  className="w-full h-full object-contain rounded-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="hidden w-full h-full bg-gradient-primary rounded-full flex items-center justify-center">
+                  <TrendingUp className="w-8 h-8 text-primary-foreground" />
+                </div>
+              </div>
+              <h4 className="text-lg font-bold text-foreground mb-2">Innovation Hub</h4>
+              <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.innovationhub.desc')}</p>
+            </div>
+            
+            <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
+              <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                <img 
+                  src="/images/logos/universites.svg" 
+                  alt="Universités Logo" 
+                  className="w-full h-full object-contain rounded-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="hidden w-full h-full bg-gradient-primary rounded-full flex items-center justify-center">
+                  <Building2 className="w-8 h-8 text-primary-foreground" />
+                </div>
+              </div>
+              <h4 className="text-lg font-bold text-foreground mb-2">Universités</h4>
+              <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.universities.desc')}</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Special Thanks */}
+        <div className="glass p-8 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent text-center">
+          <h3 className="text-2xl font-bold text-foreground mb-6">{t('landing.acknowledgments.specialThanks')}</h3>
+          <div className="max-w-4xl mx-auto">
+            <p className="text-lg text-foreground leading-relaxed mb-4">
+              <span className="font-semibold text-primary">FAO Hack4SafeFood Challenge 2025</span> {t('landing.acknowledgments.faoHack')}
+            </p>
+            <div className="w-16 h-1 bg-gradient-primary mx-auto mt-6"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Value Proposition & Access */}
+      <div className="w-full max-w-6xl mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.access.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.access.subtitle')}</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="glass p-8 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent relative">
+            <div className="absolute -top-4 left-6 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-semibold">{t('landing.access.mostPopular')}</div>
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-foreground mb-2">{t('landing.access.freeAccess')}</h3>
+              <div className="text-4xl font-bold text-primary mb-2">0<span className="text-lg text-muted-foreground">MAD</span></div>
+              <p className="text-sm text-muted-foreground">{t('landing.access.perfectStart')}</p>
+            </div>
+            <ul className="space-y-3 mb-8">
+              <li className="flex items-center gap-3 text-sm">
+                <CheckCircle className="w-5 h-5 text-primary" />
+                <span>{t('landing.access.features.aiScans')}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <CheckCircle className="w-5 h-5 text-primary" />
+                <span>{t('landing.access.features.basicRecipes')}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <CheckCircle className="w-5 h-5 text-primary" />
+                <span>{t('landing.access.features.nutritionalInfo')}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <CheckCircle className="w-5 h-5 text-primary" />
+                <span>{t('landing.access.features.basicTracking')}</span>
+              </li>
+            </ul>
+            <button 
+              onClick={onNavigateToScan}
+              className="w-full btn-organic py-3 text-center font-semibold text-primary-foreground hover:scale-105 transition-all duration-300"
+            >
+              {t('landing.access.startFree')}
+            </button>
+          </div>
+          
+          <div className="glass p-8 rounded-3xl border border-border/50">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-foreground mb-2">{t('landing.access.premiumFeatures')}</h3>
+              <div className="text-3xl font-bold text-foreground mb-2">{t('landing.access.comingSoon')}</div>
+              <p className="text-sm text-muted-foreground">{t('landing.access.enhancedExperience')}</p>
+            </div>
+            <ul className="space-y-3 mb-8">
+              <li className="flex items-center gap-3 text-sm">
+                <Star className="w-5 h-5 text-accent" />
+                <span>{t('landing.access.features.unlimitedScans')}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <Star className="w-5 h-5 text-accent" />
+                <span>{t('landing.access.features.exclusiveRecipes')}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <Star className="w-5 h-5 text-accent" />
+                <span>{t('landing.access.features.advancedAnalytics')}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <Star className="w-5 h-5 text-accent" />
+                <span>{t('landing.access.features.familyAccounts')}</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <Star className="w-5 h-5 text-accent" />
+                <span>{t('landing.access.features.priorityAccess')}</span>
+              </li>
+            </ul>
+            <button className="w-full px-6 py-3 rounded-2xl border border-border glass text-center font-medium transition-all duration-300 opacity-75 cursor-not-allowed">
+              {t('landing.access.notifyWhenAvailable')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Community & Future Features */}
+      <div className="w-full max-w-6xl mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.future.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.future.subtitle')}</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="glass p-8 rounded-3xl border border-border/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300">
+            <div className="absolute top-4 right-4 bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-medium">{t('landing.future.title')}</div>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground">{t('landing.future.communityHub.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('landing.future.communityHub.desc')}</p>
+              </div>
+            </div>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.shareRecipes')}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.joinChallenges')}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.getTips')}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.followInfluencers')}
+              </li>
+            </ul>
+          </div>
+          
+          <div className="glass p-8 rounded-3xl border border-border/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300">
+            <div className="absolute top-4 right-4 bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-medium">{t('landing.future.beta')}</div>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground">{t('landing.future.wasteTracker.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('landing.future.wasteTracker.desc')}</p>
+              </div>
+            </div>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.trackCO2')}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.monitorSavings')}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.visualizeImpact')}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-primary" />
+                {t('landing.future.features.setGoals')}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Bottom CTA */}
+      <div className="w-full max-w-6xl">
+        <div className="glass p-8 rounded-3xl border border-border/50 text-center">
+          <blockquote className="text-xl md:text-2xl font-medium text-foreground mb-2 italic">
+            {t('landing.bottomCtaQuote')}
+          </blockquote>
+          <div className="w-16 h-1 bg-gradient-primary mx-auto mb-8"></div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button 
+              onClick={onNavigateToScan} 
+              className="btn-organic px-8 py-4 text-lg font-semibold text-primary-foreground flex items-center gap-3 hover:scale-105 transition-all duration-300 shadow-glow group"
+            >
+              <TrendingUp className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+              {t('landing.startScanning')} 
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </button>
+            
+            <div className="flex gap-3">
+              <button 
+                onClick={onNavigateToRecipes} 
+                className="px-6 py-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 text-sm font-medium"
+              >
+                {t('landing.exploreRecipes')}
+              </button>
+              <button 
+                onClick={onNavigateToLeaves} 
+                className="px-6 py-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 text-sm font-medium"
+              >
+                {t('landing.leavesEncyclopedia')}
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Attribution */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-muted-foreground">
+            {t('landing.sources')}
+          </p>
         </div>
       </div>
     </div>
