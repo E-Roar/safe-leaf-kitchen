@@ -100,13 +100,13 @@ export default {
 					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'leaf-float': 'leaf-float 6s ease-in-out infinite',
-				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-				'organic-bounce': 'organic-bounce 2s ease-in-out infinite'
-			},
+				animation: {
+					'accordion-down': 'accordion-down 0.2s ease-out',
+					'accordion-up': 'accordion-up 0.2s ease-out',
+					'leaf-float': 'leaf-float 6s ease-in-out infinite',
+					'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+					'organic-bounce': 'organic-bounce 8s ease-in-out infinite'
+				},
 			transitionTimingFunction: {
 				'organic': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 			}
