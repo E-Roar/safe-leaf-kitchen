@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useState, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw, BarChart3, LineChart } from "lucide-react";
 import { APIService } from "@/services/apiService";
@@ -9,6 +8,9 @@ import { ImpactService, ImpactMetrics } from "@/services/impactService";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart as RechartsBarChart, Bar, Area, AreaChart } from "recharts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import MobileDebugPanel from "@/components/ui/MobileDebugPanel";
+import { ChromeCompatibilityChecker, ChromeCompatibilityReport } from "@/utils/chromeCompatibility";
+import { RemoteErrorLogger } from "@/utils/remoteErrorLogger";
 
 interface StatCard {
   title: string;
@@ -51,10 +53,44 @@ export default function StatsPage() {
     favoritesCount: 0
   });
 
+  const [chromeCompatibility, setChromeCompatibility] = useState<ChromeCompatibilityReport | null>(null);
+
   useEffect(() => {
+    // Run Chrome compatibility check on mount
+    console.log('Running Chrome compatibility check...');
+    RemoteErrorLogger.log('info', 'Stats page loaded - starting compatibility check');
+    
+    const compatReport = ChromeCompatibilityChecker.generateReport();
+    setChromeCompatibility(compatReport);
+    
+    // Log compatibility issues if any
+    if (compatReport.issues.length > 0) {
+      console.warn('Chrome compatibility issues detected:', compatReport.issues);
+      RemoteErrorLogger.log('warn', 'Chrome compatibility issues detected', {
+        issueCount: compatReport.issues.length,
+        issues: compatReport.issues,
+        browser: compatReport.isChrome ? `Chrome ${compatReport.version}` : 'Not Chrome',
+        mobile: compatReport.isMobile
+      });
+    } else {
+      RemoteErrorLogger.log('info', 'No Chrome compatibility issues detected');
+    }
+    
+    // Run quick test for debugging
+    ChromeCompatibilityChecker.runQuickTest();
+    
     const loadStats = () => {
-      const detectedLeaves = APIService.getDetectedLeaves();
-      const impactMetrics = ImpactService.getCumulativeImpact();
+      try {
+        console.log('Loading stats - Starting...');
+        RemoteErrorLogger.log('debug', 'Stats loading started');
+        
+        const detectedLeaves = APIService.getDetectedLeaves();
+        console.log('Detected leaves loaded:', detectedLeaves.length);
+        RemoteErrorLogger.log('debug', 'Detected leaves loaded', { count: detectedLeaves.length });
+        
+        const impactMetrics = ImpactService.getCumulativeImpact();
+        console.log('Impact metrics loaded:', impactMetrics);
+        RemoteErrorLogger.log('debug', 'Impact metrics loaded', impactMetrics);
       
       // Convert detected leaves to the expected format
       const detectedLeavesRecord: Record<string, number> = {};
@@ -65,44 +101,123 @@ export default function StatsPage() {
         });
       });
 
-      setStats({
-        totalScans: APIService.getScans(),
-        totalChats: APIService.getChats(),
-        detectedLeaves: detectedLeavesRecord,
-        recipeSuggestions: APIService.getRecipeSuggestions(),
-        savedConversations: APIService.getConversationList().length,
-        impactMetrics
-      });
+        setStats({
+          totalScans: APIService.getScans(),
+          totalChats: APIService.getChats(),
+          detectedLeaves: detectedLeavesRecord,
+          recipeSuggestions: APIService.getRecipeSuggestions(),
+          savedConversations: APIService.getConversationList().length,
+          impactMetrics
+        });
+        console.log('Stats updated successfully');
+        RemoteErrorLogger.log('debug', 'Stats updated successfully', {
+          totalScans: APIService.getScans(),
+          totalChats: APIService.getChats(),
+          detectedLeavesCount: Object.keys(detectedLeavesRecord).length
+        });
 
-      // Load analytics data for charts
-      setAnalyticsData({
-        dailyScans: AnalyticsService.getScanTrend(14), // Last 14 days
-        dailyChats: AnalyticsService.getChatTrend(14),
-        weeklyStats: AnalyticsService.getWeeklyStatsRange(8), // Last 8 weeks
-        leafTrends: AnalyticsService.getLeafDetectionTrend(7) // Last 7 days
-      });
+        // Load analytics data for charts
+        console.log('Loading analytics data...');
+        const analyticsData = {
+          dailyScans: AnalyticsService.getScanTrend(14), // Last 14 days
+          dailyChats: AnalyticsService.getChatTrend(14),
+          weeklyStats: AnalyticsService.getWeeklyStatsRange(8), // Last 8 weeks
+          leafTrends: AnalyticsService.getLeafDetectionTrend(7) // Last 7 days
+        };
+        console.log('Analytics data loaded:', analyticsData);
+        setAnalyticsData(analyticsData);
+        RemoteErrorLogger.log('debug', 'Analytics data loaded', {
+          dailyScansCount: analyticsData.dailyScans.length,
+          dailyChatsCount: analyticsData.dailyChats.length,
+          weeklyStatsCount: analyticsData.weeklyStats.length,
+          leafTrendsCount: analyticsData.leafTrends.length
+        });
 
-      // Debug information
-      setDebugInfo({
-        detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
-        impactCalculation: JSON.stringify(impactMetrics, null, 2),
-        storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
-        recipesReceived: APIService.getRecipeViews().length,
-        favoritesCount: APIService.getFavoriteRecipes().length
-      });
+        // Debug information
+        setDebugInfo({
+          detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
+          impactCalculation: JSON.stringify(impactMetrics, null, 2),
+          storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
+          recipesReceived: APIService.getRecipeViews().length,
+          favoritesCount: APIService.getFavoriteRecipes().length
+        });
+        console.log('Stats loading completed successfully');
+        RemoteErrorLogger.log('info', 'Stats loading completed successfully');
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        RemoteErrorLogger.log('error', 'Error loading stats', {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        });
+        
+        // Set fallback values to prevent UI crashes
+        setStats({
+          totalScans: 0,
+          totalChats: 0,
+          detectedLeaves: {},
+          recipeSuggestions: 0,
+          savedConversations: 0,
+          impactMetrics: {} as ImpactMetrics
+        });
+        setAnalyticsData({
+          dailyScans: [],
+          dailyChats: [],
+          weeklyStats: [],
+          leafTrends: []
+        });
+      }
     };
 
     loadStats();
     // Refresh stats when component becomes visible
-    const interval = setInterval(loadStats, 2000);
+    const interval = setInterval(() => {
+      console.log('Refreshing stats...');
+      loadStats();
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
   // Clear all data
   const clearAllData = () => {
+    RemoteErrorLogger.log('info', 'Clearing all data');
     localStorage.clear();
     window.location.reload();
   };
+
+  // Debug helper function accessible from browser console
+  useEffect(() => {
+    // Make debug functions globally accessible
+    (window as any).safeLeafDebug = {
+      showLogs: () => RemoteErrorLogger.displayDebugInfo(),
+      exportLogs: () => RemoteErrorLogger.exportLogs(),
+      clearLogs: () => RemoteErrorLogger.clearLogs(),
+      getCompatibility: () => chromeCompatibility,
+      shareDebugUrl: () => {
+        const url = RemoteErrorLogger.createShareableDebugInfo();
+        console.log('Debug URL:', url);
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(url);
+          console.log('Debug URL copied to clipboard');
+        }
+        return url;
+      },
+      testFeatures: () => {
+        ChromeCompatibilityChecker.runQuickTest();
+        RemoteErrorLogger.displayDebugInfo();
+      }
+    };
+    
+    console.log('🔍 Safe Leaf Debug commands available:');
+    console.log('- safeLeafDebug.showLogs() - Show all error logs');
+    console.log('- safeLeafDebug.exportLogs() - Export logs as JSON');
+    console.log('- safeLeafDebug.shareDebugUrl() - Create shareable debug URL');
+    console.log('- safeLeafDebug.testFeatures() - Test browser features');
+    console.log('- safeLeafDebug.getCompatibility() - Get compatibility report');
+    
+    return () => {
+      delete (window as any).safeLeafDebug;
+    };
+  }, [chromeCompatibility]);
 
   // Fixed percentage calculation with proper error handling
   const totalLeafCount = Object.values(stats.detectedLeaves).reduce((a, b) => a + b, 0);
@@ -252,6 +367,44 @@ export default function StatsPage() {
           {t('stats.headerSubtitle')}
         </p>
       </div>
+
+      {/* Chrome Compatibility Warnings */}
+      {chromeCompatibility && chromeCompatibility.issues.length > 0 && (
+        <div className="glass rounded-2xl p-3 sm:p-4 border-orange-200 bg-orange-50">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs font-bold">!</span>
+            </div>
+            <h3 className="text-base sm:text-lg font-semibold text-orange-800">
+              Browser Compatibility Issues Detected
+            </h3>
+          </div>
+          <div className="space-y-2 mb-4">
+            {chromeCompatibility.issues.slice(0, 3).map((issue, index) => (
+              <div key={index} className={`p-2 rounded-lg text-sm ${
+                issue.type === 'error' ? 'bg-red-100 text-red-800' :
+                issue.type === 'warning' ? 'bg-orange-100 text-orange-800' :
+                'bg-blue-100 text-blue-800'
+              }`}>
+                <div className="font-medium">[{issue.category}] {issue.message}</div>
+                {issue.solution && (
+                  <div className="text-xs mt-1 opacity-80">💡 {issue.solution}</div>
+                )}
+              </div>
+            ))}
+          </div>
+          {chromeCompatibility.recommendations.length > 0 && (
+            <div>
+              <div className="text-sm font-medium text-orange-800 mb-2">Quick Fixes:</div>
+              <div className="text-xs text-orange-700 space-y-1">
+                {chromeCompatibility.recommendations.slice(0, 3).map((rec, index) => (
+                  <div key={index}>• {rec}</div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Data Controls */}
       <div className="glass rounded-2xl p-3 sm:p-4">
@@ -754,6 +907,9 @@ export default function StatsPage() {
           </div>
         </details>
       )}
+      
+      {/* Mobile Debug Panel */}
+      {isMobile && <MobileDebugPanel />}
     </div>
   );
 }

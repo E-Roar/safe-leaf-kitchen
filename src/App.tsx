@@ -15,6 +15,7 @@ import { safeStorage } from "@/lib/safeStorage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { logger } from "@/lib/logger";
 import { VisualEffectsProvider } from "@/contexts/VisualEffectsContext";
+import { RemoteErrorLogger } from "@/utils/remoteErrorLogger";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,8 +76,17 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    // Initialize remote error logger first
+    RemoteErrorLogger.initialize();
+    RemoteErrorLogger.log('info', 'App initialized', {
+      activeTab,
+      theme,
+      timestamp: new Date().toISOString()
+    });
+    
     registerServiceWorker().catch(error => {
       logger.error('Failed to register service worker', error);
+      RemoteErrorLogger.log('error', 'Service worker registration failed', error);
     });
   }, []);
 
