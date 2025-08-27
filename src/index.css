@@ -155,6 +155,43 @@
     color: hsl(var(--foreground));
   }
 
+  /* Mobile chart optimizations */
+  @media (max-width: 768px) {
+    .glass {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    
+    /* Chart container mobile fixes */
+    [data-chart] {
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* Recharts mobile optimizations */
+    .recharts-wrapper {
+      overflow: hidden !important;
+    }
+    
+    .recharts-surface {
+      overflow: visible;
+    }
+    
+    /* Touch-friendly tooltips */
+    .recharts-tooltip-wrapper {
+      pointer-events: auto;
+    }
+    
+    /* Responsive text scaling */
+    .recharts-text {
+      font-size: 10px !important;
+    }
+    
+    .recharts-cartesian-axis-tick-value {
+      font-size: 10px !important;
+    }
+  }
+
   /* Parallax layer effects for depth illusion */
   .parallax-bg {
     position: relative;

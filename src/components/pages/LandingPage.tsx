@@ -228,7 +228,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <div className="absolute inset-0 bg-gradient-glow rounded-full opacity-60 animate-pulse-glow group-hover:opacity-100 transition-opacity duration-500"></div>
             
             {/* Floating mini icons with simple animations */}
-            <div className="absolute -top-4 -right-4 w-16 h-16 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '0.5s' }}>
+            <div className="absolute -top-4 -right-4 w-16 h-16 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '3s' }}>
               <Scan className="w-8 h-8 text-primary" />
             </div>
             <div className="absolute -bottom-4 -left-4 w-16 h-16 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '1s' }}>

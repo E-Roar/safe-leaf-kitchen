@@ -221,6 +221,14 @@ const defaultTranslations: Translations = {
   'stats.controls': { EN: 'Controls', FR: 'Contrôles', AR: 'التحكم' },
   'stats.resetAllData': { EN: 'Reset All Data', FR: 'Réinitialiser toutes les données', AR: 'إعادة تعيين كل البيانات' },
   'stats.mostScannedLeaves': { EN: 'Most Scanned Leaves', FR: 'Feuilles les plus scannées', AR: 'أكثر الأوراق مسحًا' },
+  
+  // Analytics charts
+  'stats.charts.dailyScans': { EN: 'Daily Scans Trend', FR: 'Tendance des scans quotidiens', AR: 'اتجاه المسح اليومي' },
+  'stats.charts.dailyChats': { EN: 'Daily Chats Trend', FR: 'Tendance des discussions quotidiennes', AR: 'اتجاه الدردشة اليومية' },
+  'stats.charts.weeklyActivity': { EN: 'Weekly Activity', FR: 'Activité hebdomadaire', AR: 'النشاط الأسبوعي' },
+  'stats.charts.leafTrends': { EN: 'Leaf Detection Trends', FR: 'Tendances de détection des feuilles', AR: 'اتجاهات اكتشاف الأوراق' },
+  'stats.charts.noData': { EN: 'No leaf detection data available yet', FR: 'Aucune donnée de détection de feuilles disponible', AR: 'لا توجد بيانات اكتشاف أوراق متاحة بعد' },
+  'stats.charts.startScanning': { EN: 'Start scanning leaves to see trends here', FR: 'Commencez à scanner des feuilles pour voir les tendances', AR: 'ابدأ مسح الأوراق لرؤية الاتجاهات هنا' },
   'stats.nutritionalInsights': { EN: 'Nutritional Insights', FR: 'Analyses nutritionnelles', AR: 'رؤى غذائية' },
   'stats.recipeInsights': { EN: 'Recipe Insights', FR: 'Analyses de recettes', AR: 'رؤى الوصفات' },
   'stats.recipeNutritionSummary': { EN: 'Recipe Nutrition Summary', FR: 'Résumé nutritionnel des recettes', AR: 'ملخص تغذية الوصفات' },

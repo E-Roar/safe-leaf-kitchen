@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { logger } from '@/lib/logger';
+import { AnalyticsService } from '@/services/analyticsService';
 
 // Settings are managed via SettingsService (with hardcoded defaults)
 import { SettingsService } from "@/services/settingsService";
@@ -69,7 +70,16 @@ export class APIService {
         headers: { "Content-Type": "application/x-www-form-urlencoded" }
       });
 
-      return response.data;
+      // Track scan in analytics
+      const result = response.data;
+      if (result.predictions && result.predictions.length > 0) {
+        const detectedLeaf = result.predictions[0].class;
+        AnalyticsService.recordScan(detectedLeaf);
+      } else {
+        AnalyticsService.recordScan();
+      }
+
+      return result;
     } catch (error) {
       logger.error("Roboflow API error:", error);
       throw new Error("Failed to detect leaf in image");
@@ -80,12 +90,18 @@ export class APIService {
     try {
       const settings = SettingsService.getSettings();
       
+      let result: string;
       // Choose provider based on settings
       if (settings.chatProvider === 'n8n') {
-        return this.sendChatMessageToN8N(messages);
+        result = await this.sendChatMessageToN8N(messages);
       } else {
-        return this.sendChatMessageToOpenRouter(messages);
+        result = await this.sendChatMessageToOpenRouter(messages);
       }
+      
+      // Track chat in analytics
+      AnalyticsService.recordChat();
+      
+      return result;
     } catch (error) {
       logger.error("Chat API error:", error);
       throw error;
@@ -135,7 +151,7 @@ export class APIService {
       
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          logger.error("API Response Error:", error.response.status, error.response.data);
+          logger.error("API Response Error:", { status: error.response.status, data: error.response.data });
           throw new Error(`API Error: ${error.response.status} - ${error.response.data?.error || 'Unknown error'}`);
         } else if (error.request) {
           logger.error("Network Error:", error.request);
@@ -184,7 +200,7 @@ export class APIService {
       
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          logger.error("N8N Response Error:", error.response.status, error.response.data);
+          logger.error("N8N Response Error:", { status: error.response.status, data: error.response.data });
           throw new Error(`N8N Error: ${error.response.status} - ${error.response.data?.error || 'Unknown error'}`);
         } else if (error.request) {
           logger.error("Network Error:", error.request);
@@ -262,20 +278,16 @@ export class APIService {
   // Detected leaves tracking
   static saveDetectedLeaves(leaves: DetectionResult[]): boolean {
     const key = this.getStorageKey('detected_leaves');
-    let stored = this.getStorage(key);
+    let stored: Array<{ timestamp: number; leaves: DetectionResult[] }> = this.getStorage(key) || [];
     const newEntry = {
       timestamp: Date.now(),
       leaves: leaves
     };
     
-    if (stored) {
-      stored.push(newEntry);
-      // Keep only last 100 detections
-      if (stored.length > 100) {
-        stored.splice(0, stored.length - 100);
-      }
-    } else {
-      stored = [newEntry];
+    stored.push(newEntry);
+    // Keep only last 100 detections
+    if (stored.length > 100) {
+      stored.splice(0, stored.length - 100);
     }
     
     return this.setStorage(key, stored);
@@ -308,13 +320,16 @@ export class APIService {
   static saveRecipeView(recipeId: number): boolean {
     const key = this.getStorageKey('recipe_views');
     const stored = this.getStorage<RecipeView[]>(key) || [];
-    const newEntry = { id: recipeId, timestamp: Date.now() };
+    const newEntry: RecipeView = { id: recipeId, timestamp: new Date() };
     
     stored.push(newEntry);
     // Keep only last 200 views
     if (stored.length > 200) {
       stored.splice(0, stored.length - 200);
     }
+    
+    // Track recipe view in analytics
+    AnalyticsService.recordRecipeView();
     
     return this.setStorage(key, stored);
   }
@@ -333,7 +348,7 @@ export class APIService {
     if (existingIndex >= 0) {
       stored.splice(existingIndex, 1);
     } else {
-      stored.push({ id: recipeId, timestamp: Date.now() });
+      stored.push({ id: recipeId, timestamp: new Date() });
     }
     
     return this.setStorage(key, stored);
@@ -457,7 +472,7 @@ export class APIService {
   }
 
   private static getStat(key: string): number {
-    const stored = this.getStorage(key);
+    const stored = this.getStorage<number>(key);
     return stored || 0;
   }
 

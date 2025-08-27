@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw } from "lucide-react";
+import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw, BarChart3, LineChart } from "lucide-react";
 import { APIService } from "@/services/apiService";
+import { AnalyticsService } from "@/services/analyticsService";
 import { recipes } from "@/data/recipes";
 import { ImpactService, ImpactMetrics } from "@/services/impactService";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart as RechartsBarChart, Bar, Area, AreaChart } from "recharts";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StatCard {
   title: string;
@@ -21,6 +26,7 @@ interface LeafData {
 
 export default function StatsPage() {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [stats, setStats] = useState({
     totalScans: 0,
     totalChats: 0,
@@ -28,6 +34,13 @@ export default function StatsPage() {
     recipeSuggestions: 0,
     savedConversations: 0,
     impactMetrics: {} as ImpactMetrics
+  });
+
+  const [analyticsData, setAnalyticsData] = useState({
+    dailyScans: [] as { date: string; value: number }[],
+    dailyChats: [] as { date: string; value: number }[],
+    weeklyStats: [] as any[],
+    leafTrends: [] as any[]
   });
 
   const [debugInfo, setDebugInfo] = useState({
@@ -59,6 +72,14 @@ export default function StatsPage() {
         recipeSuggestions: APIService.getRecipeSuggestions(),
         savedConversations: APIService.getConversationList().length,
         impactMetrics
+      });
+
+      // Load analytics data for charts
+      setAnalyticsData({
+        dailyScans: AnalyticsService.getScanTrend(14), // Last 14 days
+        dailyChats: AnalyticsService.getChatTrend(14),
+        weeklyStats: AnalyticsService.getWeeklyStatsRange(8), // Last 8 weeks
+        leafTrends: AnalyticsService.getLeafDetectionTrend(7) // Last 7 days
       });
 
       // Debug information
@@ -221,21 +242,21 @@ export default function StatsPage() {
   ];
 
   return (
-    <div className="min-h-screen p-4 space-y-6">
+    <div className={`min-h-screen p-2 sm:p-4 space-y-4 sm:space-y-6 ${isMobile ? 'pb-20' : ''}`}>
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-foreground mb-2">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           {t('stats.headerTitle')}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           {t('stats.headerSubtitle')}
         </p>
       </div>
 
       {/* Data Controls */}
-      <div className="glass rounded-2xl p-4">
+      <div className="glass rounded-2xl p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-          <h3 className="text-lg font-semibold text-foreground">{t('stats.controls')}</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.controls')}</h3>
           <button
             onClick={clearAllData}
             className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors w-full sm:w-auto"
@@ -250,21 +271,21 @@ export default function StatsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
         {statCards.slice(0, 4).map((card, index) => (
           <div
             key={index}
-            className={`glass rounded-2xl p-4 relative overflow-hidden ${card.color}`}
+            className={`glass rounded-2xl p-3 sm:p-4 relative overflow-hidden ${card.color}`}
           >
             <div className="relative z-10">
               <div className="flex items-start justify-between mb-2">
                 <div className={`p-2 rounded-xl bg-primary/10`}>
-                  <card.icon className="w-5 h-5 text-primary" />
+                  <card.icon className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
                 </div>
               </div>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-foreground">{card.value}</p>
-                <p className="text-sm text-muted-foreground">{card.title}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{card.value}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-tight">{card.title}</p>
                 {card.change && (
                   <p className="text-xs text-accent font-medium">{card.change}</p>
                 )}
@@ -275,21 +296,21 @@ export default function StatsPage() {
       </div>
 
       {/* Additional Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {statCards.slice(4, 6).map((card, index) => (
           <div
             key={index + 4}
-            className={`glass rounded-2xl p-4 relative overflow-hidden ${card.color}`}
+            className={`glass rounded-2xl p-3 sm:p-4 relative overflow-hidden ${card.color}`}
           >
             <div className="relative z-10">
               <div className="flex items-start justify-between mb-2">
                 <div className={`p-2 rounded-xl bg-primary/10`}>
-                  <card.icon className="w-5 h-5 text-primary" />
+                  <card.icon className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
                 </div>
               </div>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-foreground">{card.value}</p>
-                <p className="text-sm text-muted-foreground">{card.title}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{card.value}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-tight">{card.title}</p>
                 {card.change && (
                   <p className="text-xs text-accent font-medium">{card.change}</p>
                 )}
@@ -299,18 +320,233 @@ export default function StatsPage() {
         ))}
       </div>
 
+      {/* Analytics Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 mb-6">
+        {/* Daily Scans Trend */}
+        <div className="glass rounded-2xl p-3 sm:p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <LineChart className="w-5 h-5 text-primary" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.charts.dailyScans')}</h3>
+          </div>
+          <div className={`${isMobile ? 'h-48' : 'h-64'} w-full`}>
+            <ChartContainer
+              config={{
+                scans: {
+                  label: "Scans",
+                  color: "hsl(var(--primary))",
+                },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsLineChart data={analyticsData.dailyScans} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
+                    interval={isMobile ? 1 : 0}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} width={isMobile ? 30 : 40} />
+                  <ChartTooltip
+                    content={<ChartTooltipContent />}
+                    labelFormatter={(value) => {
+                      const date = new Date(value);
+                      return date.toLocaleDateString();
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="var(--color-scans)" 
+                    strokeWidth={isMobile ? 1.5 : 2}
+                    dot={{ fill: "var(--color-scans)", strokeWidth: 2, r: isMobile ? 3 : 4 }}
+                    activeDot={{ r: isMobile ? 4 : 6, fill: "var(--color-scans)" }}
+                  />
+                </RechartsLineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+        </div>
+
+        {/* Daily Chats Trend */}
+        <div className="glass rounded-2xl p-3 sm:p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <MessageCircle className="w-5 h-5 text-accent" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.charts.dailyChats')}</h3>
+          </div>
+          <div className={`${isMobile ? 'h-48' : 'h-64'} w-full`}>
+            <ChartContainer
+              config={{
+                chats: {
+                  label: "Chats",
+                  color: "hsl(var(--accent))",
+                },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={analyticsData.dailyChats} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
+                    interval={isMobile ? 1 : 0}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} width={isMobile ? 30 : 40} />
+                  <ChartTooltip
+                    content={<ChartTooltipContent />}
+                    labelFormatter={(value) => {
+                      const date = new Date(value);
+                      return date.toLocaleDateString();
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="var(--color-chats)" 
+                    fill="var(--color-chats)"
+                    fillOpacity={0.3}
+                    strokeWidth={isMobile ? 1.5 : 2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+        </div>
+
+        {/* Weekly Activity Overview */}
+        <div className="glass rounded-2xl p-3 sm:p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="w-5 h-5 text-secondary" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.charts.weeklyActivity')}</h3>
+          </div>
+          <div className={`${isMobile ? 'h-48' : 'h-64'} w-full`}>
+            <ChartContainer
+              config={{
+                scans: {
+                  label: "Scans",
+                  color: "hsl(var(--primary))",
+                },
+                chats: {
+                  label: "Chats",
+                  color: "hsl(var(--accent))",
+                },
+                recipes: {
+                  label: "Recipes",
+                  color: "hsl(var(--secondary))",
+                },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart data={analyticsData.weeklyStats} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="week" 
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
+                    interval={isMobile ? "preserveStartEnd" : 0}
+                  />
+                  <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} width={isMobile ? 30 : 40} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="total_scans" fill="var(--color-scans)" name="Scans" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="total_chats" fill="var(--color-chats)" name="Chats" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="total_recipes" fill="var(--color-recipes)" name="Recipes" radius={[2, 2, 0, 0]} />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+        </div>
+
+        {/* Leaf Detection Distribution */}
+        <div className="glass rounded-2xl p-3 sm:p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Leaf className="w-5 h-5 text-green-500" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.charts.leafTrends')}</h3>
+          </div>
+          <div className={`${isMobile ? 'h-48' : 'h-64'} w-full`}>
+            {analyticsData.leafTrends.length > 0 && Object.keys(analyticsData.leafTrends[0]).length > 1 ? (
+              <ChartContainer
+                config={Object.keys(analyticsData.leafTrends[0])
+                  .filter(key => key !== 'date')
+                  .reduce((config, leaf, index) => {
+                    const colors = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))', '#10b981', '#f59e0b', '#ef4444'];
+                    config[leaf] = {
+                      label: leaf.charAt(0).toUpperCase() + leaf.slice(1),
+                      color: colors[index % colors.length],
+                    };
+                    return config;
+                  }, {} as any)
+                }
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsLineChart data={analyticsData.leafTrends} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: isMobile ? 10 : 12 }}
+                      interval={isMobile ? 1 : 0}
+                      tickFormatter={(value) => {
+                        const date = new Date(value);
+                        return `${date.getMonth() + 1}/${date.getDate()}`;
+                      }}
+                    />
+                    <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} width={isMobile ? 30 : 40} />
+                    <ChartTooltip
+                      content={<ChartTooltipContent />}
+                      labelFormatter={(value) => {
+                        const date = new Date(value);
+                        return date.toLocaleDateString();
+                      }}
+                    />
+                    {Object.keys(analyticsData.leafTrends[0])
+                      .filter(key => key !== 'date')
+                      .map((leaf, index) => {
+                        return (
+                          <Line 
+                            key={leaf}
+                            type="monotone" 
+                            dataKey={leaf} 
+                            stroke={`var(--color-${leaf})`}
+                            strokeWidth={isMobile ? 1.5 : 2}
+                            dot={{ r: isMobile ? 2 : 3 }}
+                            connectNulls={false}
+                          />
+                        );
+                      })
+                    }
+                  </RechartsLineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <div className="text-center">
+                  <Leaf className="w-8 sm:w-12 h-8 sm:h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-xs sm:text-sm">{t('stats.charts.noData')}</p>
+                  <p className="text-xs">{t('stats.charts.startScanning')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Top Detected Leaves */}
       {topLeaves.length > 0 && (
-        <div className="glass rounded-2xl p-6">
+        <div className="glass rounded-2xl p-3 sm:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Award className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold text-foreground">{t('stats.mostScannedLeaves')}</h3>
+            <Award className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.mostScannedLeaves')}</h3>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {topLeaves.map((leaf, index) => (
-              <div key={leaf.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+              <div key={leaf.name} className="flex items-center justify-between p-2 sm:p-0">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className={`w-6 sm:w-8 h-6 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                     index === 0 ? 'bg-primary text-primary-foreground' :
                     index === 1 ? 'bg-accent text-accent-foreground' :
                     'bg-secondary text-secondary-foreground'
@@ -318,12 +554,12 @@ export default function StatsPage() {
                     {index + 1}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground capitalize">{leaf.name}</p>
+                    <p className="font-medium text-foreground capitalize text-sm sm:text-base">{leaf.name}</p>
                     <p className="text-xs text-muted-foreground">{leaf.count} scans</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-foreground">{leaf.percentage.toFixed(1)}%</p>
+                  <p className="text-xs sm:text-sm font-semibold text-foreground">{leaf.percentage.toFixed(1)}%</p>
                 </div>
               </div>
             ))}
@@ -332,15 +568,15 @@ export default function StatsPage() {
       )}
 
       {/* Nutritional Insights */}
-      <div className="glass rounded-2xl p-6">
+      <div className="glass rounded-2xl p-3 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">{t('stats.nutritionalInsights')}</h3>
+          <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.nutritionalInsights')}</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {nutritionalInsights.map((insight, index) => (
-            <div key={index} className="text-center">
-              <p className={`text-2xl font-bold ${insight.color}`}>{insight.value}</p>
+            <div key={index} className="text-center p-3 sm:p-0">
+              <p className={`text-xl sm:text-2xl font-bold ${insight.color}`}>{insight.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{insight.description}</p>
             </div>
           ))}
@@ -348,104 +584,104 @@ export default function StatsPage() {
       </div>
 
       {/* Recipe Tips */}
-      <div className="glass rounded-2xl p-6">
+      <div className="glass rounded-2xl p-3 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <ChefHat className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">{t('stats.recipeInsights')}</h3>
+          <ChefHat className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.recipeInsights')}</h3>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {recipeTips.map((tip, index) => (
-            <div key={index} className="flex items-start gap-3 p-3 bg-gradient-organic rounded-xl">
-              <div className="text-sm text-foreground leading-relaxed">{tip}</div>
+            <div key={index} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gradient-organic rounded-xl">
+              <div className="text-xs sm:text-sm text-foreground leading-relaxed">{tip}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Recipe Nutrition Summary */}
-      <div className="glass rounded-2xl p-6">
+      <div className="glass rounded-2xl p-3 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Leaf className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">{t('stats.recipeNutritionSummary')}</h3>
+          <Leaf className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.recipeNutritionSummary')}</h3>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.summary.totalAntioxidantScore')}</span>
-            <span className="font-medium text-foreground">Very High</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.summary.totalAntioxidantScore')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">Very High</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.summary.avgProteins')}</span>
-            <span className="font-medium text-foreground">{avgProteins.toFixed(1)}g {t('stats.insight.perRecipe')}</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.summary.avgProteins')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">{avgProteins.toFixed(1)}g {t('stats.insight.perRecipe')}</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.summary.totalPolyphenols')}</span>
-            <span className="font-medium text-foreground">{avgPolyphenols.toFixed(0)}mg {t('stats.insight.perRecipe')}</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.summary.totalPolyphenols')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">{avgPolyphenols.toFixed(0)}mg {t('stats.insight.perRecipe')}</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.summary.highAntioxidantRecipes')}</span>
-            <span className="font-medium text-foreground">{highAntioxidantRecipes}/{totalRecipes}</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.summary.highAntioxidantRecipes')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">{highAntioxidantRecipes}/{totalRecipes}</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.summary.totalProteinsAll')}</span>
-            <span className="font-medium text-foreground">{totalProteins.toFixed(1)}g</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.summary.totalProteinsAll')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">{totalProteins.toFixed(1)}g</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.summary.totalPolyphenolsAll')}</span>
-            <span className="font-medium text-foreground">{totalPolyphenols.toFixed(0)}mg</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.summary.totalPolyphenolsAll')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">{totalPolyphenols.toFixed(0)}mg</span>
           </div>
         </div>
       </div>
 
       {/* Impact Summary */}
-      <div className="glass rounded-2xl p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Leaf className="w-5 h-5 text-green-500" />
+      <div className="glass rounded-2xl p-3 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Leaf className="w-4 sm:w-5 h-4 sm:h-5 text-green-500" />
           {t('stats.impact.header')}
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl bg-green-500/10 border border-green-500/20 gap-2">
               <div className="flex items-center gap-3">
-                <Coins className="w-6 h-6 text-green-600" />
+                <Coins className="w-5 sm:w-6 h-5 sm:h-6 text-green-600 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('stats.impact.totalMoneySaved')}</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('stats.impact.totalMoneySaved')}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-600">
                     {moneySaved.toFixed(2)} MAD
                   </p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 gap-2">
               <div className="flex items-center gap-3">
-                <TreePine className="w-6 h-6 text-emerald-600" />
+                <TreePine className="w-5 sm:w-6 h-5 sm:h-6 text-emerald-600 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('stats.impact.co2eAvoided')}</p>
-                  <p className="text-2xl font-bold text-emerald-600">
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('stats.impact.co2eAvoided')}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-emerald-600">
                     {co2Avoided.toFixed(2)} kg
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="p-3 sm:p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
               <div className="flex items-center gap-3 mb-3">
-                <Leaf className="w-5 h-5 text-blue-600" />
-                <p className="text-sm font-medium text-blue-600">{t('stats.impact.totalLeavesUsed')}</p>
+                <Leaf className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
+                <p className="text-xs sm:text-sm font-medium text-blue-600">{t('stats.impact.totalLeavesUsed')}</p>
               </div>
-              <p className="text-3xl font-bold text-blue-600">
+              <p className="text-2xl sm:text-3xl font-bold text-blue-600">
                 {totalLeavesUsed.toFixed(1)} g
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {t('stats.impact.wildLeavesNote')}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+            <div className="p-3 sm:p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
               <div className="flex items-center gap-3 mb-3">
-                <Zap className="w-5 h-5 text-purple-600" />
-                <p className="text-sm font-medium text-purple-600">{t('stats.impact.polyphenolsGained')}</p>
+                <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" />
+                <p className="text-xs sm:text-sm font-medium text-purple-600">{t('stats.impact.polyphenolsGained')}</p>
               </div>
-              <p className="text-3xl font-bold text-purple-600">
+              <p className="text-2xl sm:text-3xl font-bold text-purple-600">
                 {polyphenolsGained.toFixed(1)} mg
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -454,42 +690,42 @@ export default function StatsPage() {
             </div>
           </div>
         </div>
-        <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
-          <p className="text-sm text-muted-foreground text-center">
+        <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
+          <p className="text-xs sm:text-sm text-muted-foreground text-center">
             💚 {t('stats.impact.bottomNote')}
           </p>
         </div>
       </div>
 
       {/* Weekly Summary */}
-      <div className="glass rounded-2xl p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">{t('stats.thisWeekSummary')}</h3>
-        <div className="space-y-4">
+      <div className="glass rounded-2xl p-3 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4">{t('stats.thisWeekSummary')}</h3>
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.week.mostActiveDay')}</span>
-            <span className="font-medium text-foreground">Wednesday</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.week.mostActiveDay')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">Wednesday</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.week.favoriteLeafType')}</span>
-            <span className="font-medium text-foreground capitalize">
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.week.favoriteLeafType')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base capitalize">
               {topLeaves[0]?.name || t('stats.week.noDataYet')}
             </span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.week.averageSessionTime')}</span>
-            <span className="font-medium text-foreground">3m 24s</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.week.averageSessionTime')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">3m 24s</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.week.recipesAvailable')}</span>
-            <span className="font-medium text-foreground">{totalRecipes}</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.week.recipesAvailable')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">{totalRecipes}</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.week.avgCookingTime')}</span>
-            <span className="font-medium text-foreground">30 min</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.week.avgCookingTime')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">30 min</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
-            <span className="text-muted-foreground text-sm">{t('stats.week.totalLeafScans')}</span>
-            <span className="font-medium text-foreground">{totalLeafCount}</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">{t('stats.week.totalLeafScans')}</span>
+            <span className="font-medium text-foreground text-sm sm:text-base">{totalLeafCount}</span>
           </div>
         </div>
       </div>
