@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, RotateCcw } from "lucide-react";
 import { APIService, DetectionResult } from "@/services/apiService";
-import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 
 interface CameraScannerProps {
@@ -61,7 +60,7 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
       }
     } catch (error) {
       logger.error("Camera access error:", error);
-      toast.error("Unable to access camera");
+      // Removed toast error message
       setIsCameraLoading(false);
     }
   }, [facingMode]); // Only depend on facingMode
@@ -91,7 +90,7 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
     if (!videoRef.current || !canvasRef.current || isScanning) return;
 
     setIsScanning(true);
-    toast.loading("Analyzing leaf...");
+    // Removed toast loading message
 
     try {
       const video = videoRef.current;
@@ -108,8 +107,7 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
         await new Promise(resolve => setTimeout(resolve, 200));
       }
       if (video.videoWidth === 0 || video.videoHeight === 0) {
-        toast.dismiss();
-        toast.error("Camera not ready. Please try again.");
+        // Removed toast error message
         logger.warn("CameraScanner: video dimensions are 0");
         return;
       }
@@ -127,22 +125,22 @@ export default function CameraScanner({ onClose, onDetection }: CameraScannerPro
       const result = await APIService.detectLeaf(base64Image);
       logger.debug("Roboflow response:", result);
       
-      toast.dismiss();
+      // Removed toast messages for success/error
       
       if (result.predictions && result.predictions.length > 0) {
         onDetection(result.predictions);
-        toast.success("Leaf detected successfully!");
+        // Removed success toast message
         // Automatically close camera when leaf is detected
         setTimeout(() => {
           onClose();
-        }, 1000); // Small delay to show success message
+        }, 500); // Reduced delay since no message to show
       } else {
         onDetection([]);
-        toast.error("No leaves detected. Try a different angle or lighting.");
+        // Removed error toast message
       }
     } catch (error) {
       logger.error("Detection error:", error);
-      toast.error("Detection failed. Please try again.");
+      // Removed toast error message
     } finally {
       setIsScanning(false);
     }
