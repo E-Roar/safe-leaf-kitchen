@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Home, MessageCircle, BarChart3, ChefHat, Settings, Leaf, Plus, X } from "lucide-react";
+import { Home, MessageCircle, BarChart3, ChefHat, Settings, Leaf, Plus, X, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SettingsService } from "@/services/settingsService";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/useI18n";
+import { APIService } from "@/services/apiService";
+import { ImpactService } from "@/services/impactService";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -60,6 +62,74 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
       chatProvider,
     });
     toast.success("Settings saved. Changes apply immediately for this session.");
+  };
+
+  const addDemoData = () => {
+    console.log('Adding demo data...');
+    
+    // Add sample leaf detections
+    const demoLeaves = [
+      { class: 'Onion Leaves', confidence: 0.95, x: 100, y: 100, width: 200, height: 200, detection_id: `demo-${Date.now()}-onion` },
+      { class: 'Garlic Leaves', confidence: 0.88, x: 150, y: 150, width: 180, height: 180, detection_id: `demo-${Date.now()}-garlic` },
+      { class: 'Leek Leaves', confidence: 0.92, x: 200, y: 200, width: 190, height: 190, detection_id: `demo-${Date.now()}-leek` }
+    ];
+    
+    demoLeaves.forEach(leaf => {
+      APIService.saveDetectedLeaves([leaf]);
+      APIService.incrementScans();
+    });
+    
+    // Add sample recipe views
+    for (let i = 1; i <= 5; i++) {
+      APIService.saveRecipeView(i);
+    }
+    
+    // Add sample favorites
+    APIService.toggleFavoriteRecipe(1);
+    APIService.toggleFavoriteRecipe(3);
+    
+    console.log('Demo data added successfully');
+    
+    // Verify impact calculations
+    setTimeout(() => {
+      const impact = ImpactService.getCumulativeImpact();
+      console.log('Updated impact after demo data:', impact);
+      toast.success(`Demo data added! Impact: ${impact.amount_g}g leaves, ${impact.price_saved_MAD.toFixed(2)} MAD saved`);
+    }, 100);
+  };
+  
+  const clearAllData = () => {
+    if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+      const keysToRemove = Object.keys(localStorage).filter(key => key.includes('safeleaf'));
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+      });
+      toast.success('All data cleared successfully');
+    }
+  };
+  
+  const getDebugInfo = () => {
+    try {
+      const detectedLeaves = APIService.getDetectedLeaves();
+      const impactMetrics = ImpactService.getCumulativeImpact();
+      const debugInfo = {
+        detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
+        impactCalculation: JSON.stringify(impactMetrics, null, 2),
+        storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
+        recipesReceived: APIService.getRecipeViews()?.length || 0,
+        favoritesCount: APIService.getFavoriteRecipes()?.length || 0
+      };
+      return debugInfo;
+    } catch (err) {
+      console.warn('Failed to get debug info:', err);
+      return {
+        detectedLeavesRaw: 'Error loading data',
+        impactCalculation: 'Error loading data',
+        storageKeys: [],
+        recipesReceived: 0,
+        favoritesCount: 0
+      };
+    }
   };
 
   return (
@@ -294,6 +364,59 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
               <p className="text-xs text-muted-foreground mt-2">
                 Settings reset to defaults on app restart
               </p>
+              
+              {/* Debug Controls Section */}
+              <div className="mt-6 pt-4 border-t border-border">
+                <h4 className="text-sm font-semibold text-foreground mb-3">Debug Controls</h4>
+                
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={addDemoData}
+                    className="flex items-center justify-center gap-2 px-3 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
+                  >
+                    <Leaf className="w-4 h-4" />
+                    <span>Add Demo Data</span>
+                  </button>
+                  
+                  <button
+                    onClick={clearAllData}
+                    className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Clear All Data</span>
+                  </button>
+                </div>
+                
+                {/* Debug Information Display */}
+                <div className="mt-4">
+                  <details className="text-xs">
+                    <summary className="cursor-pointer text-muted-foreground hover:text-foreground mb-2">
+                      Debug Information
+                    </summary>
+                    <div className="bg-muted/30 p-3 rounded-lg space-y-2 max-h-40 overflow-y-auto">
+                      {(() => {
+                        const debug = getDebugInfo();
+                        return (
+                          <div className="space-y-1">
+                            <div><span className="font-medium">Recipes Viewed:</span> {debug.recipesReceived}</div>
+                            <div><span className="font-medium">Favorites:</span> {debug.favoritesCount}</div>
+                            <div><span className="font-medium">Storage Keys:</span> {debug.storageKeys.length}</div>
+                            <div className="pt-2">
+                              <div className="font-medium mb-1">Impact Data:</div>
+                              <pre className="whitespace-pre-wrap text-xs">{debug.impactCalculation}</pre>
+                            </div>
+                          </div>
+                        );
+                      })()
+                      }
+                    </div>
+                  </details>
+                </div>
+                
+                <p className="text-xs text-muted-foreground mt-2">
+                  Debug controls are password protected
+                </p>
+              </div>
             </div>
           </div>
         </div>

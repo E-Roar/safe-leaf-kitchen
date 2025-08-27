@@ -55,6 +55,160 @@ export default function StatsPage() {
 
   const [chromeCompatibility, setChromeCompatibility] = useState<ChromeCompatibilityReport | null>(null);
 
+  // Move loadStats outside useEffect so it can be called from addDemoData
+  const loadStats = () => {
+    try {
+      console.log('Loading stats - Starting...');
+      RemoteErrorLogger.log('debug', 'Stats loading started');
+      
+      // Get detected leaves with proper error handling
+      let detectedLeaves: Array<{ timestamp: number; leaves: any[] }> = [];
+      try {
+        detectedLeaves = APIService.getDetectedLeaves() || [];
+        console.log('Detected leaves loaded:', detectedLeaves.length);
+        RemoteErrorLogger.log('debug', 'Detected leaves loaded', { count: detectedLeaves.length });
+      } catch (err) {
+        console.warn('Failed to load detected leaves:', err);
+        RemoteErrorLogger.log('warn', 'Failed to load detected leaves', err);
+        detectedLeaves = [];
+      }
+      
+      // Get impact metrics with proper error handling
+      let impactMetrics: ImpactMetrics = {} as ImpactMetrics;
+      try {
+        impactMetrics = ImpactService.getCumulativeImpact() || {} as ImpactMetrics;
+        console.log('Impact metrics loaded:', impactMetrics);
+        RemoteErrorLogger.log('debug', 'Impact metrics loaded', impactMetrics);
+      } catch (err) {
+        console.warn('Failed to load impact metrics:', err);
+        RemoteErrorLogger.log('warn', 'Failed to load impact metrics', err);
+        impactMetrics = {} as ImpactMetrics;
+      }
+    
+    // Convert detected leaves to the expected format with error handling
+    const detectedLeavesRecord: Record<string, number> = {};
+    if (Array.isArray(detectedLeaves)) {
+      detectedLeaves.forEach((detection, index) => {
+        if (detection && detection.leaves && Array.isArray(detection.leaves)) {
+          detection.leaves.forEach(leaf => {
+            if (leaf && leaf.class) {
+              const leafType = leaf.class;
+              detectedLeavesRecord[leafType] = (detectedLeavesRecord[leafType] || 0) + 1;
+            }
+          });
+        }
+      });
+    }
+
+      // Get other stats with error handling
+      let totalScans = 0;
+      let totalChats = 0;
+      let recipeSuggestions = 0;
+      let savedConversations = 0;
+      
+      try {
+        totalScans = APIService.getScans() || 0;
+        totalChats = APIService.getChats() || 0;
+        recipeSuggestions = APIService.getRecipeSuggestions() || 0;
+        savedConversations = APIService.getConversationList()?.length || 0;
+      } catch (err) {
+        console.warn('Failed to load basic stats:', err);
+        RemoteErrorLogger.log('warn', 'Failed to load basic stats', err);
+      }
+
+      setStats({
+        totalScans,
+        totalChats,
+        detectedLeaves: detectedLeavesRecord,
+        recipeSuggestions,
+        savedConversations,
+        impactMetrics
+      });
+      console.log('Stats updated successfully');
+      RemoteErrorLogger.log('debug', 'Stats updated successfully', {
+        totalScans,
+        totalChats,
+        detectedLeavesCount: Object.keys(detectedLeavesRecord).length
+      });
+
+      // Load analytics data for charts with error handling
+      console.log('Loading analytics data...');
+      let analyticsData = {
+        dailyScans: [] as { date: string; value: number }[],
+        dailyChats: [] as { date: string; value: number }[],
+        weeklyStats: [] as any[],
+        leafTrends: [] as any[]
+      };
+      
+      try {
+        analyticsData = {
+          dailyScans: AnalyticsService.getScanTrend(14) || [], // Last 14 days
+          dailyChats: AnalyticsService.getChatTrend(14) || [],
+          weeklyStats: AnalyticsService.getWeeklyStatsRange(8) || [], // Last 8 weeks
+          leafTrends: AnalyticsService.getLeafDetectionTrend(7) || [] // Last 7 days
+        };
+        console.log('Analytics data loaded:', analyticsData);
+        RemoteErrorLogger.log('debug', 'Analytics data loaded', {
+          dailyScansCount: analyticsData.dailyScans.length,
+          dailyChatsCount: analyticsData.dailyChats.length,
+          weeklyStatsCount: analyticsData.weeklyStats.length,
+          leafTrendsCount: analyticsData.leafTrends.length
+        });
+      } catch (err) {
+        console.warn('Failed to load analytics data:', err);
+        RemoteErrorLogger.log('warn', 'Failed to load analytics data', err);
+      }
+      
+      setAnalyticsData(analyticsData);
+
+      // Debug information with error handling
+      try {
+        const debugInfo = {
+          detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
+          impactCalculation: JSON.stringify(impactMetrics, null, 2),
+          storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
+          recipesReceived: APIService.getRecipeViews()?.length || 0,
+          favoritesCount: APIService.getFavoriteRecipes()?.length || 0
+        };
+        setDebugInfo(debugInfo);
+      } catch (err) {
+        console.warn('Failed to load debug info:', err);
+        RemoteErrorLogger.log('warn', 'Failed to load debug info', err);
+        setDebugInfo({
+          detectedLeavesRaw: '[]',
+          impactCalculation: '{}',
+          storageKeys: [],
+          recipesReceived: 0,
+          favoritesCount: 0
+        });
+      }
+      console.log('Stats loading completed successfully');
+      RemoteErrorLogger.log('info', 'Stats loading completed successfully');
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      RemoteErrorLogger.log('error', 'Error loading stats', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      // Set fallback values to prevent UI crashes
+      setStats({
+        totalScans: 0,
+        totalChats: 0,
+        detectedLeaves: {},
+        recipeSuggestions: 0,
+        savedConversations: 0,
+        impactMetrics: {} as ImpactMetrics
+      });
+      setAnalyticsData({
+        dailyScans: [],
+        dailyChats: [],
+        weeklyStats: [],
+        leafTrends: []
+      });
+    }
+  };
+
   useEffect(() => {
     // Run Chrome compatibility check on mount
     console.log('Running Chrome compatibility check...');
@@ -79,159 +233,6 @@ export default function StatsPage() {
     // Run quick test for debugging
     ChromeCompatibilityChecker.runQuickTest();
     
-    const loadStats = () => {
-      try {
-        console.log('Loading stats - Starting...');
-        RemoteErrorLogger.log('debug', 'Stats loading started');
-        
-        // Get detected leaves with proper error handling
-        let detectedLeaves: Array<{ timestamp: number; leaves: any[] }> = [];
-        try {
-          detectedLeaves = APIService.getDetectedLeaves() || [];
-          console.log('Detected leaves loaded:', detectedLeaves.length);
-          RemoteErrorLogger.log('debug', 'Detected leaves loaded', { count: detectedLeaves.length });
-        } catch (err) {
-          console.warn('Failed to load detected leaves:', err);
-          RemoteErrorLogger.log('warn', 'Failed to load detected leaves', err);
-          detectedLeaves = [];
-        }
-        
-        // Get impact metrics with proper error handling
-        let impactMetrics: ImpactMetrics = {} as ImpactMetrics;
-        try {
-          impactMetrics = ImpactService.getCumulativeImpact() || {} as ImpactMetrics;
-          console.log('Impact metrics loaded:', impactMetrics);
-          RemoteErrorLogger.log('debug', 'Impact metrics loaded', impactMetrics);
-        } catch (err) {
-          console.warn('Failed to load impact metrics:', err);
-          RemoteErrorLogger.log('warn', 'Failed to load impact metrics', err);
-          impactMetrics = {} as ImpactMetrics;
-        }
-      
-      // Convert detected leaves to the expected format with error handling
-      const detectedLeavesRecord: Record<string, number> = {};
-      if (Array.isArray(detectedLeaves)) {
-        detectedLeaves.forEach((detection, index) => {
-          if (detection && detection.leaves && Array.isArray(detection.leaves)) {
-            detection.leaves.forEach(leaf => {
-              if (leaf && leaf.class) {
-                const leafType = leaf.class;
-                detectedLeavesRecord[leafType] = (detectedLeavesRecord[leafType] || 0) + 1;
-              }
-            });
-          }
-        });
-      }
-
-        // Get other stats with error handling
-        let totalScans = 0;
-        let totalChats = 0;
-        let recipeSuggestions = 0;
-        let savedConversations = 0;
-        
-        try {
-          totalScans = APIService.getScans() || 0;
-          totalChats = APIService.getChats() || 0;
-          recipeSuggestions = APIService.getRecipeSuggestions() || 0;
-          savedConversations = APIService.getConversationList()?.length || 0;
-        } catch (err) {
-          console.warn('Failed to load basic stats:', err);
-          RemoteErrorLogger.log('warn', 'Failed to load basic stats', err);
-        }
-
-        setStats({
-          totalScans,
-          totalChats,
-          detectedLeaves: detectedLeavesRecord,
-          recipeSuggestions,
-          savedConversations,
-          impactMetrics
-        });
-        console.log('Stats updated successfully');
-        RemoteErrorLogger.log('debug', 'Stats updated successfully', {
-          totalScans,
-          totalChats,
-          detectedLeavesCount: Object.keys(detectedLeavesRecord).length
-        });
-
-        // Load analytics data for charts with error handling
-        console.log('Loading analytics data...');
-        let analyticsData = {
-          dailyScans: [] as { date: string; value: number }[],
-          dailyChats: [] as { date: string; value: number }[],
-          weeklyStats: [] as any[],
-          leafTrends: [] as any[]
-        };
-        
-        try {
-          analyticsData = {
-            dailyScans: AnalyticsService.getScanTrend(14) || [], // Last 14 days
-            dailyChats: AnalyticsService.getChatTrend(14) || [],
-            weeklyStats: AnalyticsService.getWeeklyStatsRange(8) || [], // Last 8 weeks
-            leafTrends: AnalyticsService.getLeafDetectionTrend(7) || [] // Last 7 days
-          };
-          console.log('Analytics data loaded:', analyticsData);
-          RemoteErrorLogger.log('debug', 'Analytics data loaded', {
-            dailyScansCount: analyticsData.dailyScans.length,
-            dailyChatsCount: analyticsData.dailyChats.length,
-            weeklyStatsCount: analyticsData.weeklyStats.length,
-            leafTrendsCount: analyticsData.leafTrends.length
-          });
-        } catch (err) {
-          console.warn('Failed to load analytics data:', err);
-          RemoteErrorLogger.log('warn', 'Failed to load analytics data', err);
-        }
-        
-        setAnalyticsData(analyticsData);
-
-        // Debug information with error handling
-        try {
-          const debugInfo = {
-            detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
-            impactCalculation: JSON.stringify(impactMetrics, null, 2),
-            storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
-            recipesReceived: APIService.getRecipeViews()?.length || 0,
-            favoritesCount: APIService.getFavoriteRecipes()?.length || 0
-          };
-          setDebugInfo(debugInfo);
-        } catch (err) {
-          console.warn('Failed to load debug info:', err);
-          RemoteErrorLogger.log('warn', 'Failed to load debug info', err);
-          setDebugInfo({
-            detectedLeavesRaw: '[]',
-            impactCalculation: '{}',
-            storageKeys: [],
-            recipesReceived: 0,
-            favoritesCount: 0
-          });
-        }
-        console.log('Stats loading completed successfully');
-        RemoteErrorLogger.log('info', 'Stats loading completed successfully');
-      } catch (error) {
-        console.error('Error loading stats:', error);
-        RemoteErrorLogger.log('error', 'Error loading stats', {
-          error: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined
-        });
-        
-        // Set fallback values to prevent UI crashes
-        setStats({
-          totalScans: 0,
-          totalChats: 0,
-          detectedLeaves: {},
-          recipeSuggestions: 0,
-          savedConversations: 0,
-          impactMetrics: {} as ImpactMetrics
-        });
-        setAnalyticsData({
-          dailyScans: [],
-          dailyChats: [],
-          weeklyStats: [],
-          leafTrends: []
-        });
-      }
-    };
-
     loadStats();
     // Refresh stats when component becomes visible (reduced frequency)
     const interval = setInterval(() => {
@@ -246,6 +247,85 @@ export default function StatsPage() {
     RemoteErrorLogger.log('info', 'Clearing all data');
     localStorage.clear();
     window.location.reload();
+  };
+
+  // Add demo leaf detection data for testing impact calculations
+  const addDemoData = () => {
+    RemoteErrorLogger.log('info', 'Adding demo leaf detection data');
+    console.log('Adding demo data...');
+    
+    // First check current state
+    console.log('Current localStorage keys:', Object.keys(localStorage).filter(key => key.includes('safeleaf')));
+    
+    // Create sample leaf detection data
+    const demoDetections = [
+      {
+        timestamp: Date.now(),
+        leaves: [
+          {
+            x: 507,
+            y: 808,
+            width: 740,
+            height: 356,
+            confidence: 0.8656852841377258,
+            class: 'Onion Leaves',
+            class_id: 10,
+            detection_id: 'demo-onion-1'
+          }
+        ]
+      },
+      {
+        timestamp: Date.now() - 3600000, // 1 hour ago
+        leaves: [
+          {
+            x: 300,
+            y: 400,
+            width: 600,
+            height: 400,
+            confidence: 0.7523,
+            class: 'Garlic Leaves',
+            class_id: 5,
+            detection_id: 'demo-garlic-1'
+          }
+        ]
+      },
+      {
+        timestamp: Date.now() - 7200000, // 2 hours ago
+        leaves: [
+          {
+            x: 400,
+            y: 500,
+            width: 500,
+            height: 300,
+            confidence: 0.9123,
+            class: 'Onion Leaves',
+            class_id: 10,
+            detection_id: 'demo-onion-2'
+          }
+        ]
+      }
+    ];
+    
+    // Store in the same format as APIService
+    localStorage.setItem('safeleafkitchen_detected_leaves', JSON.stringify(demoDetections));
+    console.log('Demo data stored:', demoDetections);
+    
+    // Add some basic stats
+    localStorage.setItem('scans', '3');
+    localStorage.setItem('chats', '2');
+    
+    // Immediately test impact calculation
+    console.log('Testing impact calculation immediately...');
+    const testImpact = ImpactService.getCumulativeImpact();
+    console.log('Immediate impact test result:', testImpact);
+    
+    // Also test the parsing directly
+    const rawData = localStorage.getItem('safeleafkitchen_detected_leaves');
+    console.log('Raw stored data:', rawData);
+    
+    // Refresh the page data instead of reloading
+    console.log('Refreshing stats data...');
+    loadStats();
   };
 
   // Debug helper function accessible from browser console
@@ -474,16 +554,20 @@ export default function StatsPage() {
       <div className="glass rounded-2xl p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
           <h3 className="text-base sm:text-lg font-semibold text-foreground">{t('stats.controls')}</h3>
-          <button
-            onClick={clearAllData}
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors w-full sm:w-auto"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span className="whitespace-nowrap">{t('stats.resetAllData')}</span>
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={clearAllData}
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors w-full sm:w-auto"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span className="whitespace-nowrap">{t('stats.resetAllData')}</span>
+            </button>
+          </div>
         </div>
         <div className="text-xs text-muted-foreground">
-          Viewed recipes: {debugInfo.recipesReceived} • Favorites: {debugInfo.favoritesCount}
+          {stats.impactMetrics.amount_g > 0 && (
+            <span>Impact: {stats.impactMetrics.amount_g}g leaves, {stats.impactMetrics.price_saved_MAD.toFixed(2)} MAD saved</span>
+          )}
         </div>
       </div>
 

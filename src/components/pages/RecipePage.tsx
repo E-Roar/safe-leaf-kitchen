@@ -3,6 +3,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { ChevronDown, ChevronUp, ChefHat, Clock, Users, Leaf, Zap, BookOpen, Star, Menu, X, Play } from "lucide-react";
 import { recipes, Recipe } from "@/data/recipes";
 import { APIService } from "@/services/apiService";
+import { ImpactService } from "@/services/impactService";
 import { cn } from "@/lib/utils";
 
 type Language = 'en' | 'fr' | 'ar';
@@ -63,16 +64,64 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
   };
 
   const handleUseRecipe = (recipe: Recipe) => {
+    console.log('Using recipe:', recipe.title.en);
+    
     setIsSidebarOpen(false);
+    
     // Count as received/viewed recipe
     APIService.saveRecipeView(recipe.id);
+    
+    // Extract leaf types from the recipe ingredients
+    const leafTypes = extractLeafTypesFromRecipe(recipe);
+    console.log('Extracted leaf types from recipe:', leafTypes);
+    
+    // Get impact before adding new leaves
+    const impactBefore = ImpactService.getCumulativeImpact();
+    console.log('Impact before recipe usage:', impactBefore);
+    
+    // Add the detected leaves to trigger impact calculation
+    if (leafTypes.length > 0) {
+      handleLeafDetection(leafTypes);
+      
+      // Immediate validation: check impact after adding leaves
+      setTimeout(() => {
+        const impactAfter = ImpactService.getCumulativeImpact();
+        console.log('Impact after recipe usage:', impactAfter);
+        
+        // Verify the impact has changed
+        if (impactAfter.amount_g > impactBefore.amount_g) {
+          console.log(`✅ Impact calculations updated successfully! Added ${impactAfter.amount_g - impactBefore.amount_g}g of leaves`);
+          console.log(`💰 Money saved: ${impactAfter.price_saved_MAD.toFixed(2)} MAD (+${(impactAfter.price_saved_MAD - impactBefore.price_saved_MAD).toFixed(2)})`);
+          console.log(`🌱 CO2 avoided: ${impactAfter.co2e_kg_avoided.toFixed(2)} kg (+${(impactAfter.co2e_kg_avoided - impactBefore.co2e_kg_avoided).toFixed(2)})`);
+        } else {
+          console.warn('⚠️  Impact calculations may not have updated properly');
+        }
+      }, 100); // Small delay to ensure localStorage is updated
+      
+      console.log('Impact calculations triggered for recipe usage');
+    }
+    
+    // Provide user feedback
+    console.log(`✨ Recipe "${recipe.title.en}" used successfully! Impact calculations updated.`);
   };
 
   const handleLeafDetection = (leafTypes: string[]) => {
-    // Add each leaf type to detected leaves
+    console.log('Processing leaf detection for recipe usage:', leafTypes);
+    
+    // Add each leaf type to detected leaves using exact class names
     leafTypes.forEach(leafType => {
-      // Save detected leaves data - create a mock detection result
-      const mockDetection = { class: leafType, confidence: 1, x: 0, y: 0, width: 100, height: 100 };
+      // Save detected leaves data - create a mock detection result with exact class name
+      const mockDetection = { 
+        class: leafType, // Use exact class name (e.g., 'Onion Leaves')
+        confidence: 1, 
+        x: 0, 
+        y: 0, 
+        width: 100, 
+        height: 100,
+        detection_id: `recipe-${Date.now()}-${leafType.toLowerCase().replace(/\s+/g, '-')}`
+      };
+      
+      console.log('Saving detected leaf for recipe usage:', mockDetection);
       APIService.saveDetectedLeaves([mockDetection]);
     });
     
@@ -80,6 +129,8 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
     for (let i = 0; i < leafTypes.length; i++) {
       APIService.incrementScans();
     }
+    
+    console.log(`Added ${leafTypes.length} leaf types to impact calculations from recipe usage`);
   };
 
   // Handle favorite toggle with state update
@@ -99,40 +150,53 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
     const ingredients = recipe.ingredients.en.join(' ').toLowerCase();
     const leafTypes: string[] = [];
     
-    // Define leaf type keywords and their mappings
+    // Define leaf type keywords and their mappings to exact class names
     const leafKeywords = {
-      'onion': 'onion',
-      'garlic': 'garlic', 
-      'leek': 'leek',
-      'chive': 'chive',
-      'scallion': 'scallion',
-      'shallot': 'shallot',
-      'wild garlic': 'wild garlic',
-      'ramp': 'ramp',
-      'green onion': 'green onion',
-      'carrot': 'carrot',
-      'beet': 'beet',
-      'radish': 'radish',
-      'turnip': 'turnip',
-      'parsley': 'parsley',
-      'cilantro': 'cilantro',
-      'mint': 'mint',
-      'basil': 'basil',
-      'thyme': 'thyme',
-      'oregano': 'oregano',
-      'sage': 'sage'
+      'onion': 'Onion Leaves',
+      'onion leaves': 'Onion Leaves',
+      'garlic': 'Garlic Leaves',
+      'garlic leaves': 'Garlic Leaves',
+      'leek': 'Leek Leaves',
+      'leek leaves': 'Leek Leaves',
+      'chive': 'Chive Leaves',
+      'chives': 'Chive Leaves',
+      'scallion': 'Scallion Leaves',
+      'scallion leaves': 'Scallion Leaves',
+      'shallot': 'Shallot Leaves',
+      'shallot leaves': 'Shallot Leaves',
+      'wild garlic': 'Garlic Leaves',
+      'ramp': 'Onion Leaves', // Map to closest equivalent
+      'green onion': 'Onion Leaves',
+      'spring onion': 'Onion Leaves',
+      'carrot': 'Onion Leaves', // Map carrot tops to closest equivalent
+      'carrot leaves': 'Onion Leaves',
+      'beet': 'Onion Leaves', // Map beet greens to closest equivalent
+      'beet leaves': 'Onion Leaves',
+      'radish': 'Onion Leaves', // Map radish greens to closest equivalent
+      'radish leaves': 'Onion Leaves',
+      'turnip': 'Onion Leaves', // Map turnip greens to closest equivalent
+      'turnip leaves': 'Onion Leaves',
+      'parsley': 'Onion Leaves', // Map herbs to closest equivalent
+      'cilantro': 'Onion Leaves',
+      'mint': 'Onion Leaves',
+      'basil': 'Onion Leaves',
+      'thyme': 'Onion Leaves',
+      'oregano': 'Onion Leaves',
+      'sage': 'Onion Leaves'
     };
     
     // Check for each leaf type in ingredients
-    Object.entries(leafKeywords).forEach(([keyword, leafType]) => {
+    Object.entries(leafKeywords).forEach(([keyword, leafClassName]) => {
       if (ingredients.includes(keyword)) {
-        leafTypes.push(leafType);
+        if (!leafTypes.includes(leafClassName)) {
+          leafTypes.push(leafClassName);
+        }
       }
     });
     
-    // If no specific leaves found, add a generic "onion" (since most recipes use onion leaves)
+    // If no specific leaves found, add a default "Onion Leaves" (since most recipes use onion leaves)
     if (leafTypes.length === 0) {
-      leafTypes.push('onion');
+      leafTypes.push('Onion Leaves');
     }
     
     return leafTypes;
@@ -480,17 +544,141 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
               </div>
             </div>
           ) : (
-            /* Empty State */
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mb-6">
-                <ChefHat className="w-12 h-12 text-primary-foreground" />
+            /* Favorite Recipes Ranking */
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+                    <Star className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                </div>
+                <h1 className="text-3xl font-bold text-foreground mb-2">
+                  Favorite Recipes
+                </h1>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Your top-rated recipes based on usage and favorites
+                </p>
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                {t('recipes.selectRecipe')}
-              </h2>
-              <p className="text-muted-foreground max-w-md">
-                {t('recipes.emptyHint')}
-              </p>
+
+              {/* Favorite Recipes List */}
+              <div className="max-w-4xl mx-auto">
+                {(() => {
+                  // Get favorite recipes and sort by usage
+                  const favoriteRecipeIds = favorites;
+                  const recipeViews = APIService.getRecipeViews();
+                  
+                  // Create ranking based on favorites + view count
+                  const recipeRanking = recipes
+                    .map(recipe => {
+                      const isFavorite = favoriteRecipeIds.includes(recipe.id);
+                      const viewCount = recipeViews.filter(view => view.id === recipe.id).length;
+                      const score = (isFavorite ? 100 : 0) + viewCount;
+                      return { recipe, score, viewCount, isFavorite };
+                    })
+                    .filter(item => item.score > 0) // Only show recipes with some interaction
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 6); // Top 6 recipes
+                  
+                  if (recipeRanking.length === 0) {
+                    return (
+                      <div className="text-center py-12">
+                        <ChefHat className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-foreground mb-2">No favorites yet</h3>
+                        <p className="text-muted-foreground">Select recipes from the sidebar and mark them as favorites to see your ranking here.</p>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {recipeRanking.map((item, index) => (
+                        <button
+                          key={item.recipe.id}
+                          onClick={() => handleRecipeSelect(item.recipe)}
+                          className="glass rounded-2xl p-4 text-left transition-all duration-300 hover:shadow-lg hover:scale-105 relative"
+                        >
+                          {/* Ranking Badge */}
+                          <div className="absolute top-3 left-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+                            {index + 1}
+                          </div>
+                          
+                          {/* Favorite Star */}
+                          {item.isFavorite && (
+                            <div className="absolute top-3 right-3">
+                              <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-4 mt-6">
+                            <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-organic flex items-center justify-center">
+                              <img
+                                src={getRecipeImage(item.recipe.title.en)}
+                                alt={item.recipe.title.en}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  target.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                              <ChefHat className="w-8 h-8 text-primary hidden" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-foreground text-base line-clamp-2 mb-1">
+                                {item.recipe.title[selectedLanguage]}
+                              </h3>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                                <span className={getNutritionColor(item.recipe.nutrition.antioxidant_score)}>
+                                  {item.recipe.nutrition.antioxidant_score}
+                                </span>
+                                <span>•</span>
+                                <span>{item.viewCount} views</span>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2 text-xs">
+                                <div className="text-center p-2 bg-background/50 rounded-lg">
+                                  <div className="font-semibold text-primary">{item.recipe.nutrition.proteins_g}g</div>
+                                  <div className="text-muted-foreground">Proteins</div>
+                                </div>
+                                <div className="text-center p-2 bg-background/50 rounded-lg">
+                                  <div className="font-semibold text-accent">{item.recipe.nutrition.polyphenols_mg}mg</div>
+                                  <div className="text-muted-foreground">Polyphenols</div>
+                                </div>
+                                <div className="text-center p-2 bg-background/50 rounded-lg">
+                                  <div className="font-semibold text-secondary">{item.recipe.nutrition.flavonoids_mg}mg</div>
+                                  <div className="text-muted-foreground">Flavonoids</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()
+                }
+                
+                {/* Call to Action */}
+                <div className="text-center mt-8 p-6 glass rounded-2xl">
+                  <p className="text-muted-foreground mb-4">
+                    Discover more recipes in the sidebar or try the "Use Recipe" feature to track your cooking impact!
+                  </p>
+                  <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4" />
+                      <span>Mark favorites</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Play className="w-4 h-4" />
+                      <span>Use recipes</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ChefHat className="w-4 h-4" />
+                      <span>Track impact</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

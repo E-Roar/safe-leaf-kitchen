@@ -203,11 +203,24 @@ export class RemoteErrorLogger {
     console.warn = (...args) => {
       originalWarn.apply(console, args);
       if (!isLogging && args.length > 0 && !String(args[0]).includes('[SAFELEAF-WARN]')) {
+        // Filter out repetitive Recharts ResponsiveContainer warnings
+        const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+        
+        // Enhanced filter for ResponsiveContainer warnings
+        if ((message.includes('width') && message.includes('height') && message.includes('ResponsiveContainer')) ||
+            (message.includes('fixed numbers') && message.includes('ResponsiveContainer')) ||
+            message.includes('maybe you don\'t need to use a ResponsiveContainer')) {
+          return; // Skip logging this repetitive warning
+        }
+        
+        // Filter out other common chart library warnings
+        if (message.includes('recharts') && (message.includes('Warning:') || message.includes('warn2'))) {
+          return; // Skip logging chart library warnings
+        }
+        
         isLogging = true;
         try {
-          this.log('warn', args.map(arg => 
-            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-          ).join(' '));
+          this.log('warn', message);
         } catch (e) {
           // Silently fail to prevent recursion
         } finally {
