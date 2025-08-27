@@ -128,28 +128,51 @@ class ImpactService {
   // Get cumulative impact from all detected leaves
   static getCumulativeImpact(): ImpactMetrics {
     const detectedLeaves = this.getDetectedLeavesData();
+    console.log('ImpactService: Starting calculation with detected leaves:', detectedLeaves);
     
     let totalAmount_g = 0;
     let totalPolyphenols_mg = 0;
     
     Object.entries(detectedLeaves).forEach(([leafType, count]) => {
-      if (count <= 0) return; // Skip invalid counts
+      if (count <= 0) {
+        console.log(`ImpactService: Skipping ${leafType} with count ${count}`);
+        return; // Skip invalid counts
+      }
       
       // Estimate leaf weight based on type (more realistic estimates)
       const leafWeight_g = this.getLeafWeightEstimate(leafType);
-      totalAmount_g += count * leafWeight_g;
+      const leafAmount_g = count * leafWeight_g;
+      totalAmount_g += leafAmount_g;
       
       // Estimate polyphenols based on leaf type (more accurate estimates)
       const polyphenolsPerLeaf_mg = this.getPolyphenolsPerLeaf(leafType);
-      totalPolyphenols_mg += count * polyphenolsPerLeaf_mg;
+      const leafPolyphenols_mg = count * polyphenolsPerLeaf_mg;
+      totalPolyphenols_mg += leafPolyphenols_mg;
+      
+      console.log(`ImpactService: ${leafType} - count: ${count}, weight: ${leafWeight_g}g, polyphenols: ${polyphenolsPerLeaf_mg}mg`);
+      console.log(`  → Total for ${leafType}: ${leafAmount_g}g, ${leafPolyphenols_mg}mg polyphenols`);
     });
-
-    return this.calculateImpact(totalAmount_g, totalPolyphenols_mg);
+    
+    console.log(`ImpactService: Final totals - Amount: ${totalAmount_g}g, Polyphenols: ${totalPolyphenols_mg}mg`);
+    
+    const result = this.calculateImpact(totalAmount_g, totalPolyphenols_mg);
+    console.log('ImpactService: Final impact metrics:', result);
+    
+    return result;
   }
 
   // Get leaf weight estimate per leaf type (more realistic estimates)
   private static getLeafWeightEstimate(leafType: string): number {
     const weightMap: Record<string, number> = {
+      // Exact detection class names
+      'Onion Leaves': 30,
+      'Garlic Leaves': 25,
+      'Leek Leaves': 45,
+      'Chive Leaves': 20,
+      'Scallion Leaves': 35,
+      'Shallot Leaves': 30,
+      
+      // Alternative names for flexibility
       'onion': 30,      // Onion leaves are typically 25-35g
       'garlic': 25,     // Garlic leaves are 20-30g
       'leek': 45,       // Leek leaves are larger 40-50g
@@ -172,19 +195,37 @@ class ImpactService {
       'sage': 12        // Sage 10-15g
     };
 
-    // Find best match for leaf type
+    // First try exact match
+    if (weightMap[leafType]) {
+      console.log(`ImpactService: Found exact weight match for '${leafType}': ${weightMap[leafType]}g`);
+      return weightMap[leafType];
+    }
+    
+    // Find best match for leaf type (case insensitive partial match)
+    const lowerLeafType = leafType.toLowerCase();
     for (const [key, value] of Object.entries(weightMap)) {
-      if (leafType.toLowerCase().includes(key)) {
+      if (lowerLeafType.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerLeafType)) {
+        console.log(`ImpactService: Found partial weight match for '${leafType}' → '${key}': ${value}g`);
         return value;
       }
     }
     
+    console.log(`ImpactService: No weight match found for '${leafType}', using default: 30g`);
     return 30; // Default average weight
   }
 
   // Get polyphenols content per leaf type (more accurate estimates based on research)
   private static getPolyphenolsPerLeaf(leafType: string): number {
     const polyphenolsMap: Record<string, number> = {
+      // Exact detection class names
+      'Onion Leaves': 140,
+      'Garlic Leaves': 220,
+      'Leek Leaves': 160,
+      'Chive Leaves': 180,
+      'Scallion Leaves': 150,
+      'Shallot Leaves': 170,
+      
+      // Alternative names for flexibility
       'onion': 140,     // Onion leaves are rich in quercetin
       'garlic': 220,    // Garlic leaves have high allicin content
       'leek': 160,      // Leek leaves are good source of kaempferol
@@ -207,37 +248,67 @@ class ImpactService {
       'sage': 200       // Sage
     };
 
-    // Find best match for leaf type
+    // First try exact match
+    if (polyphenolsMap[leafType]) {
+      console.log(`ImpactService: Found exact polyphenols match for '${leafType}': ${polyphenolsMap[leafType]}mg`);
+      return polyphenolsMap[leafType];
+    }
+    
+    // Find best match for leaf type (case insensitive partial match)
+    const lowerLeafType = leafType.toLowerCase();
     for (const [key, value] of Object.entries(polyphenolsMap)) {
-      if (leafType.toLowerCase().includes(key)) {
+      if (lowerLeafType.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerLeafType)) {
+        console.log(`ImpactService: Found partial polyphenols match for '${leafType}' → '${key}': ${value}mg`);
         return value;
       }
     }
     
+    console.log(`ImpactService: No polyphenols match found for '${leafType}', using default: 160mg`);
     return 160; // Default average polyphenols content
   }
 
   // Get detected leaves data from storage with error handling
-  // FIXED: Use the correct storage key that matches StorageService
+  // FIXED: Parse the actual detected leaves array structure from APIService
   private static getDetectedLeavesData(): Record<string, number> {
     try {
-      // Use the same key format as StorageService
+      // Use the same key format as APIService
       const data = localStorage.getItem('safeleafkitchen_detected_leaves');
       if (!data) return {};
       
       const parsed = JSON.parse(data);
-      if (typeof parsed !== 'object' || parsed === null) return {};
       
-      // Validate and clean the data
-      const cleaned: Record<string, number> = {};
-      Object.entries(parsed).forEach(([key, value]) => {
-        const numValue = Number(value);
-        if (!isNaN(numValue) && numValue >= 0) {
-          cleaned[key] = numValue;
-        }
-      });
+      // Handle the array format: [{timestamp, leaves: [{class: "Onion Leaves", ...}]}]
+      if (Array.isArray(parsed)) {
+        const leafCounts: Record<string, number> = {};
+        
+        parsed.forEach((detection: any) => {
+          if (detection && detection.leaves && Array.isArray(detection.leaves)) {
+            detection.leaves.forEach((leaf: any) => {
+              if (leaf && leaf.class) {
+                const leafType = leaf.class;
+                leafCounts[leafType] = (leafCounts[leafType] || 0) + 1;
+              }
+            });
+          }
+        });
+        
+        console.log('ImpactService: Parsed detected leaves:', leafCounts);
+        return leafCounts;
+      }
       
-      return cleaned;
+      // Handle legacy object format: {"Onion Leaves": 1}
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+        const cleaned: Record<string, number> = {};
+        Object.entries(parsed).forEach(([key, value]) => {
+          const numValue = Number(value);
+          if (!isNaN(numValue) && numValue >= 0) {
+            cleaned[key] = numValue;
+          }
+        });
+        return cleaned;
+      }
+      
+      return {};
     } catch (error) {
       console.error('Error parsing detected leaves data:', error);
       return {};
