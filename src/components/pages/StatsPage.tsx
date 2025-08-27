@@ -234,14 +234,14 @@ export default function StatsPage() {
 
       {/* Data Controls */}
       <div className="glass rounded-2xl p-4">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
           <h3 className="text-lg font-semibold text-foreground">{t('stats.controls')}</h3>
           <button
             onClick={clearAllData}
-            className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors w-full sm:w-auto"
           >
             <RefreshCw className="w-4 h-4" />
-            {t('stats.resetAllData')}
+            <span className="whitespace-nowrap">{t('stats.resetAllData')}</span>
           </button>
         </div>
         <div className="text-xs text-muted-foreground">
@@ -250,7 +250,7 @@ export default function StatsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         {statCards.slice(0, 4).map((card, index) => (
           <div
             key={index}
@@ -275,7 +275,7 @@ export default function StatsPage() {
       </div>
 
       {/* Additional Stats Row */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {statCards.slice(4, 6).map((card, index) => (
           <div
             key={index + 4}
@@ -337,7 +337,7 @@ export default function StatsPage() {
           <TrendingUp className="w-5 h-5 text-primary" />
           <h3 className="text-lg font-semibold text-foreground">{t('stats.nutritionalInsights')}</h3>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {nutritionalInsights.map((insight, index) => (
             <div key={index} className="text-center">
               <p className={`text-2xl font-bold ${insight.color}`}>{insight.value}</p>
@@ -369,28 +369,28 @@ export default function StatsPage() {
           <h3 className="text-lg font-semibold text-foreground">{t('stats.recipeNutritionSummary')}</h3>
         </div>
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.summary.totalAntioxidantScore')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.summary.totalAntioxidantScore')}</span>
             <span className="font-medium text-foreground">Very High</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.summary.avgProteins')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.summary.avgProteins')}</span>
             <span className="font-medium text-foreground">{avgProteins.toFixed(1)}g {t('stats.insight.perRecipe')}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.summary.totalPolyphenols')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.summary.totalPolyphenols')}</span>
             <span className="font-medium text-foreground">{avgPolyphenols.toFixed(0)}mg {t('stats.insight.perRecipe')}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.summary.highAntioxidantRecipes')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.summary.highAntioxidantRecipes')}</span>
             <span className="font-medium text-foreground">{highAntioxidantRecipes}/{totalRecipes}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.summary.totalProteinsAll')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.summary.totalProteinsAll')}</span>
             <span className="font-medium text-foreground">{totalProteins.toFixed(1)}g</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.summary.totalPolyphenolsAll')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.summary.totalPolyphenolsAll')}</span>
             <span className="font-medium text-foreground">{totalPolyphenols.toFixed(0)}mg</span>
           </div>
         </div>
@@ -465,30 +465,30 @@ export default function StatsPage() {
       <div className="glass rounded-2xl p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">{t('stats.thisWeekSummary')}</h3>
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.week.mostActiveDay')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.week.mostActiveDay')}</span>
             <span className="font-medium text-foreground">Wednesday</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.week.favoriteLeafType')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.week.favoriteLeafType')}</span>
             <span className="font-medium text-foreground capitalize">
               {topLeaves[0]?.name || t('stats.week.noDataYet')}
             </span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.week.averageSessionTime')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.week.averageSessionTime')}</span>
             <span className="font-medium text-foreground">3m 24s</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.week.recipesAvailable')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.week.recipesAvailable')}</span>
             <span className="font-medium text-foreground">{totalRecipes}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.week.avgCookingTime')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.week.avgCookingTime')}</span>
             <span className="font-medium text-foreground">30 min</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('stats.week.totalLeafScans')}</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <span className="text-muted-foreground text-sm">{t('stats.week.totalLeafScans')}</span>
             <span className="font-medium text-foreground">{totalLeafCount}</span>
           </div>
         </div>
