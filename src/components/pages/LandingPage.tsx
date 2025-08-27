@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon, Sparkles, Heart, TrendingUp, CheckCircle, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useMultiParallax } from "@/hooks/useParallax";
+import { useVanillaTilt, useParallaxLetters } from "@/hooks/useVanillaTilt";
 import { useVisualEffects } from "@/contexts/VisualEffectsContext";
 import FloatingLeaves from "@/components/effects/FloatingLeaves";
 
@@ -16,6 +17,21 @@ interface LandingPageProps {
 export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves, onToggleTheme }: LandingPageProps) {
   const { t } = useI18n();
   const { settings, toggleParticles } = useVisualEffects();
+  
+  // Vanilla-tilt effect for the hero title container
+  const titleRef = useVanillaTilt<HTMLDivElement>({
+    max: 8,
+    speed: 300,
+    glare: true,
+    'max-glare': 0.1,
+    scale: 1.02,
+    perspective: 1000,
+    transition: true,
+    easing: 'cubic-bezier(.03,.98,.52,.99)'
+  });
+  
+  // Parallax letters effect for the title text
+  const lettersRef = useParallaxLetters('SafeLeafKitchen');
   
   // Parallax configuration for different layers - Extremely subtle for better UX and stability
   const parallaxOffsets = useMultiParallax([
@@ -155,87 +171,74 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           }`} />
         </button>
       </div>
-      {/* Enhanced Hero Section with Subtle Parallax */}
-      <div 
-        className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center mb-20 mt-8 relative z-10"
-        style={{ transform: `translateY(${parallaxOffsets[2]}px)` }}
-      >
-        <div className="order-2 lg:order-1 text-center lg:text-left">
-          {/* Badge with subtle floating effect */}
-          <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6 group cursor-default">
-            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-            <span className="text-sm font-medium text-foreground">{t('landing.hero.badge')}</span>
-          </div>
-          
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 tracking-tight leading-tight">
-            SafeLeaf<span className="text-primary bg-gradient-primary bg-clip-text text-transparent">Kitchen</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6 max-w-2xl">
-            {t('landing.tagline')}
-          </p>
-          
-          <div className="flex items-center gap-2 mb-8 justify-center lg:justify-start">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-              ))}
-            </div>
-            <span className="text-sm text-muted-foreground font-medium">{t('landing.hero.trusted')}</span>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center lg:justify-start">
-            <button
-              onClick={onNavigateToScan}
-              className="btn-organic px-8 py-4 text-lg font-semibold text-primary-foreground flex items-center gap-3 justify-center hover:scale-105 transition-all duration-300 shadow-glow group"
+      {/* Full-Width Hero Section with Vanilla-Tilt Title */}
+      <div className="w-full relative z-10 mt-16 sm:mt-20 mb-16">
+        {/* Hero Container with Green Gradient Background - Full Width */}
+        <div className="hero-container">
+          {/* Animated SafeLeafKitchen Title with Parallax Letters */}
+          <div className="text-center mb-8">
+            <div 
+              ref={titleRef}
+              className="hero-title text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] mb-6 inline-block"
             >
-              <Scan className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
-              {t('landing.scanNow')}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </button>
-            <button
-              onClick={onNavigateToChat}
-              className="px-8 py-4 rounded-2xl border border-border text-foreground glass hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center group"
-            >
-              <MessageCircle className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
-              {t('landing.askAssistant')}
-            </button>
+              <div ref={lettersRef} className="parallax-letters-container" />
+            </div>
           </div>
           
-          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground justify-center lg:justify-start">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-primary" />
-              <span>{t('landing.hero.leafSpecies')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-primary" />
-              <span>{t('landing.hero.scientificParams')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-primary" />
-              <span>{t('landing.hero.moroccanRecipes')}</span>
-            </div>
-          </div>
-        </div>
-        <div className="order-1 lg:order-2 flex justify-center relative">
-          <div className="relative group">
-            {/* Main leaf icon with subtle parallax */}
-            <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 bg-gradient-primary rounded-full flex items-center justify-center shadow-leaf animate-leaf-float group-hover:scale-110 transition-all duration-500">
-              <Leaf className="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 text-primary-foreground group-hover:rotate-12 transition-transform duration-500" />
-            </div>
-            
-            {/* Enhanced glow effect */}
-            <div className="absolute inset-0 bg-gradient-glow rounded-full opacity-60 animate-pulse-glow group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            {/* Floating mini icons with simple animations */}
-            <div className="absolute -top-4 -right-4 w-16 h-16 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '3s' }}>
-              <Scan className="w-8 h-8 text-primary" />
-            </div>
-            <div className="absolute -bottom-4 -left-4 w-16 h-16 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '1s' }}>
-              <ChefHat className="w-8 h-8 text-primary" />
-            </div>
-            <div className="absolute top-1/2 -left-8 w-14 h-14 glass rounded-2xl flex items-center justify-center animate-organic-bounce" style={{ animationDelay: '1.5s' }}>
-              <Heart className="w-6 h-6 text-primary" />
+          {/* Content Section with Enhanced Readability */}
+          <div className="hero-content">
+            <div className="max-w-4xl mx-auto text-center">
+              {/* Badge with subtle floating effect */}
+              <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6 group cursor-default">
+                <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                <span className="text-sm font-medium text-foreground">{t('landing.hero.badge')}</span>
+              </div>
+              
+              <p className="text-lg md:text-xl leading-relaxed mb-6 max-w-3xl mx-auto text-muted-foreground">
+                {t('landing.tagline')}
+              </p>
+              
+              <div className="flex items-center gap-2 mb-8 justify-center">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                  ))}
+                </div>
+                <span className="text-sm font-medium">{t('landing.hero.trusted')}</span>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center">
+                <button
+                  onClick={onNavigateToScan}
+                  className="btn-organic px-8 py-4 text-lg font-semibold text-primary-foreground flex items-center gap-3 justify-center hover:scale-105 transition-all duration-300 shadow-glow group"
+                >
+                  <Scan className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+                  {t('landing.scanNow')}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </button>
+                <button
+                  onClick={onNavigateToChat}
+                  className="px-8 py-4 rounded-2xl border border-border text-foreground glass hover:scale-105 transition-all duration-300 flex items-center gap-3 justify-center group"
+                >
+                  <MessageCircle className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+                  {t('landing.askAssistant')}
+                </button>
+              </div>
+              
+              <div className="flex flex-wrap gap-6 text-sm justify-center">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                  <span className="text-foreground">{t('landing.hero.leafSpecies')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                  <span className="text-foreground">{t('landing.hero.scientificParams')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                  <span className="text-foreground">{t('landing.hero.moroccanRecipes')}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

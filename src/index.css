@@ -17,6 +17,220 @@
   animation: wobble 450ms ease-in-out;
 }
 
+/* SafeLeafKitchen Animated Title */
+@keyframes title-glow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 20px hsl(142 76% 36% / 0.3));
+    transform: scale(1);
+  }
+  50% { 
+    filter: drop-shadow(0 0 40px hsl(142 76% 36% / 0.6));
+    transform: scale(1.02);
+  }
+}
+
+@keyframes title-float {
+  0%, 100% { transform: translateY(0px) rotateX(0deg); }
+  50% { transform: translateY(-8px) rotateX(2deg); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.hero-title {
+  background: linear-gradient(135deg, 
+    hsl(142 80% 25%) 0%,
+    hsl(120 75% 30%) 25%,
+    hsl(100 70% 35%) 50%,
+    hsl(120 75% 30%) 75%,
+    hsl(142 80% 25%) 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 8s ease-in-out infinite;
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  cursor: default;
+  user-select: none;
+  will-change: transform, filter;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.hero-title:hover {
+  animation: gradient-shift 4s ease-in-out infinite;
+  /* Removed filter effects to prevent blur */
+}
+
+/* Parallax letter effects */
+.parallax-letter {
+  display: inline-block;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.parallax-letters-container {
+  display: inline-block;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  cursor: default;
+  user-select: none;
+  will-change: transform;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.parallax-letters-container:hover {
+  /* Removed filter effects to prevent blur */
+}
+
+.hero-container {
+  background: linear-gradient(135deg, 
+    hsl(142 60% 15% / 0.95) 0%,
+    hsl(120 55% 20% / 0.9) 25%,
+    hsl(100 50% 25% / 0.85) 50%,
+    hsl(120 55% 20% / 0.9) 75%,
+    hsl(142 60% 15% / 0.95) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 12s ease-in-out infinite;
+  min-height: 100vh;
+  border-radius: 0;
+  padding: 6rem 2rem 4rem;
+  border: none;
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+}
+
+.hero-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, hsl(142 70% 40% / 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, hsl(120 65% 35% / 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-container > * {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Enhanced readability styles */
+.hero-content {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content .text-foreground {
+  color: rgba(255, 255, 255, 1) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode adjustments */
+.dark .hero-content {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .hero-content .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dark .hero-content .text-foreground {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .hero-container {
+    padding: 4rem 1rem 2rem;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    width: 100vw;
+  }
+  
+  .hero-title {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+  }
+  
+  .parallax-letters-container {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+  }
+  
+  .hero-content {
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  /* Disable hover effects on touch devices */
+  @media (hover: none) {
+    .hero-title:hover {
+      transform: none;
+      animation: gradient-shift 8s ease-in-out infinite;
+    }
+    
+    .parallax-letters-container:hover {
+      transform: none;
+      animation: gradient-shift 8s ease-in-out infinite;
+      filter: none;
+    }
+    
+    .parallax-letter {
+      transform: none !important;
+    }
+  }
+}
+
+/* Additional touch optimizations */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: clamp(2rem, 10vw, 3rem);
+    line-height: 1;
+  }
+  
+  .hero-container {
+    padding: 3rem 0.75rem 1.5rem;
+  }
+  
+  .hero-content {
+    padding: 1rem;
+  }
+}
+
 /* SafeLeafKitchen Design System - Dark Modern Theme */
 
 @layer base {
