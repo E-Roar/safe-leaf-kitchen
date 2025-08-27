@@ -15,6 +15,7 @@ export class RemoteErrorLogger {
   private static sessionId = this.generateSessionId();
   private static logs: RemoteLog[] = [];
   private static maxLogs = 100;
+  private static isLogging = false; // Prevent recursion
   
   static initialize() {
     // Override console methods
@@ -31,50 +32,68 @@ export class RemoteErrorLogger {
   }
 
   static log(level: 'error' | 'warn' | 'info' | 'debug', message: string, extra?: any) {
-    const remoteLog: RemoteLog = {
-      timestamp: new Date().toISOString(),
-      level,
-      message,
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      sessionId: this.sessionId,
-      extra
-    };
-
-    // Add to local storage for persistence
-    this.logs.push(remoteLog);
-    if (this.logs.length > this.maxLogs) {
-      this.logs = this.logs.slice(-this.maxLogs);
-    }
+    // Prevent infinite recursion
+    if (this.isLogging) return;
     
-    // Store in localStorage
     try {
-      localStorage.setItem('safeleaf_remote_logs', JSON.stringify(this.logs));
-    } catch (e) {
-      console.warn('Failed to store logs in localStorage');
-    }
+      this.isLogging = true;
+      
+      const remoteLog: RemoteLog = {
+        timestamp: new Date().toISOString(),
+        level,
+        message,
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        sessionId: this.sessionId,
+        extra
+      };
 
-    // Log to console with special formatting for easy identification
-    const prefix = `[SAFELEAF-${level.toUpperCase()}]`;
-    const formatted = `${prefix} ${message}`;
-    
-    switch (level) {
-      case 'error':
-        console.error(formatted, extra);
-        break;
-      case 'warn':
-        console.warn(formatted, extra);
-        break;
-      case 'info':
-        console.info(formatted, extra);
-        break;
-      case 'debug':
-        console.debug(formatted, extra);
-        break;
-    }
+      // Add to local storage for persistence
+      this.logs.push(remoteLog);
+      if (this.logs.length > this.maxLogs) {
+        this.logs = this.logs.slice(-this.maxLogs);
+      }
+      
+      // Store in localStorage with error handling
+      try {
+        localStorage.setItem('safeleaf_remote_logs', JSON.stringify(this.logs));
+      } catch (e) {
+        // Silently fail if localStorage is not available
+      }
 
-    // Try to send to remote endpoint if available
-    this.sendToRemote(remoteLog);
+      // Log to console with special formatting for easy identification
+      const prefix = `[SAFELEAF-${level.toUpperCase()}]`;
+      const formatted = `${prefix} ${message}`;
+      
+      // Use original console methods to avoid recursion
+      const originalMethods = (window as any)._originalConsole || {
+        error: console.error,
+        warn: console.warn,
+        info: console.info,
+        debug: console.debug
+      };
+      
+      switch (level) {
+        case 'error':
+          originalMethods.error(formatted, extra);
+          break;
+        case 'warn':
+          originalMethods.warn(formatted, extra);
+          break;
+        case 'info':
+          originalMethods.info(formatted, extra);
+          break;
+        case 'debug':
+          originalMethods.debug(formatted, extra);
+          break;
+      }
+
+      // Try to send to remote endpoint if available
+      this.sendToRemote(remoteLog);
+      
+    } finally {
+      this.isLogging = false;
+    }
   }
 
   static getLogs(): RemoteLog[] {
@@ -148,21 +167,53 @@ export class RemoteErrorLogger {
   }
 
   private static interceptConsole() {
+    // Store original console methods
     const originalError = console.error;
     const originalWarn = console.warn;
+    const originalInfo = console.info;
+    const originalDebug = console.debug;
+    
+    // Store them globally for access in log method
+    (window as any)._originalConsole = {
+      error: originalError,
+      warn: originalWarn,
+      info: originalInfo,
+      debug: originalDebug
+    };
+    
+    // Prevent infinite recursion by checking if we're already logging
+    let isLogging = false;
     
     console.error = (...args) => {
       originalError.apply(console, args);
-      this.log('error', args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-      ).join(' '));
+      if (!isLogging && args.length > 0 && !String(args[0]).includes('[SAFELEAF-ERROR]')) {
+        isLogging = true;
+        try {
+          this.log('error', args.map(arg => 
+            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+          ).join(' '));
+        } catch (e) {
+          // Silently fail to prevent recursion
+        } finally {
+          isLogging = false;
+        }
+      }
     };
     
     console.warn = (...args) => {
       originalWarn.apply(console, args);
-      this.log('warn', args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-      ).join(' '));
+      if (!isLogging && args.length > 0 && !String(args[0]).includes('[SAFELEAF-WARN]')) {
+        isLogging = true;
+        try {
+          this.log('warn', args.map(arg => 
+            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+          ).join(' '));
+        } catch (e) {
+          // Silently fail to prevent recursion
+        } finally {
+          isLogging = false;
+        }
+      }
     };
   }
 

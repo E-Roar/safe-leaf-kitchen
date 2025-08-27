@@ -295,7 +295,8 @@ export class APIService {
 
   static getDetectedLeaves(): Array<{ timestamp: number; leaves: DetectionResult[] }> {
     const key = this.getStorageKey('detected_leaves');
-    return this.getStorage(key) || [];
+    const result = this.getStorage(key) || [];
+    return Array.isArray(result) ? result : [];
   }
 
   // Recipe suggestions tracking

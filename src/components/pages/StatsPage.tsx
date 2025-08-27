@@ -84,63 +84,127 @@ export default function StatsPage() {
         console.log('Loading stats - Starting...');
         RemoteErrorLogger.log('debug', 'Stats loading started');
         
-        const detectedLeaves = APIService.getDetectedLeaves();
-        console.log('Detected leaves loaded:', detectedLeaves.length);
-        RemoteErrorLogger.log('debug', 'Detected leaves loaded', { count: detectedLeaves.length });
+        // Get detected leaves with proper error handling
+        let detectedLeaves: Array<{ timestamp: number; leaves: any[] }> = [];
+        try {
+          detectedLeaves = APIService.getDetectedLeaves() || [];
+          console.log('Detected leaves loaded:', detectedLeaves.length);
+          RemoteErrorLogger.log('debug', 'Detected leaves loaded', { count: detectedLeaves.length });
+        } catch (err) {
+          console.warn('Failed to load detected leaves:', err);
+          RemoteErrorLogger.log('warn', 'Failed to load detected leaves', err);
+          detectedLeaves = [];
+        }
         
-        const impactMetrics = ImpactService.getCumulativeImpact();
-        console.log('Impact metrics loaded:', impactMetrics);
-        RemoteErrorLogger.log('debug', 'Impact metrics loaded', impactMetrics);
+        // Get impact metrics with proper error handling
+        let impactMetrics: ImpactMetrics = {} as ImpactMetrics;
+        try {
+          impactMetrics = ImpactService.getCumulativeImpact() || {} as ImpactMetrics;
+          console.log('Impact metrics loaded:', impactMetrics);
+          RemoteErrorLogger.log('debug', 'Impact metrics loaded', impactMetrics);
+        } catch (err) {
+          console.warn('Failed to load impact metrics:', err);
+          RemoteErrorLogger.log('warn', 'Failed to load impact metrics', err);
+          impactMetrics = {} as ImpactMetrics;
+        }
       
-      // Convert detected leaves to the expected format
+      // Convert detected leaves to the expected format with error handling
       const detectedLeavesRecord: Record<string, number> = {};
-      detectedLeaves.forEach((detection, index) => {
-        detection.leaves.forEach(leaf => {
-          const leafType = leaf.class;
-          detectedLeavesRecord[leafType] = (detectedLeavesRecord[leafType] || 0) + 1;
+      if (Array.isArray(detectedLeaves)) {
+        detectedLeaves.forEach((detection, index) => {
+          if (detection && detection.leaves && Array.isArray(detection.leaves)) {
+            detection.leaves.forEach(leaf => {
+              if (leaf && leaf.class) {
+                const leafType = leaf.class;
+                detectedLeavesRecord[leafType] = (detectedLeavesRecord[leafType] || 0) + 1;
+              }
+            });
+          }
         });
-      });
+      }
+
+        // Get other stats with error handling
+        let totalScans = 0;
+        let totalChats = 0;
+        let recipeSuggestions = 0;
+        let savedConversations = 0;
+        
+        try {
+          totalScans = APIService.getScans() || 0;
+          totalChats = APIService.getChats() || 0;
+          recipeSuggestions = APIService.getRecipeSuggestions() || 0;
+          savedConversations = APIService.getConversationList()?.length || 0;
+        } catch (err) {
+          console.warn('Failed to load basic stats:', err);
+          RemoteErrorLogger.log('warn', 'Failed to load basic stats', err);
+        }
 
         setStats({
-          totalScans: APIService.getScans(),
-          totalChats: APIService.getChats(),
+          totalScans,
+          totalChats,
           detectedLeaves: detectedLeavesRecord,
-          recipeSuggestions: APIService.getRecipeSuggestions(),
-          savedConversations: APIService.getConversationList().length,
+          recipeSuggestions,
+          savedConversations,
           impactMetrics
         });
         console.log('Stats updated successfully');
         RemoteErrorLogger.log('debug', 'Stats updated successfully', {
-          totalScans: APIService.getScans(),
-          totalChats: APIService.getChats(),
+          totalScans,
+          totalChats,
           detectedLeavesCount: Object.keys(detectedLeavesRecord).length
         });
 
-        // Load analytics data for charts
+        // Load analytics data for charts with error handling
         console.log('Loading analytics data...');
-        const analyticsData = {
-          dailyScans: AnalyticsService.getScanTrend(14), // Last 14 days
-          dailyChats: AnalyticsService.getChatTrend(14),
-          weeklyStats: AnalyticsService.getWeeklyStatsRange(8), // Last 8 weeks
-          leafTrends: AnalyticsService.getLeafDetectionTrend(7) // Last 7 days
+        let analyticsData = {
+          dailyScans: [] as { date: string; value: number }[],
+          dailyChats: [] as { date: string; value: number }[],
+          weeklyStats: [] as any[],
+          leafTrends: [] as any[]
         };
-        console.log('Analytics data loaded:', analyticsData);
+        
+        try {
+          analyticsData = {
+            dailyScans: AnalyticsService.getScanTrend(14) || [], // Last 14 days
+            dailyChats: AnalyticsService.getChatTrend(14) || [],
+            weeklyStats: AnalyticsService.getWeeklyStatsRange(8) || [], // Last 8 weeks
+            leafTrends: AnalyticsService.getLeafDetectionTrend(7) || [] // Last 7 days
+          };
+          console.log('Analytics data loaded:', analyticsData);
+          RemoteErrorLogger.log('debug', 'Analytics data loaded', {
+            dailyScansCount: analyticsData.dailyScans.length,
+            dailyChatsCount: analyticsData.dailyChats.length,
+            weeklyStatsCount: analyticsData.weeklyStats.length,
+            leafTrendsCount: analyticsData.leafTrends.length
+          });
+        } catch (err) {
+          console.warn('Failed to load analytics data:', err);
+          RemoteErrorLogger.log('warn', 'Failed to load analytics data', err);
+        }
+        
         setAnalyticsData(analyticsData);
-        RemoteErrorLogger.log('debug', 'Analytics data loaded', {
-          dailyScansCount: analyticsData.dailyScans.length,
-          dailyChatsCount: analyticsData.dailyChats.length,
-          weeklyStatsCount: analyticsData.weeklyStats.length,
-          leafTrendsCount: analyticsData.leafTrends.length
-        });
 
-        // Debug information
-        setDebugInfo({
-          detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
-          impactCalculation: JSON.stringify(impactMetrics, null, 2),
-          storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
-          recipesReceived: APIService.getRecipeViews().length,
-          favoritesCount: APIService.getFavoriteRecipes().length
-        });
+        // Debug information with error handling
+        try {
+          const debugInfo = {
+            detectedLeavesRaw: JSON.stringify(detectedLeaves, null, 2),
+            impactCalculation: JSON.stringify(impactMetrics, null, 2),
+            storageKeys: Object.keys(localStorage).filter(key => key.includes('safeleaf')),
+            recipesReceived: APIService.getRecipeViews()?.length || 0,
+            favoritesCount: APIService.getFavoriteRecipes()?.length || 0
+          };
+          setDebugInfo(debugInfo);
+        } catch (err) {
+          console.warn('Failed to load debug info:', err);
+          RemoteErrorLogger.log('warn', 'Failed to load debug info', err);
+          setDebugInfo({
+            detectedLeavesRaw: '[]',
+            impactCalculation: '{}',
+            storageKeys: [],
+            recipesReceived: 0,
+            favoritesCount: 0
+          });
+        }
         console.log('Stats loading completed successfully');
         RemoteErrorLogger.log('info', 'Stats loading completed successfully');
       } catch (error) {
@@ -169,11 +233,11 @@ export default function StatsPage() {
     };
 
     loadStats();
-    // Refresh stats when component becomes visible
+    // Refresh stats when component becomes visible (reduced frequency)
     const interval = setInterval(() => {
       console.log('Refreshing stats...');
       loadStats();
-    }, 2000);
+    }, 10000); // Increased from 2000ms to 10000ms
     return () => clearInterval(interval);
   }, []);
 
