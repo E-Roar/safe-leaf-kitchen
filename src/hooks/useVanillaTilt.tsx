@@ -112,10 +112,12 @@ export const useParallaxLetters = (text: string) => {
       span.style.cssText = `
         display: inline-block;
         position: relative;
-        z-index: 100;
+        z-index: 1001;
         transform-style: preserve-3d;
         transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         will-change: transform;
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
       `;
       return span;
     });

@@ -88,7 +88,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       type: "onsite"
     },
     {
-      name: "Reda El Bakrauy",
+      name: "Reda El Bakraouy",
       role: "Lead Developer",
       specialty: "Tech Stack Architect",
       type: "onsite"
