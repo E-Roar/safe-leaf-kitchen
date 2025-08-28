@@ -1761,7 +1761,7 @@ Examples:
     <div className="h-screen flex flex-col">
       {/* Header */}
       <div className="glass border-b border-border p-3 sm:p-4 flex items-center justify-between sticky top-0 z-20 bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <button
             onClick={() => setShowConversations(!showConversations)}
             className="p-2 rounded-lg bg-secondary/20 text-secondary hover:bg-secondary/30 transition-all duration-300"
@@ -1769,11 +1769,11 @@ Examples:
           >
             <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
-          <h2 className="text-base sm:text-lg font-semibold text-foreground">
+          <h2 className="text-sm sm:text-base md:text-lg font-semibold text-foreground whitespace-nowrap">
             SafeLeaf Assistant
           </h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={startNewConversation}
             className="p-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-all duration-300"
