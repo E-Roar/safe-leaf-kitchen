@@ -25,6 +25,10 @@ export interface RoboflowResponse {
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
+  suggestedRecipe?: string;
+  suggestedLeafId?: number;
+  suggestedLeafName?: string;
+  suggestedLeaves?: { id: number; name: string }[];
 }
 
 export interface ConversationData {
@@ -212,6 +216,51 @@ export class APIService {
     }
   }
 
+  // Text-to-speech methods
+  static speak(text: string, force: boolean = false, onStart?: () => void, onEnd?: () => void): void {
+    if (this.isMuted && !force) {
+      return;
+    }
+
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 0.8;
+
+      utterance.onstart = () => {
+        logger.debug('TTS: Speech started');
+        onStart?.();
+      };
+
+      utterance.onend = () => {
+        logger.debug('TTS: Speech ended');
+        onEnd?.();
+      };
+
+      utterance.onerror = (event) => {
+        logger.error('TTS: Speech synthesis error:', event.error);
+        onEnd?.();
+      };
+
+      speechSynthesis.speak(utterance);
+    } else {
+      logger.warn('TTS: Speech synthesis not supported in this browser');
+      onEnd?.();
+    }
+  }
+
+  static stopSpeech(): void {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      logger.debug('TTS: Speech synthesis cancelled');
+    }
+  }
+
   // Speech recognition
   static startSpeechRecognition(onResult: (text: string) => void, onError: (error: string) => void): () => void {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -367,14 +416,17 @@ export class APIService {
 
   // Conversation management
   static saveConversation(conversationId: string, messages: ChatMessage[]): boolean {
-    const key = this.getStorageKey('conversation');
+    const key = this.getStorageKey(`conversation_${conversationId}`);
     const conversationData = {
       id: conversationId,
       messages: messages,
       timestamp: Date.now()
     };
     
+    console.log('Saving conversation with key:', key, 'messages:', messages.length);
+    
     if (!this.setStorage(key, conversationData)) {
+      console.error('Failed to save conversation data');
       return false;
     }
 
@@ -404,9 +456,12 @@ export class APIService {
   }
 
   static loadConversation(conversationId: string): ChatMessage[] | null {
-    const key = this.getStorageKey('conversation');
+    const key = this.getStorageKey(`conversation_${conversationId}`);
+    console.log('Loading conversation with key:', key);
     const conversationData = this.getStorage<{ messages: ChatMessage[] }>(key);
-    return conversationData?.messages || null;
+    const result = conversationData?.messages || null;
+    console.log('Loaded messages:', result?.length || 0);
+    return result;
   }
 
   static getConversationList(): ConversationData[] {
@@ -439,7 +494,7 @@ export class APIService {
   }
 
   static deleteConversation(conversationId: string): boolean {
-    const key = this.getStorageKey('conversation');
+    const key = this.getStorageKey(`conversation_${conversationId}`);
     if (!this.removeStorage(key)) {
       return false;
     }

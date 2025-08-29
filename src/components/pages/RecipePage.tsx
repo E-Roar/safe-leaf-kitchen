@@ -5,6 +5,7 @@ import { recipes, Recipe } from "@/data/recipes";
 import { APIService } from "@/services/apiService";
 import { ImpactService } from "@/services/impactService";
 import { cn } from "@/lib/utils";
+import { MasonryGallery } from "@/components/ui/MasonryGallery";
 
 type Language = 'en' | 'fr' | 'ar';
 
@@ -346,8 +347,8 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
               <div className="max-w-4xl mx-auto">
                 {expandedRecipe === selectedRecipe.id ? (
                   <div className="space-y-6">
-                    {/* Recipe Image */}
-                    <div className="aspect-video rounded-3xl overflow-hidden bg-gradient-organic">
+                    {/* Recipe Image - Square aspect ratio */}
+                    <div className="aspect-square rounded-3xl overflow-hidden bg-gradient-organic max-w-md mx-auto">
                       <img
                         src={getRecipeImage(selectedRecipe.title.en)}
                         alt={selectedRecipe.title.en}
@@ -527,6 +528,15 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
                               {favorites.includes(selectedRecipe.id) ? t('recipes.favorited') : t('recipes.addToFavorites')}
                             </span>
                           </button>
+                        </div>
+                        
+                        {/* Recipe Gallery - Pinterest-style Masonry */}
+                        <div className="mt-8">
+                          <MasonryGallery 
+                            recipeId={selectedRecipe.id}
+                            recipeTitle={selectedRecipe.title.en}
+                            className=""
+                          />
                         </div>
                       </div>
                     </div>

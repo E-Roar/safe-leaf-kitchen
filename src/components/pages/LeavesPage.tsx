@@ -3,6 +3,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { X, Menu, Leaf, Search, Star } from "lucide-react";
 import { leaves, LeafInfo } from "@/data/leaves";
 import { cn } from "@/lib/utils";
+import { LeafGallery } from "@/components/ui/LeafGallery";
 import nutritionRaw from "../../../tableau_nutritionnel 9 feuilles.json";
 import bioactivesRaw from "../../../tableau_composes_bioactifs 9 feuilles.json";
 import bioActivitiesRaw from "../../../vertopal.com_Activités biologiques et molécules bioactives présentes dans les feuilles d.json";
@@ -496,6 +497,15 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                   <p className="text-sm text-muted-foreground">{selectedLeaf.safety}</p>
                 </div>
               )}
+              
+              {/* Leaf Gallery - Pinterest-style Masonry */}
+              <div className="mt-8">
+                <LeafGallery 
+                  leafId={selectedLeaf.id}
+                  leafName={selectedLeaf.name.en}
+                  className=""
+                />
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">

@@ -118,6 +118,9 @@ export const useParallaxLetters = (text: string) => {
         will-change: transform;
         color: white !important;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        direction: ltr;
+        unicode-bidi: bidi-override;
+        white-space: nowrap;
       `;
       return span;
     });

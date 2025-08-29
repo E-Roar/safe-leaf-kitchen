@@ -179,7 +179,8 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <div className="text-center mb-8">
             <div 
               ref={titleRef}
-              className="hero-title text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] mb-6 inline-block"
+              className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 inline-block whitespace-nowrap"
+              style={{ direction: 'ltr', unicodeBidi: 'bidi-override' }}
             >
               <div ref={lettersRef} className="parallax-letters-container" />
             </div>
@@ -237,6 +238,71 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-primary" />
                   <span className="text-foreground">{t('landing.hero.moroccanRecipes')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Video Tutorial Section */}
+      <div 
+        className="w-full max-w-4xl mb-20"
+        style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
+      >
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.video.title')}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.video.subtitle')}</p>
+        </div>
+        
+        <div className="glass rounded-3xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-500 group">
+          <div className="aspect-video bg-gradient-to-br from-muted/20 to-muted/40 flex items-center justify-center relative">
+            <video 
+              className="w-full h-full object-cover"
+              controls
+              poster="/images/video-thumbnail.png"
+              preload="metadata"
+            >
+              <source src="/videos/safeleafkitchen-tutorial.mp4" type="video/mp4" />
+              <div className="absolute inset-0 flex items-center justify-center text-center p-8">
+                <div>
+                  <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+                    <div className="w-0 h-0 border-l-[12px] border-l-primary border-y-[8px] border-y-transparent ml-1" />
+                  </div>
+                  <p className="text-foreground font-medium mb-2">Video not supported in your browser</p>
+                  <p className="text-sm text-muted-foreground">Please use a modern browser to view the tutorial</p>
+                </div>
+              </div>
+            </video>
+            
+            {/* Video overlay for better visual integration */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          </div>
+          
+          {/* Video description */}
+          <div className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center flex-shrink-0">
+                <div className="w-0 h-0 border-l-[8px] border-l-primary-foreground border-y-[6px] border-y-transparent ml-0.5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.video.watchTitle')}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  {t('landing.video.description')}
+                </p>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                    <span className="text-foreground">{t('landing.video.features.scanning')}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                    <span className="text-foreground">{t('landing.video.features.chat')}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                    <span className="text-foreground">{t('landing.video.features.recipes')}</span>
+                  </div>
                 </div>
               </div>
             </div>

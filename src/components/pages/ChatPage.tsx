@@ -78,11 +78,16 @@ export default function ChatPage() {
     const loadConversations = () => {
       const conversationList = APIService.getConversationList();
       setConversations(conversationList);
+      console.log('Available conversations:', conversationList.length);
       
       // Try to restore the last active conversation
       const lastConversationId = APIService.getCurrentConversation();
+      console.log('Last conversation ID:', lastConversationId);
+      
       if (lastConversationId && conversationList.find(c => c.id === lastConversationId)) {
         const savedMessages = APIService.loadConversation(lastConversationId);
+        console.log('Loaded saved messages for conversation:', lastConversationId, savedMessages?.length || 0);
+        
         if (savedMessages) {
           // Convert ChatMessage[] to Message[]
           const convertedMessages: Message[] = savedMessages.map((msg, index) => ({
@@ -90,10 +95,10 @@ export default function ChatPage() {
             type: msg.role === 'user' ? 'user' : 'bot',
             content: msg.content,
             timestamp: new Date(),
-            suggestedRecipe: undefined,
-            suggestedLeafId: undefined,
-            suggestedLeafName: undefined,
-            suggestedLeaves: undefined
+            suggestedRecipe: msg.suggestedRecipe,
+            suggestedLeafId: msg.suggestedLeafId,
+            suggestedLeafName: msg.suggestedLeafName,
+            suggestedLeaves: msg.suggestedLeaves
           }));
           setMessages(convertedMessages);
           setCurrentConversationId(lastConversationId);
@@ -107,6 +112,7 @@ export default function ChatPage() {
       if (!currentConversationId && conversationList.length > 0) {
         const mostRecentConversation = conversationList[0];
         const savedMessages = APIService.loadConversation(mostRecentConversation.id);
+        
         if (savedMessages) {
           // Convert ChatMessage[] to Message[]
           const convertedMessages: Message[] = savedMessages.map((msg, index) => ({
@@ -114,10 +120,10 @@ export default function ChatPage() {
             type: msg.role === 'user' ? 'user' : 'bot',
             content: msg.content,
             timestamp: new Date(),
-            suggestedRecipe: undefined,
-            suggestedLeafId: undefined,
-            suggestedLeafName: undefined,
-            suggestedLeaves: undefined
+            suggestedRecipe: msg.suggestedRecipe,
+            suggestedLeafId: msg.suggestedLeafId,
+            suggestedLeafName: msg.suggestedLeafName,
+            suggestedLeaves: msg.suggestedLeaves
           }));
           setMessages(convertedMessages);
           setCurrentConversationId(mostRecentConversation.id);
@@ -130,6 +136,7 @@ export default function ChatPage() {
       
       // If no conversations exist, start a new one
       if (conversationList.length === 0) {
+        console.log('No conversations found, starting new one');
         startNewConversation();
       }
     };
@@ -159,12 +166,19 @@ export default function ChatPage() {
   // Save conversation when messages change
   useEffect(() => {
     if (currentConversationId && messages.length > 0) {
-      // Convert Message[] to ChatMessage[]
+      // Convert Message[] to ChatMessage[] with all interactive data
       const chatMessages: ChatMessage[] = messages.map(msg => ({
         role: msg.type === 'user' ? 'user' : 'assistant',
-        content: msg.content
+        content: msg.content,
+        suggestedRecipe: msg.suggestedRecipe,
+        suggestedLeafId: msg.suggestedLeafId,
+        suggestedLeafName: msg.suggestedLeafName,
+        suggestedLeaves: msg.suggestedLeaves
       }));
-      APIService.saveConversation(currentConversationId, chatMessages);
+      console.log('Saving conversation:', currentConversationId, 'with', chatMessages.length, 'messages');
+      const saveResult = APIService.saveConversation(currentConversationId, chatMessages);
+      console.log('Save result:', saveResult);
+      
       // Refresh conversation list
       const conversationList = APIService.getConversationList();
       setConversations(conversationList);
@@ -208,10 +222,10 @@ What would you like to know today?`,
         type: msg.role === 'user' ? 'user' : 'bot',
         content: msg.content,
         timestamp: new Date(),
-        suggestedRecipe: undefined,
-        suggestedLeafId: undefined,
-        suggestedLeafName: undefined,
-        suggestedLeaves: undefined
+        suggestedRecipe: msg.suggestedRecipe,
+        suggestedLeafId: msg.suggestedLeafId,
+        suggestedLeafName: msg.suggestedLeafName,
+        suggestedLeaves: msg.suggestedLeaves
       }));
       setMessages(convertedMessages);
       setCurrentConversationId(conversationId);
