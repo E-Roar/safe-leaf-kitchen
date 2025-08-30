@@ -111,6 +111,8 @@ export function ImageLightbox({
 
   // Touch gestures for mobile
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
+  const [swipeStartX, setSwipeStartX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   const getTouchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
@@ -126,6 +128,11 @@ export function ImageLightbox({
     if (e.touches.length === 2) {
       setLastTouchDistance(getTouchDistance(e.touches));
     } else if (e.touches.length === 1) {
+      // For swipe navigation
+      setSwipeStartX(e.touches[0].clientX);
+      setIsSwiping(true);
+      
+      // For pan
       setIsDragging(true);
       const touch = e.touches[0];
       setDragStart({ x: touch.clientX, y: touch.clientY });
@@ -144,6 +151,20 @@ export function ImageLightbox({
         setZoom(prev => Math.min(Math.max(prev * scale, 1), 5));
       }
       setLastTouchDistance(currentDistance);
+    } else if (e.touches.length === 1 && isSwiping && Math.abs(e.touches[0].clientX - swipeStartX) > 30) {
+      // Horizontal swipe for navigation (only if not zoomed)
+      if (zoom <= 1) {
+        const deltaX = e.touches[0].clientX - swipeStartX;
+        if (deltaX > 50 && currentIndex > 0) {
+          // Swipe right - go to previous image
+          onNavigate(currentIndex - 1);
+          setIsSwiping(false);
+        } else if (deltaX < -50 && currentIndex < images.length - 1) {
+          // Swipe left - go to next image
+          onNavigate(currentIndex + 1);
+          setIsSwiping(false);
+        }
+      }
     } else if (e.touches.length === 1 && isDragging) {
       // Pan
       const touch = e.touches[0];
@@ -158,6 +179,7 @@ export function ImageLightbox({
 
   const handleTouchEnd = () => {
     setIsDragging(false);
+    setIsSwiping(false);
     setLastTouchDistance(0);
   };
 
@@ -191,7 +213,7 @@ export function ImageLightbox({
     <div 
       className={cn(
         "fixed inset-0 z-50 bg-black/20 backdrop-blur-md",
-        "flex items-center justify-center",
+        "flex flex-col items-center justify-center",
         className
       )}
       onClick={(e) => {
@@ -233,65 +255,84 @@ export function ImageLightbox({
         </div>
       </div>
 
-      {/* Navigation arrows */}
-      {images.length > 1 && (
-        <>
-          {currentIndex > 0 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-60 text-white hover:bg-white/20 h-12 w-12"
-              onClick={() => onNavigate(currentIndex - 1)}
-            >
-              <ChevronLeft className="h-8 w-8" />
-            </Button>
-          )}
-          
-          {currentIndex < images.length - 1 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-60 text-white hover:bg-white/20 h-12 w-12"
-              onClick={() => onNavigate(currentIndex + 1)}
-            >
-              <ChevronRight className="h-8 w-8" />
-            </Button>
-          )}
-        </>
-      )}
-
       {/* Image counter */}
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-60 px-4 py-2 rounded-full bg-black/50 text-white text-sm">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-60 px-4 py-2 rounded-full bg-black/50 text-white text-sm">
           {currentIndex + 1} / {images.length}
         </div>
       )}
 
-      {/* Main image container */}
-      <div 
-        className="relative flex items-center justify-center w-[90vw] sm:w-[80vw] lg:w-[70vw] h-[80vh] sm:h-[75vh] lg:h-[80vh] p-4 sm:p-6 lg:p-8 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 shadow-2xl"
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
-      >
-        <img
-          src={currentImage.src}
-          alt={currentImage.alt}
-          className="max-w-full max-h-full object-contain transition-transform duration-200 ease-out select-none rounded-xl"
-          style={{
-            transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-            transformOrigin: 'center center'
-          }}
-          draggable={false}
-          loading="eager"
-          crossOrigin="anonymous"
-        />
+      {/* Main content container */}
+      <div className="flex flex-col items-center">
+        {/* Main image container */}
+        <div 
+          className="relative flex items-center justify-center w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] h-[70vh] sm:h-[65vh] md:h-[60vh] lg:h-[65vh] p-2 sm:p-4 md:p-6 lg:p-8 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 shadow-2xl mb-4"
+          onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+        >
+          <img
+            src={currentImage.src}
+            alt={currentImage.alt}
+            className="max-w-full max-h-full object-contain transition-transform duration-200 ease-out select-none rounded-xl"
+            style={{
+              transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+              transformOrigin: 'center center',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto'
+            }}
+            draggable={false}
+            loading="eager"
+            crossOrigin="anonymous"
+          />
+        </div>
+
+        {/* Navigation controls below image for mobile */}
+        {images.length > 1 && (
+          <div className="flex items-center justify-center gap-8 w-full px-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20 h-12 w-12"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (currentIndex > 0) {
+                  onNavigate(currentIndex - 1);
+                }
+              }}
+              disabled={currentIndex === 0}
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </Button>
+            
+            <div className="px-4 py-2 rounded-full bg-black/50 text-white text-sm">
+              {currentIndex + 1} / {images.length}
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20 h-12 w-12"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (currentIndex < images.length - 1) {
+                  onNavigate(currentIndex + 1);
+                }
+              }}
+              disabled={currentIndex === images.length - 1}
+            >
+              <ChevronRight className="h-8 w-8" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Instructions - removed for cleaner interface */}
