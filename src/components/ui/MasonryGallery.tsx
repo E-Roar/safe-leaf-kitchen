@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Image as ImageIcon } from "lucide-react";
+import { ImageLightbox } from "./ImageLightbox";
 
 interface MasonryGalleryProps {
   recipeId: number;
@@ -13,6 +14,7 @@ interface GalleryImage {
   alt: string;
   aspectRatio?: number; // Make aspect ratio optional
   loaded: boolean;
+  failed?: boolean; // Add failed state
   naturalWidth?: number;
   naturalHeight?: number;
 }
@@ -20,6 +22,8 @@ interface GalleryImage {
 export function MasonryGallery({ recipeId, recipeTitle, className }: MasonryGalleryProps) {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Generate gallery images based on recipe
   useEffect(() => {
@@ -32,71 +36,136 @@ export function MasonryGallery({ recipeId, recipeTitle, className }: MasonryGall
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, '-');
       
-      // Common image variations - don't force aspect ratios, let images load naturally
+      // Limit to exactly 5 most common recipe image patterns
       const imageVariations = [
-        { name: 'ingredients' },
-        { name: 'preparation' },
-        { name: 'cooking' },
-        { name: 'final' },
-        { name: 'served' },
-        { name: 'detail' },
-        { name: 'close-up' },
-        { name: 'plating' },
+        { name: '1' },
+        { name: '2' },
+        { name: '3' },
+        { name: '4' },
+        { name: '5' }
       ];
       
-      // Create gallery images array with multiple formats
+      // Create gallery images array with exactly 5 images
       const galleryImages: GalleryImage[] = [];
       
-      // Try common image variations with PNG format only
-      imageVariations.forEach(variation => {
+      // Try numbered image variations with PNG format only
+      imageVariations.forEach((variation, index) => {
         galleryImages.push({
           src: `/images/recipes/${folderName}/${variation.name}.png`,
-          alt: `${recipeTitle} - ${variation.name}`,
+          alt: `${recipeTitle} - Image ${index + 1}`,
           loaded: false,
         });
       });
       
-      // Add some additional gallery images
-      for (let i = 1; i <= 8; i++) {
-        galleryImages.push({
-          src: `/images/recipes/${folderName}/gallery-${i}.png`,
-          alt: `${recipeTitle} - Gallery ${i}`,
-          loaded: false,
-        });
-      }
-      
       setImages(galleryImages);
       
-      // Simulate loading delay for better UX
-      setTimeout(() => setIsLoading(false), 300);
+      // Add a fallback timeout in case some images never trigger events
+      setTimeout(() => {
+        console.log('⏰ Recipe fallback timeout triggered - forcing loading complete');
+        setIsLoading(false);
+      }, 3000);
     };
 
     generateGalleryImages();
   }, [recipeId, recipeTitle]);
 
+  // Start loading images as soon as they're available
+  useEffect(() => {
+    if (images.length > 0) {
+      console.log(`🔄 Starting to load ${images.length} recipe images`);
+      // The actual loading happens in the render when images are created
+    }
+  }, [images]);
+
   const handleImageLoad = (index: number, event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
     const aspectRatio = img.naturalWidth / img.naturalHeight;
     
-    setImages(prev => prev.map((image, i) => 
-      i === index ? { 
-        ...image, 
-        loaded: true, 
-        aspectRatio,
-        naturalWidth: img.naturalWidth,
-        naturalHeight: img.naturalHeight 
-      } : image
-    ));
+    setImages(prev => {
+      const newImages = prev.map((image, i) => 
+        i === index ? { 
+          ...image, 
+          loaded: true, 
+          aspectRatio,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight 
+        } : image
+      );
+      
+      // Check if all images have been attempted (loaded or failed)
+      const allAttempted = newImages.every(img => img.loaded || img.failed);
+      if (allAttempted) {
+        setIsLoading(false);
+      }
+      
+      return newImages;
+    });
+    
+    console.log(`✅ Recipe image loaded successfully: ${img.src}`);
   };
 
-  const handleImageError = (index: number) => {
-    // Remove failed images from the gallery
-    setImages(prev => prev.filter((_, i) => i !== index));
+  const handleImageError = (index: number, src: string) => {
+    console.log(`❌ Recipe image failed to load: ${src}`);
+    
+    setImages(prev => {
+      const newImages = prev.map((image, i) => 
+        i === index ? { ...image, failed: true } : image
+      );
+      
+      // Check if all images have been attempted (loaded or failed)
+      const allAttempted = newImages.every(img => img.loaded || img.failed);
+      if (allAttempted) {
+        setIsLoading(false);
+      }
+      
+      return newImages;
+    });
   };
 
-  if (isLoading) {
+  const handleImageClick = (imageIndex: number) => {
+    setLightboxIndex(imageIndex);
+    setLightboxOpen(true);
+  };
+
+  const handleLightboxNavigate = (newIndex: number) => {
+    setLightboxIndex(newIndex);
+  };
+
+  const handleLightboxClose = () => {
+    setLightboxOpen(false);
+  };
+
+  // Filter out only loaded images for display (exclude failed ones)
+  const loadedImages = images.filter(img => img.loaded && !img.failed);
+  const hasAttemptedLoading = images.some(img => img.loaded || img.failed);
+
+  // Temporary debug logging
+  console.log('Recipe Gallery state:', { 
+    totalImages: images.length, 
+    loadedImages: loadedImages.length, 
+    hasAttemptedLoading,
+    isLoading 
+  });
+
+  if (isLoading || (images.length > 0 && loadedImages.length === 0 && !hasAttemptedLoading)) {
     return (
       <div className={cn("w-full", className)}>
+        {/* Hidden loading images - always present to trigger loading */}
+        <div className="absolute left-[-9999px] top-0 opacity-0 pointer-events-none">
+          {images.map((image, index) => (
+            <img
+              key={image.src}
+              src={image.src}
+              alt={image.alt}
+              className="w-4 h-4"
+              onLoad={(e) => handleImageLoad(index, e)}
+              onError={() => handleImageError(index, image.src)}
+              loading="eager"
+              crossOrigin="anonymous"
+            />
+          ))}
+        </div>
+        
         <div className="flex items-center gap-2 mb-4">
           <ImageIcon className="w-5 h-5 text-primary" />
           <h4 className="font-semibold text-foreground">Recipe Gallery</h4>
@@ -112,19 +181,29 @@ export function MasonryGallery({ recipeId, recipeTitle, className }: MasonryGall
     );
   }
 
-  if (images.length === 0) {
-    return null;
-  }
-
-  // Filter out only loaded images for display
-  const loadedImages = images.filter(img => img.loaded);
-
   if (loadedImages.length === 0) {
+    // Don't show anything if no images loaded - this is normal
     return null;
   }
 
   return (
     <div className={cn("w-full", className)}>
+      {/* Hidden loading images - always present to trigger loading */}
+      <div className="absolute left-[-9999px] top-0 opacity-0 pointer-events-none">
+        {images.map((image, index) => (
+          <img
+            key={image.src}
+            src={image.src}
+            alt={image.alt}
+            className="w-4 h-4"
+            onLoad={(e) => handleImageLoad(index, e)}
+            onError={() => handleImageError(index, image.src)}
+            loading="eager"
+            crossOrigin="anonymous"
+          />
+        ))}
+      </div>
+      
       <div className="flex items-center gap-2 mb-4">
         <ImageIcon className="w-5 h-5 text-primary" />
         <h4 className="font-semibold text-foreground">Recipe Gallery</h4>
@@ -132,43 +211,40 @@ export function MasonryGallery({ recipeId, recipeTitle, className }: MasonryGall
       </div>
       
       {/* Horizontal Responsive Masonry Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         {loadedImages.map((image, index) => (
           <div
             key={image.src}
             className="group cursor-pointer"
+            onClick={() => handleImageClick(index)}
           >
             <div 
-              className="relative overflow-hidden rounded-lg bg-muted/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] w-full"
-              style={{ aspectRatio: image.aspectRatio || 1 }}
+              className="relative overflow-hidden rounded-xl bg-muted/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] w-full min-h-[120px]"
+              style={{ aspectRatio: image.aspectRatio && image.aspectRatio > 0.5 && image.aspectRatio < 2 ? image.aspectRatio : 1 }}
             >
-              {/* Remove loading placeholder since we only show loaded images */}
-              
               <img
                 src={image.src}
                 alt={image.alt}
-                className={cn(
-                  "w-full h-full object-cover transition-all duration-300",
-                  "group-hover:scale-105"
-                )}
-                onLoad={(e) => handleImageLoad(index, e)}
-                onError={() => handleImageError(index)}
+                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 rounded-xl gallery-image"
                 loading="lazy"
+                crossOrigin="anonymous"
               />
               
               {/* Overlay on hover */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              
-              {/* Image info overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p className="text-white text-sm font-medium truncate">
-                  {image.alt}
-                </p>
-              </div>
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Lightbox */}
+      <ImageLightbox
+        images={loadedImages}
+        currentIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={handleLightboxClose}
+        onNavigate={handleLightboxNavigate}
+      />
       
       {/* Gallery Footer */}
       <div className="mt-6 p-4 glass rounded-xl text-center">

@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats" | "recipes" | "leaves">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats" | "recipes" | "leaves" | "settings">("home");
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
   const [selectedLeafId, setSelectedLeafId] = useState<number | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -62,6 +62,10 @@ const App = () => {
 
   const handleNavigateToLeaves = useCallback(() => {
     setActiveTab("leaves");
+  }, []);
+
+  const handleNavigateToSettings = useCallback(() => {
+    setActiveTab("settings");
   }, []);
 
   const handleNavigateToScan = useCallback(() => {
@@ -139,6 +143,8 @@ const App = () => {
         return <RecipePage selectedRecipeId={selectedRecipeId} />;
       case "leaves":
         return <LeavesPage selectedLeafId={selectedLeafId} />;
+      case "settings":
+        return <div></div>; // Settings are now handled in the password-protected AppLayout
       default:
         return (
           <LandingPage

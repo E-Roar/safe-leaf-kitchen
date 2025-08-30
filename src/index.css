@@ -3,6 +3,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Image optimization and caching */
+img {
+  image-rendering: auto;
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Ensure images are cached */
+img[src] {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Gallery image optimization */
+.gallery-image {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}
+
 @keyframes wobble {
   0% { transform: rotate(0deg) scale(1); }
   15% { transform: rotate(-8deg) scale(1.04); }
@@ -20,11 +39,11 @@
 /* SafeLeafKitchen Animated Title */
 @keyframes title-glow {
   0%, 100% { 
-    filter: drop-shadow(0 0 20px hsl(142 76% 36% / 0.3));
+    filter: drop-shadow(0 0 20px hsla(271, 76%, 36%, 0.3));
     transform: scale(1);
   }
   50% { 
-    filter: drop-shadow(0 0 40px hsl(142 76% 36% / 0.6));
+    filter: drop-shadow(0 0 40px hsla(313, 76%, 36%, 0.6));
     transform: scale(1.02);
   }
 }
@@ -307,6 +326,15 @@
   display: block;
 }
 
+/* Lightbox glass effect styles */
+.lightbox-glass {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
 @layer base {
   :root {
     /* Light mode derived from reference palette (soft greens, white cards) */
@@ -321,10 +349,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 150 20% 15%;
 
-    /* Primary - leafy green */
+    /* Primary - leafy green 
+        --primary-glow: 142 50% 45%;
+
+    */
     --primary: 142 45% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 142 50% 45%;
+    --primary-glow: 142 10% 35%;
 
     /* Secondary - soft sage */
     --secondary: 140 25% 90%;
@@ -354,15 +385,16 @@
     --gradient-primary: linear-gradient(135deg, hsl(142 45% 35%), hsl(120 40% 45%));
     --gradient-hero: linear-gradient(135deg, hsl(150 40% 98%), hsl(150 35% 96%), hsl(150 30% 94%));
     --gradient-organic: linear-gradient(180deg, hsl(150 30% 98%), hsl(150 28% 96%));
-    --gradient-glow: radial-gradient(circle, hsl(142 45% 35% / 0.2), transparent 70%);
+    --gradient-glow: radial-gradient(circle, hsla(323, 96%, 50%, 0.2), transparent 70%);
     
-    /* Shadows with nature depth */
+    /* Shadows with nature depth 
+        --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.4);
+*/
     --shadow-organic: 0 10px 30px -10px hsl(160 25% 5% / 0.5);
-    --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.4);
     --shadow-leaf: 0 20px 50px -15px hsl(160 25% 5% / 0.6);
     
     /* Glass effects - Light mode glass */
-    --glass-bg: hsl(0 0% 100% / 0.75);
+    --glass-bg: hsl(0 0% 100% / 0.5);
     --glass-border: hsl(150 15% 86% / 0.8);
     
     /* Animations */
@@ -392,7 +424,7 @@
 
     --primary: 142 76% 36%;
     --primary-foreground: 160 15% 8%;
-    --primary-glow: 142 90% 45%;
+    --primary-glow: 142 45% 11%;
 
     --secondary: 160 25% 18%;
     --secondary-foreground: 160 15% 85%;
@@ -583,5 +615,264 @@
   .input-organic:focus {
     border-color: hsl(var(--primary));
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+  }
+}
+
+/* ==================================================
+   DYNAMIC NEON GLOW SYSTEM
+   ================================================== */
+
+/* Neon glow color palette - Vibrant two-color combinations */
+:root {
+  /* Primary glow combinations */
+  --neon-primary-outer: 142 90% 45%;
+  --neon-primary-inner: 120 85% 55%;
+  
+  /* Accent glow combinations */
+  --neon-accent-outer: 280 95% 70%;
+  --neon-accent-inner: 320 90% 80%;
+  
+  /* Secondary glow combinations */
+  --neon-secondary-outer: 200 95% 65%;
+  --neon-secondary-inner: 180 90% 75%;
+  
+  /* Warning glow combinations */
+  --neon-warning-outer: 45 100% 65%;
+  --neon-warning-inner: 25 95% 75%;
+  
+  /* Error glow combinations */
+  --neon-error-outer: 0 95% 65%;
+  --neon-error-inner: 15 90% 75%;
+  
+  /* Success glow combinations */
+  --neon-success-outer: 120 85% 55%;
+  --neon-success-inner: 140 80% 65%;
+}
+
+/* Base neon glow animations */
+@keyframes neonPulse {
+  0%, 100% { 
+    filter: brightness(1) saturate(1);
+    transform: scale(1);
+  }
+  50% { 
+    filter: brightness(1.2) saturate(1.3);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes neonFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+  75% { opacity: 0.9; }
+}
+
+@keyframes neonShimmer {
+  0% { box-shadow: var(--glow-base); }
+  33% { box-shadow: var(--glow-intense); }
+  66% { box-shadow: var(--glow-base); }
+  100% { box-shadow: var(--glow-intense); }
+}
+
+/* Intensity levels - Subtle */
+.glow-subtle {
+  --glow-opacity: 0.3;
+  --glow-blur: 8px;
+  --glow-spread: 2px;
+  --glow-animation-duration: 4s;
+}
+
+/* Intensity levels - Medium */
+.glow-medium {
+  --glow-opacity: 0.5;
+  --glow-blur: 15px;
+  --glow-spread: 4px;
+  --glow-animation-duration: 3s;
+}
+
+/* Intensity levels - Vibrant */
+.glow-vibrant {
+  --glow-opacity: 0.8;
+  --glow-blur: 25px;
+  --glow-spread: 8px;
+  --glow-animation-duration: 2s;
+}
+
+/* Global neon effects when enabled */
+.neon-glow-enabled {
+  /* Primary elements (buttons, links, icons) */
+  .glass,
+  .btn-organic,
+  button,
+  .group {
+    --glow-base: 
+      0 0 var(--glow-blur) var(--glow-spread) hsl(var(--neon-primary-outer) / var(--glow-opacity)),
+      inset 0 0 calc(var(--glow-blur) * 0.5) calc(var(--glow-spread) * 0.5) hsl(var(--neon-primary-inner) / calc(var(--glow-opacity) * 0.6));
+    
+    --glow-intense: 
+      0 0 calc(var(--glow-blur) * 1.5) calc(var(--glow-spread) * 1.5) hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 1.2)),
+      inset 0 0 var(--glow-blur) var(--glow-spread) hsl(var(--neon-primary-inner) / var(--glow-opacity)),
+      0 0 calc(var(--glow-blur) * 2) calc(var(--glow-spread) * 2) hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.4));
+    
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: var(--glow-base);
+    border: 1px solid hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.6));
+  }
+  
+  .glass:hover,
+  .btn-organic:hover,
+  button:hover,
+  .group:hover {
+    box-shadow: var(--glow-intense);
+    animation: neonPulse var(--glow-animation-duration) ease-in-out infinite;
+  }
+  
+  /* Accent elements */
+  .text-accent,
+  .bg-accent,
+  .border-accent,
+  .shadow-accent\/10,
+  .shadow-accent\/20 {
+    --glow-base: 
+      0 0 var(--glow-blur) var(--glow-spread) hsl(var(--neon-accent-outer) / var(--glow-opacity)),
+      inset 0 0 calc(var(--glow-blur) * 0.5) calc(var(--glow-spread) * 0.5) hsl(var(--neon-accent-inner) / calc(var(--glow-opacity) * 0.6));
+    
+    box-shadow: var(--glow-base);
+    border-color: hsl(var(--neon-accent-outer) / calc(var(--glow-opacity) * 0.8)) !important;
+  }
+  
+  /* Secondary elements */
+  .text-secondary,
+  .bg-secondary,
+  .border-secondary {
+    --glow-base: 
+      0 0 var(--glow-blur) var(--glow-spread) hsl(var(--neon-secondary-outer) / var(--glow-opacity)),
+      inset 0 0 calc(var(--glow-blur) * 0.5) calc(var(--glow-spread) * 0.5) hsl(var(--neon-secondary-inner) / calc(var(--glow-opacity) * 0.6));
+    
+    box-shadow: var(--glow-base);
+    border-color: hsl(var(--neon-secondary-outer) / calc(var(--glow-opacity) * 0.8)) !important;
+  }
+  
+  /* Input fields */
+  input,
+  textarea,
+  .input-organic {
+    --glow-base: 
+      0 0 calc(var(--glow-blur) * 0.8) calc(var(--glow-spread) * 0.8) hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.4)),
+      inset 0 0 calc(var(--glow-blur) * 0.3) calc(var(--glow-spread) * 0.3) hsl(var(--neon-primary-inner) / calc(var(--glow-opacity) * 0.3));
+    
+    box-shadow: var(--glow-base);
+    border-color: hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.5)) !important;
+  }
+  
+  input:focus,
+  textarea:focus,
+  .input-organic:focus {
+    --glow-intense: 
+      0 0 var(--glow-blur) var(--glow-spread) hsl(var(--neon-primary-outer) / var(--glow-opacity)),
+      inset 0 0 calc(var(--glow-blur) * 0.5) calc(var(--glow-spread) * 0.5) hsl(var(--neon-primary-inner) / calc(var(--glow-opacity) * 0.8)),
+      0 0 calc(var(--glow-blur) * 1.5) calc(var(--glow-spread) * 1.5) hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.6));
+    
+    box-shadow: var(--glow-intense) !important;
+    animation: neonShimmer var(--glow-animation-duration) ease-in-out infinite;
+  }
+  
+  /* Cards and containers */
+  .glass,
+  [class*="rounded"],
+  .border {
+    position: relative;
+  }
+  
+  .glass::before,
+  [class*="rounded"]::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(
+      45deg,
+      hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.3)),
+      hsl(var(--neon-primary-inner) / calc(var(--glow-opacity) * 0.2)),
+      hsl(var(--neon-accent-outer) / calc(var(--glow-opacity) * 0.3)),
+      hsl(var(--neon-accent-inner) / calc(var(--glow-opacity) * 0.2))
+    );
+    background-size: 400% 400%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradient-shift calc(var(--glow-animation-duration) * 2) ease-in-out infinite;
+  }
+  
+  .glass:hover::before,
+  [class*="rounded"]:hover::before {
+    opacity: 1;
+  }
+  
+  /* Image galleries */
+  .gallery-image,
+  img {
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .gallery-image:hover,
+  img:hover {
+    filter: brightness(1.1) saturate(1.2);
+    box-shadow: 
+      0 0 calc(var(--glow-blur) * 1.2) calc(var(--glow-spread) * 1.2) hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.8)),
+      inset 0 0 calc(var(--glow-blur) * 0.6) calc(var(--glow-spread) * 0.6) hsl(var(--neon-primary-inner) / calc(var(--glow-opacity) * 0.4));
+  }
+  
+  /* Special elements */
+  .hero-title,
+  .parallax-letters-container {
+    text-shadow: 
+      0 0 calc(var(--glow-blur) * 0.5) hsl(var(--neon-primary-outer) / var(--glow-opacity)),
+      0 0 calc(var(--glow-blur) * 0.8) hsl(var(--neon-primary-inner) / calc(var(--glow-opacity) * 0.6)),
+      2px 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  /* Navigation and interactive elements */
+  nav,
+  .sidebar,
+  [role="navigation"] {
+    backdrop-filter: blur(20px) saturate(180%);
+    border-color: hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.3)) !important;
+    box-shadow: 
+      0 0 calc(var(--glow-blur) * 0.8) calc(var(--glow-spread) * 0.8) hsl(var(--neon-primary-outer) / calc(var(--glow-opacity) * 0.3)),
+      inset 0 0 calc(var(--glow-blur) * 0.4) calc(var(--glow-spread) * 0.4) hsl(var(--neon-primary-inner) / calc(var(--glow-opacity) * 0.2));
+  }
+}
+
+/* Mobile optimizations for neon effects */
+@media (max-width: 768px) {
+  .neon-glow-enabled {
+    /* Reduce intensity on mobile for performance */
+    --glow-opacity: calc(var(--glow-opacity) * 0.7);
+    --glow-blur: calc(var(--glow-blur) * 0.8);
+    --glow-spread: calc(var(--glow-spread) * 0.6);
+  }
+  
+  /* Disable complex animations on mobile */
+  .neon-glow-enabled *:hover {
+    animation: none;
+  }
+  
+  .neon-glow-enabled .glass::before,
+  .neon-glow-enabled [class*="rounded"]::before {
+    animation: none;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .neon-glow-enabled * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .neon-glow-enabled .glass::before,
+  .neon-glow-enabled [class*="rounded"]::before {
+    animation: none;
   }
 }

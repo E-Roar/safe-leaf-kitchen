@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import { X, Menu, Leaf, Search, Star } from "lucide-react";
+import { X, Menu, Leaf, Search, Star, ArrowRight } from "lucide-react";
 import { leaves, LeafInfo } from "@/data/leaves";
 import { cn } from "@/lib/utils";
 import { LeafGallery } from "@/components/ui/LeafGallery";
@@ -155,15 +155,18 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, '-');
-    return `/images/leaves/${filename}.png`;
+    // Use the first image from the gallery folder instead of main image
+    return `/images/leaves/${filename}/1.png`;
   };
 
   const Card = ({ leaf }: { leaf: LeafInfo }) => (
     <button
       onClick={() => { setSelectedLeaf(leaf); setIsSidebarOpen(false); }}
       className={cn(
-        "w-full p-4 rounded-2xl text-left transition-all duration-300 hover:shadow-lg relative",
-        selectedLeaf?.id === leaf.id ? "glass bg-primary/10 border border-primary/20" : "glass hover:bg-muted/30"
+        "w-full p-4 rounded-2xl text-left transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative border backdrop-blur-sm",
+        selectedLeaf?.id === leaf.id 
+          ? "glass bg-primary/10 border-primary/30 shadow-lg shadow-primary/20" 
+          : "glass hover:bg-primary/5 border-primary/10 hover:border-primary/20"
       )}
     >
       <div className="absolute top-2 right-2">
@@ -199,18 +202,18 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
     <div className="h-screen flex overflow-hidden">
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-40 w-80 bg-background/95 backdrop-blur-xl border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out",
+        "fixed inset-y-0 left-0 z-40 w-80 bg-background/90 backdrop-blur-2xl border-r border-primary/20 shadow-2xl shadow-primary/10 flex flex-col transform transition-transform duration-300 ease-in-out",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-        "lg:translate-x-0 lg:border-r lg:border-border"
+        "lg:translate-x-0 lg:border-r lg:border-primary/20"
       )}>
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-primary/20 bg-background/20 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-foreground">{t('leaves.title')}</h2>
+              <h2 className="text-lg font-bold text-foreground drop-shadow-sm">{t('leaves.title')}</h2>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-lg hover:bg-muted/50 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-primary/10 hover:shadow-primary/20 transition-all duration-200 border border-transparent hover:border-primary/20"
             >
               <X className="w-5 h-5" />
             </button>
@@ -221,7 +224,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('leaves.searchPlaceholder')}
-              className="w-full pl-9 pr-3 py-2 bg-background/50 border border-border rounded-xl text-sm focus:outline-none"
+              className="w-full pl-9 pr-3 py-2 bg-background/30 backdrop-blur-sm border border-primary/20 rounded-xl text-sm focus:outline-none focus:border-primary/40 focus:shadow-primary/20 focus:shadow-sm transition-all duration-200"
             />
           </div>
         </div>
@@ -237,15 +240,15 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:pl-80">
         {/* Mobile Header */}
-        <div className="p-4 border-b border-border sticky top-12 z-20 bg-background/95 backdrop-blur-sm">
+        <div className="p-4 border-b border-primary/20 sticky top-12 z-20 bg-background/90 backdrop-blur-xl shadow-lg shadow-primary/5">
           <div className="flex items-center justify-between">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+              className="p-2 rounded-lg hover:bg-primary/10 hover:shadow-primary/20 transition-all duration-200 border border-transparent hover:border-primary/20"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-lg font-bold text-foreground">{t('leaves.title')}</h1>
+            <h1 className="text-lg font-bold text-foreground drop-shadow-sm">{t('leaves.title')}</h1>
             <div className="w-10"></div>
           </div>
         </div>
@@ -257,14 +260,14 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
               {/* Header */}
               <div className="text-center mb-2">
                 <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
-                    <Leaf className="w-6 h-6 text-primary-foreground" />
+                  <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30 border border-primary/20">
+                    <Leaf className="w-6 h-6 text-primary-foreground drop-shadow-sm" />
                   </div>
                 </div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
+                <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-sm">
                   {selectedLeaf.name[selectedLanguage]}
                 </h1>
-                <div className="mx-auto mb-4 w-full max-w-xl aspect-video rounded-3xl overflow-hidden bg-gradient-organic">
+                <div className="mx-auto mb-4 w-full max-w-xl aspect-video rounded-3xl overflow-hidden bg-gradient-organic border border-primary/20 shadow-2xl shadow-primary/10 hover:shadow-primary/20 transition-all duration-300">
                   <img
                     src={getLeafImage(selectedLeaf.name.en)}
                     alt={selectedLeaf.name.en}
@@ -282,7 +285,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
 
               {/* Language Toggle */}
               <div className="flex justify-center">
-                <div className="glass rounded-2xl p-1 flex">
+                <div className="glass rounded-2xl p-1 flex border border-primary/20 shadow-lg shadow-primary/10 backdrop-blur-md">
                   {(['en', 'fr'] as Language[]).map((lang) => (
                     <button
                       key={lang}
@@ -290,8 +293,8 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                       className={cn(
                         "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300",
                         selectedLanguage === lang
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          : "text-muted-foreground hover:text-foreground hover:bg-primary/10"
                       )}
                     >
                       {lang.toUpperCase()}
@@ -345,8 +348,8 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 return (
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Bar Chart */}
-                    <div className="glass rounded-3xl p-4">
-                      <h4 className="font-semibold mb-2 text-foreground">{t('leaves.keyNutrients')}</h4>
+                    <div className="glass rounded-3xl p-4 border border-primary/10 shadow-lg shadow-primary/5 hover:shadow-primary/10 transition-all duration-300">
+                      <h4 className="font-semibold mb-2 text-foreground drop-shadow-sm">{t('leaves.keyNutrients')}</h4>
                       <ChartContainer
                         config={{
                           value: { label: "Value", color: "hsl(var(--primary))" },
@@ -375,8 +378,8 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                       </div>
                     </div>
                     {/* Radar Chart */}
-                    <div className="glass rounded-3xl p-4">
-                      <h4 className="font-semibold mb-2 text-foreground">{t('leaves.bioactiveDensity')}</h4>
+                    <div className="glass rounded-3xl p-4 border border-accent/10 shadow-lg shadow-accent/5 hover:shadow-accent/10 transition-all duration-300">
+                      <h4 className="font-semibold mb-2 text-foreground drop-shadow-sm">{t('leaves.bioactiveDensity')}</h4>
                       <ChartContainer
                         config={{
                           score: { label: "Score", color: "hsl(var(--accent))" },
@@ -410,40 +413,40 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
               {/* Highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {selectedLeaf.highlights.proteins_percent !== undefined && (
-                  <div className="text-center p-4 bg-background/50 rounded-xl">
-                    <div className="text-lg font-bold text-primary">
+                  <div className="text-center p-4 bg-background/30 backdrop-blur-md rounded-xl border border-primary/20 shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:border-primary/30 transition-all duration-300">
+                    <div className="text-lg font-bold text-primary drop-shadow-sm">
                       {selectedLeaf.highlights.proteins_percent}%
                     </div>
                     <div className="text-xs text-muted-foreground">{t('leaves.highlight.proteins')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.polyphenols_mg_per_100g !== undefined && (
-                  <div className="text-center p-4 bg-background/50 rounded-xl">
-                    <div className="text-lg font-bold text-accent">
+                  <div className="text-center p-4 bg-background/30 backdrop-blur-md rounded-xl border border-accent/20 shadow-lg shadow-accent/10 hover:shadow-accent/20 hover:border-accent/30 transition-all duration-300">
+                    <div className="text-lg font-bold text-accent drop-shadow-sm">
                       {selectedLeaf.highlights.polyphenols_mg_per_100g} mg
                     </div>
                     <div className="text-xs text-muted-foreground">{t('leaves.highlight.polyphenolsPer100g')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.flavonoids_mg_per_100g !== undefined && (
-                  <div className="text-center p-4 bg-background/50 rounded-xl">
-                    <div className="text-lg font-bold text-secondary">
+                  <div className="text-center p-4 bg-background/30 backdrop-blur-md rounded-xl border border-secondary/20 shadow-lg shadow-secondary/10 hover:shadow-secondary/20 hover:border-secondary/30 transition-all duration-300">
+                    <div className="text-lg font-bold text-secondary drop-shadow-sm">
                       {selectedLeaf.highlights.flavonoids_mg_per_100g} mg
                     </div>
                     <div className="text-xs text-muted-foreground">{t('leaves.highlight.flavonoidsPer100g')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.calcium_mg_per_100g !== undefined && (
-                  <div className="text-center p-4 bg-background/50 rounded-xl">
-                    <div className="text-lg font-bold text-foreground">
+                  <div className="text-center p-4 bg-background/30 backdrop-blur-md rounded-xl border border-foreground/10 shadow-lg shadow-foreground/5 hover:shadow-foreground/10 hover:border-foreground/20 transition-all duration-300">
+                    <div className="text-lg font-bold text-foreground drop-shadow-sm">
                       {selectedLeaf.highlights.calcium_mg_per_100g} mg
                     </div>
                     <div className="text-xs text-muted-foreground">{t('leaves.highlight.calciumPer100g')}</div>
                   </div>
                 )}
                 {selectedLeaf.highlights.antioxidant_classification && (
-                  <div className="text-center p-4 bg-background/50 rounded-xl">
-                    <div className="text-sm font-semibold text-primary">
+                  <div className="text-center p-4 bg-background/30 backdrop-blur-md rounded-xl border border-primary/20 shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:border-primary/30 transition-all duration-300">
+                    <div className="text-sm font-semibold text-primary drop-shadow-sm">
                       {selectedLeaf.highlights.antioxidant_classification}
                     </div>
                     <div className="text-xs text-muted-foreground">Antioxidant classification</div>
@@ -452,8 +455,8 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
               </div>
 
               {/* Summary */}
-              <div className="glass rounded-3xl p-5">
-                <h4 className="font-semibold mb-2 text-foreground">{t('leaves.summary')}</h4>
+              <div className="glass rounded-3xl p-5 border border-primary/10 shadow-xl shadow-primary/10 hover:shadow-primary/20 hover:border-primary/20 transition-all duration-300">
+                <h4 className="font-semibold mb-2 text-foreground drop-shadow-sm">{t('leaves.summary')}</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">{selectedLeaf.summary}</p>
               </div>
 
@@ -464,8 +467,8 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 const compounds = selectedLeaf.compounds || [];
                 const moleculeList = extra?.molecules?.length ? extra.molecules : compounds;
                 return moleculeList && moleculeList.length > 0 ? (
-                  <div className="glass rounded-3xl p-5">
-                    <h4 className="font-semibold mb-3 text-foreground">{t('leaves.keyCompounds')}</h4>
+                  <div className="glass rounded-3xl p-5 border border-accent/10 shadow-xl shadow-accent/10 hover:shadow-accent/20 hover:border-accent/20 transition-all duration-300">
+                    <h4 className="font-semibold mb-3 text-foreground drop-shadow-sm">{t('leaves.keyCompounds')}</h4>
                     <CompoundsBubbleSimulation compounds={moleculeList} />
                   </div>
                 ) : null;
@@ -477,11 +480,11 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 const extra = frKey ? extraBioByFr[frKey] : null;
                 if (!extra?.activities?.length) return null;
                 return (
-                  <div className="glass rounded-3xl p-5">
-                    <h4 className="font-semibold mb-3 text-foreground">{t('leaves.mainBioactivities')}</h4>
+                  <div className="glass rounded-3xl p-5 border border-secondary/10 shadow-xl shadow-secondary/10 hover:shadow-secondary/20 hover:border-secondary/20 transition-all duration-300">
+                    <h4 className="font-semibold mb-3 text-foreground drop-shadow-sm">{t('leaves.mainBioactivities')}</h4>
                     <div className="flex flex-wrap gap-2">
                       {extra.activities.map((a, i) => (
-                        <span key={i} className="px-2 py-1 rounded-full text-xs bg-accent/10 text-accent">
+                        <span key={i} className="px-3 py-1.5 rounded-full text-xs bg-accent/20 text-accent border border-accent/30 shadow-sm hover:shadow-accent/20 hover:bg-accent/30 transition-all duration-200">
                           {a}
                         </span>
                       ))}
@@ -492,14 +495,14 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
 
               {/* Safety */}
               {selectedLeaf.safety && (
-                <div className="glass rounded-3xl p-5">
-                  <h4 className="font-semibold mb-2 text-foreground">{t('leaves.safety')}</h4>
+                <div className="glass rounded-3xl p-5 border border-orange-500/20 shadow-xl shadow-orange-500/10 hover:shadow-orange-500/20 hover:border-orange-500/30 transition-all duration-300">
+                  <h4 className="font-semibold mb-2 text-foreground drop-shadow-sm">{t('leaves.safety')}</h4>
                   <p className="text-sm text-muted-foreground">{selectedLeaf.safety}</p>
                 </div>
               )}
               
               {/* Leaf Gallery - Pinterest-style Masonry */}
-              <div className="mt-8">
+              <div className="mt-8" data-gallery-section>
                 <LeafGallery 
                   leafId={selectedLeaf.id}
                   leafName={selectedLeaf.name.en}

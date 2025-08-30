@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Image as ImageIcon, Leaf } from "lucide-react";
+import { ImageLightbox } from "./ImageLightbox";
+import { useI18n } from "@/hooks/useI18n";
 
 interface LeafGalleryProps {
   leafId: number;
@@ -13,13 +15,19 @@ interface GalleryImage {
   alt: string;
   aspectRatio?: number; // Make aspect ratio optional
   loaded: boolean;
+  failed?: boolean; // Add failed state
   naturalWidth?: number;
   naturalHeight?: number;
 }
 
 export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
+  const { t } = useI18n();
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  console.log(`🖼️ LeafGallery rendered for:`, { leafId, leafName });
 
   // Generate gallery images based on leaf - Dynamic discovery approach
   useEffect(() => {
@@ -32,78 +40,110 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, '-');
       
-      // Since we can't dynamically list files from the browser, we'll try a comprehensive list
-      // of possible image names that users might upload
+      console.log(`🍃 LeafGallery Debug:`, {
+        leafName,
+        folderName,
+        fullPath: `/images/leaves/${folderName}/`
+      });
+      
+      // Limit to exactly 5 most common image patterns for optimal performance
       const possibleImageNames = [
-        // Your actual uploaded files for onion leaves
-        'General-view-Welch-onion-plant-with-foliage-leaves-and-long-pseudostemSource',
-        'IMG-20191003-134515',
-        'Onion_Green_Leaves_Seeds_Open_Pollination', 
-        'Onion_leaves',
-        'The-onion-is-grown-on-the-soil-in-the-plots',
-        'slk (10)',
-        'the-vibrant-bundle-of-fresh-green-onions-ready-for-culinary-use-photo',
-        
-        // Common descriptive names
-        'whole-plant', 'leaf-detail', 'texture-close-up', 'fresh-leaves', 'dried-leaves',
-        'cross-section', 'surface-detail', 'veins-pattern', 'growth-stages', 'nutrition-prep',
-        'cooking-ready', 'microscopic', 'botanical-detail', 'plant-structure', 'leaf-texture',
-        
-        // Generic numbered patterns
-        '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
-        'image1', 'image2', 'image3', 'image4', 'image5',
-        'gallery-1', 'gallery-2', 'gallery-3', 'gallery-4', 'gallery-5',
-        'photo1', 'photo2', 'photo3', 'photo4', 'photo5',
-        
-        // Common file naming patterns
-        leafName.toLowerCase().replace(/\s+/g, '_'),
-        leafName.toLowerCase().replace(/\s+/g, '-'),
-        leafName.toLowerCase().replace(/\s+/g, ''),
-        
-        // Additional patterns users might use
-        'main', 'primary', 'hero', 'cover', 'thumbnail',
-        'close-up', 'macro', 'detail', 'overview', 'full-plant'
+        // Most common numbered patterns (exactly 5)
+        '1', '2', '3', '4', '5'
       ];
       
-      // Create gallery images array
+      // Create gallery images array - limit to exactly 5 images
       const galleryImages: GalleryImage[] = [];
       
-      // Test each possible image name
+      // Test each possible image name (exactly 5)
       possibleImageNames.forEach((imageName, index) => {
+        // Properly encode the image filename for URL
+        const encodedImageName = encodeURIComponent(imageName);
+        const imagePath = `/images/leaves/${folderName}/${encodedImageName}.png`;
+        console.log(`🖼️ Adding image path: ${imagePath}`);
         galleryImages.push({
-          src: `/images/leaves/${folderName}/${imageName}.png`,
-          alt: `${leafName} - ${imageName.replace(/[-_]/g, ' ')}`,
+          src: imagePath,
+          alt: `${leafName} - Image ${index + 1}`,
           loaded: false,
         });
       });
       
       setImages(galleryImages);
       
-      // Shorter loading delay since we're testing multiple images
-      setTimeout(() => setIsLoading(false), 200);
+      // Add a fallback timeout in case some images never trigger events
+      setTimeout(() => {
+        console.log('⏰ Fallback timeout triggered - forcing loading complete');
+        setIsLoading(false);
+      }, 3000);
     };
 
     generateGalleryImages();
   }, [leafId, leafName]);
 
+  // Start loading images as soon as they're available
+  useEffect(() => {
+    if (images.length > 0) {
+      console.log(`🔄 Starting to load ${images.length} images`);
+      // The actual loading happens in the render when images are created
+    }
+  }, [images]);
+
   const handleImageLoad = (index: number, event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
     const aspectRatio = img.naturalWidth / img.naturalHeight;
     
-    setImages(prev => prev.map((image, i) => 
-      i === index ? { 
-        ...image, 
-        loaded: true, 
-        aspectRatio,
-        naturalWidth: img.naturalWidth,
-        naturalHeight: img.naturalHeight 
-      } : image
-    ));
+    setImages(prev => {
+      const newImages = prev.map((image, i) => 
+        i === index ? { 
+          ...image, 
+          loaded: true, 
+          aspectRatio,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight 
+        } : image
+      );
+      
+      // Check if all images have been attempted (loaded or failed)
+      const allAttempted = newImages.every(img => img.loaded || img.failed);
+      if (allAttempted) {
+        setIsLoading(false);
+      }
+      
+      return newImages;
+    });
+    
+    console.log(`✅ Image loaded successfully: ${img.src}`);
   };
 
-  const handleImageError = (index: number) => {
-    // Remove failed images from the gallery
-    setImages(prev => prev.filter((_, i) => i !== index));
+  const handleImageClick = (imageIndex: number) => {
+    setLightboxIndex(imageIndex);
+    setLightboxOpen(true);
+  };
+
+  const handleLightboxNavigate = (newIndex: number) => {
+    setLightboxIndex(newIndex);
+  };
+
+  const handleLightboxClose = () => {
+    setLightboxOpen(false);
+  };
+
+  const handleImageError = (index: number, src: string) => {
+    console.log(`❌ Image failed to load: ${src}`);
+    
+    setImages(prev => {
+      const newImages = prev.map((image, i) => 
+        i === index ? { ...image, failed: true } : image
+      );
+      
+      // Check if all images have been attempted (loaded or failed)
+      const allAttempted = newImages.every(img => img.loaded || img.failed);
+      if (allAttempted) {
+        setIsLoading(false);
+      }
+      
+      return newImages;
+    });
   };
 
   if (isLoading) {
@@ -124,84 +164,121 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
     );
   }
 
-  // Filter out only loaded images for display
-  const loadedImages = images.filter(img => img.loaded);
+  // Filter out only loaded images for display (exclude failed ones)
+  const loadedImages = images.filter(img => img.loaded && !img.failed);
+  const hasAttemptedLoading = images.some(img => img.loaded || img.failed);
 
-  if (loadedImages.length === 0) {
+  // Temporary debug logging
+  console.log('Gallery state:', { 
+    totalImages: images.length, 
+    loadedImages: loadedImages.length, 
+    hasAttemptedLoading,
+    isLoading,
+    imageStates: images.map(img => ({ src: img.src, loaded: img.loaded, failed: img.failed }))
+  });
+
+  if (isLoading || (images.length > 0 && loadedImages.length === 0 && !hasAttemptedLoading)) {
     return (
       <div className={cn("w-full", className)}>
+        {/* Hidden loading images - always present to trigger loading */}
+        <div className="absolute left-[-9999px] top-0 opacity-0 pointer-events-none">
+          {images.map((image, index) => (
+            <img
+              key={image.src}
+              src={image.src}
+              alt={image.alt}
+              className="w-4 h-4"
+              onLoad={(e) => handleImageLoad(index, e)}
+              onError={() => handleImageError(index, image.src)}
+              loading="eager"
+              crossOrigin="anonymous"
+            />
+          ))}
+        </div>
+        
         <div className="flex items-center gap-2 mb-4">
           <Leaf className="w-5 h-5 text-primary" />
           <h4 className="font-semibold text-foreground">Leaf Gallery</h4>
+          <span className="text-sm text-muted-foreground">Loading...</span>
         </div>
-        <div className="p-6 glass rounded-xl text-center">
-          <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Leaf className="w-8 h-8 text-muted-foreground" />
+        <div className="text-center py-8">
+          <div className="inline-flex items-center gap-2 text-muted-foreground">
+            <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <span className="text-sm">Discovering images...</span>
           </div>
-          <p className="text-sm text-muted-foreground mb-2">
-            No images found in the gallery folder
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Expected folder: <code className="bg-muted/50 px-1 rounded">/images/leaves/{leafName.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-')}/</code>
-          </p>
         </div>
       </div>
     );
   }
 
+  if (loadedImages.length === 0) {
+    // Don't show anything if no images loaded - this is normal
+    return null;
+  }
+
   return (
     <div className={cn("w-full", className)}>
+      {/* Hidden loading images - always present to trigger loading */}
+      <div className="absolute left-[-9999px] top-0 opacity-0 pointer-events-none">
+        {images.map((image, index) => (
+          <img
+            key={image.src}
+            src={image.src}
+            alt={image.alt}
+            className="w-4 h-4"
+            onLoad={(e) => handleImageLoad(index, e)}
+            onError={() => handleImageError(index, image.src)}
+            loading="eager"
+            fetchPriority="high"
+            crossOrigin="anonymous"
+          />
+        ))}
+      </div>
+      
       <div className="flex items-center gap-2 mb-4">
-        <Leaf className="w-5 h-5 text-primary" />
-        <h4 className="font-semibold text-foreground">Leaf Gallery</h4>
-        <span className="text-sm text-muted-foreground">({loadedImages.length} photos)</span>
+        <div className="w-5 h-5 rounded-full bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/25">
+          <Leaf className="w-5 h-5 text-primary-foreground p-0.5" />
+        </div>
+        <h4 className="font-semibold text-foreground drop-shadow-sm">{t('gallery.leafGallery') || 'Leaf Gallery'}</h4>
+        <span className="text-sm text-muted-foreground bg-background/30 backdrop-blur-sm px-2 py-1 rounded-full border border-primary/10">({loadedImages.length} photos)</span>
       </div>
       
       {/* Horizontal Responsive Masonry Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 p-4 rounded-2xl bg-background/10 backdrop-blur-md border border-white/10 shadow-2xl shadow-primary/5">
         {loadedImages.map((image, index) => (
           <div
             key={image.src}
             className="group cursor-pointer"
+            onClick={() => handleImageClick(index)}
           >
             <div 
-              className="relative overflow-hidden rounded-lg bg-muted/20 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] w-full"
-              style={{ aspectRatio: image.aspectRatio || 1 }}
+              className="relative overflow-hidden rounded-xl bg-muted/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.02] hover:border-primary/30 w-full min-h-[120px] border border-white/10 backdrop-blur-sm group-hover:bg-background/20"
+              style={{ aspectRatio: image.aspectRatio && image.aspectRatio > 0.5 && image.aspectRatio < 2 ? image.aspectRatio : 1 }}
             >
-              {/* Remove loading placeholder since we only show loaded images */}
-              
               <img
                 src={image.src}
                 alt={image.alt}
-                className={cn(
-                  "w-full h-full object-cover transition-all duration-300",
-                  "group-hover:scale-105"
-                )}
-                onLoad={(e) => handleImageLoad(index, e)}
-                onError={() => handleImageError(index)}
+                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 rounded-xl gallery-image"
                 loading="lazy"
+                crossOrigin="anonymous"
               />
               
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              
-              {/* Image info overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p className="text-white text-sm font-medium truncate">
-                  {image.alt}
-                </p>
-              </div>
+              {/* Enhanced Overlay with neon glow */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
+              <div className="absolute inset-0 border border-transparent group-hover:border-primary/50 rounded-xl transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(var(--primary),0.3)]" />
             </div>
           </div>
         ))}
       </div>
       
-      {/* Gallery Footer */}
-      <div className="mt-6 p-4 glass rounded-xl text-center">
-        <p className="text-sm text-muted-foreground">
-          Botanical images dynamically loaded from the leaf's gallery folder
-        </p>
-      </div>
+      {/* Lightbox */}
+      <ImageLightbox
+        images={loadedImages}
+        currentIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={handleLightboxClose}
+        onNavigate={handleLightboxNavigate}
+      />
     </div>
   );
 }

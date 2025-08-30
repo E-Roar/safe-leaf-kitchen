@@ -13,6 +13,7 @@ const defaultTranslations: Translations = {
   'tabs.stats': { EN: 'Insights', FR: 'Statistiques', AR: 'إحصائيات' },
   'tabs.recipes': { EN: 'Recipes', FR: 'Recettes', AR: 'وصفات' },
   'tabs.leaves': { EN: 'Leaves', FR: 'Feuilles', AR: 'أوراق' },
+  'tabs.settings': { EN: 'Settings', FR: 'Paramètres', AR: 'إعدادات' },
 
   // Actions / tooltips
   'actions.menu': { EN: 'Menu', FR: 'Menu', AR: 'قائمة' },
@@ -70,6 +71,15 @@ const defaultTranslations: Translations = {
   'landing.valueProps.scanning.desc': { EN: 'AI-powered leaf identification in seconds', FR: 'Identification des feuilles par IA en quelques secondes', AR: 'تعرف على الأوراق بالذكاء الاصطناعي في ثوانٍ' },
   'landing.valueProps.recipes.desc': { EN: 'Traditional Moroccan recipes with nutritious leaves', FR: 'Recettes marocaines traditionnelles avec des feuilles nutritives', AR: 'وصفات مغربية تقليدية بأوراق مغذية' },
   'landing.valueProps.chat.desc': { EN: 'Expert nutrition advice and cooking guidance', FR: 'Conseils nutritionnels experts et guidance culinaire', AR: 'نصائح غذائية متخصصة وإرشاد الطبخ' },
+
+  // Video Section
+  'landing.video.title': { EN: 'How SafeLeafKitchen Works', FR: 'Comment fonctionne SafeLeafKitchen', AR: 'كيف يعمل SafeLeafKitchen' },
+  'landing.video.subtitle': { EN: 'Watch our quick tutorial to see how AI-powered leaf recognition transforms your kitchen', FR: 'Regardez notre tutoriel rapide pour voir comment la reconnaissance de feuilles par IA transforme votre cuisine', AR: 'شاهد دليلنا السريع لترى كيف يحول التعرف على الأوراق بالذكاء الاصطناعي مطبخك' },
+  'landing.video.watchTitle': { EN: 'Watch Tutorial', FR: 'Regarder le tutoriel', AR: 'شاهد الدليل' },
+  'landing.video.description': { EN: 'Learn how to scan leaves, get instant identification, and discover nutritious recipes in just a few simple steps.', FR: 'Apprenez à scanner les feuilles, obtenir une identification instantanée et découvrir des recettes nutritives en quelques étapes simples.', AR: 'تعلم كيفية مسح الأوراق والحصول على تعرف فوري واكتشاف وصفات مغذية في خطوات بسيطة.' },
+  'landing.video.features.scanning': { EN: 'AI Leaf Scanning', FR: 'Scan IA des feuilles', AR: 'مسح الأوراق بالذكاء الاصطناعي' },
+  'landing.video.features.chat': { EN: 'Nutrition Chat', FR: 'Chat nutrition', AR: 'دردشة التغذية' },
+  'landing.video.features.recipes': { EN: 'Recipe Discovery', FR: 'Découverte de recettes', AR: 'اكتشاف الوصفات' },
 
   // Success Metrics
   'landing.metrics.title': { EN: 'Proven Impact', FR: 'Impact prouvé', AR: 'أثر مُثبت' },
@@ -187,6 +197,7 @@ const defaultTranslations: Translations = {
   'leaves.keyCompounds': { EN: 'Key compounds', FR: 'Composés clés', AR: 'المركبات الرئيسية' },
   'leaves.mainBioactivities': { EN: 'Main bioactivities', FR: 'Activités biologiques principales', AR: 'الأنشطة الحيوية الرئيسية' },
   'leaves.safety': { EN: 'Safety', FR: 'Sécurité', AR: 'السلامة' },
+  'leaves.viewGallery': { EN: 'View Gallery', FR: 'Voir la galerie', AR: 'عرض المعرض' },
   'leaves.selectLeaf': { EN: 'Select a Leaf', FR: 'Sélectionnez une feuille', AR: 'اختر ورقة' },
   'leaves.selectLeafHint': { EN: 'Choose a leaf from the sidebar to view its nutritional and descriptive profile.', FR: 'Choisissez une feuille dans le menu pour voir son profil nutritionnel et descriptif.', AR: 'اختر ورقة من القائمة لعرض ملفها الغذائي والوصف.' },
   'leaves.highlight.proteins': { EN: 'Proteins', FR: 'Protéines', AR: 'بروتينات' },
@@ -285,6 +296,31 @@ const defaultTranslations: Translations = {
   'stats.week.totalLeafScans': { EN: 'Total Leaf Scans', FR: 'Total des scans de feuilles', AR: 'إجمالي مسحات الأوراق' },
   'stats.week.noDataYet': { EN: 'No data yet', FR: 'Pas encore de données', AR: 'لا توجد بيانات بعد' },
   'stats.common.scans': { EN: 'scans', FR: 'scans', AR: 'مسحات' },
+
+  // Settings page
+  'settings.title': { EN: 'Settings', FR: 'Paramètres', AR: 'الإعدادات' },
+  'settings.subtitle': { EN: 'Customize your SafeLeafKitchen experience', FR: 'Personnalisez votre expérience SafeLeafKitchen', AR: 'خصص تجربتك في SafeLeafKitchen' },
+  'settings.visualEffects': { EN: 'Visual Effects', FR: 'Effets visuels', AR: 'التأثيرات البصرية' },
+  'settings.theme': { EN: 'Theme', FR: 'Thème', AR: 'السمة' },
+  'settings.themeDescription': { EN: 'Choose between light and dark mode', FR: 'Choisissez entre le mode clair et sombre', AR: 'اختر بين الوضع الفاتح والداكن' },
+  'settings.neonGlow': { EN: 'Neon Glow Effects', FR: 'Effets de lueur néon', AR: 'تأثيرات الوهج النيوني' },
+  'settings.neonGlowDescription': { EN: 'Dynamic vibrant glow effects on UI elements', FR: 'Effets de lueur dynamiques vibrants sur les éléments de l\'interface', AR: 'تأثيرات وهج ديناميكية نابضة بالحياة على عناصر الواجهة' },
+  'settings.glowIntensity': { EN: 'Glow Intensity', FR: 'Intensité de la lueur', AR: 'كثافة الوهج' },
+  'settings.particles': { EN: 'Floating Particles', FR: 'Particules flottantes', AR: 'الجسيمات العائمة' },
+  'settings.particlesDescription': { EN: 'Animated leaf particles in the background', FR: 'Particules de feuilles animées en arrière-plan', AR: 'جسيمات أوراق متحركة في الخلفية' },
+  'settings.parallax': { EN: 'Parallax Effects', FR: 'Effets de parallaxe', AR: 'تأثيرات المنظور' },
+  'settings.parallaxDescription': { EN: 'Depth scrolling effects for immersive experience', FR: 'Effets de défilement en profondeur pour une expérience immersive', AR: 'تأثيرات التمرير العميق للحصول على تجربة غامرة' },
+  'settings.animations': { EN: 'Animations', FR: 'Animations', AR: 'الرسوم المتحركة' },
+  'settings.animationsDescription': { EN: 'Smooth transitions and micro-interactions', FR: 'Transitions fluides et micro-interactions', AR: 'انتقالات سلسة وتفاعلات دقيقة' },
+  'settings.preview': { EN: 'Live Preview', FR: 'Aperçu en direct', AR: 'معاينة مباشرة' },
+  'settings.sampleButton': { EN: 'Sample Button', FR: 'Bouton d\'exemple', AR: 'زر تجريبي' },
+  'settings.sampleCard': { EN: 'Sample Card', FR: 'Carte d\'exemple', AR: 'بطاقة تجريبية' },
+  'settings.sampleCardDescription': { EN: 'This card shows the current visual effects', FR: 'Cette carte montre les effets visuels actuels', AR: 'تظهر هذه البطاقة التأثيرات البصرية الحالية' },
+  'settings.performance': { EN: 'Performance Notes', FR: 'Notes de performance', AR: 'ملاحظات الأداء' },
+  'settings.performanceNote1': { EN: 'Neon glow effects are optimized for modern devices', FR: 'Les effets de lueur néon sont optimisés pour les appareils modernes', AR: 'تم تحسين تأثيرات الوهج النيوني للأجهزة الحديثة' },
+  'settings.performanceNote2': { EN: 'Effects are automatically reduced on mobile devices', FR: 'Les effets sont automatiquement réduits sur les appareils mobiles', AR: 'يتم تقليل التأثيرات تلقائياً على الأجهزة المحمولة' },
+  'settings.performanceNote3': { EN: 'All settings are saved automatically and persist between sessions', FR: 'Tous les paramètres sont sauvegardés automatiquement et persistent entre les sessions', AR: 'يتم حفظ جميع الإعدادات تلقائياً وتستمر بين الجلسات' },
+  'settings.performanceNote4': { EN: 'Reduced motion preferences are respected', FR: 'Les préférences de mouvement réduit sont respectées', AR: 'يتم احترام تفضيلات الحركة المخفضة' },
 };
 
 interface I18nContextValue {

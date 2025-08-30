@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Home, MessageCircle, BarChart3, ChefHat, Settings, Leaf, Plus, X, RefreshCw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Home, MessageCircle, BarChart3, ChefHat, Settings, Leaf, Plus, X, RefreshCw, Zap, Eye, EyeOff, Palette, Sparkles, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SettingsService } from "@/services/settingsService";
 import { toast } from "sonner";
@@ -9,8 +9,8 @@ import { ImpactService } from "@/services/impactService";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  activeTab: "home" | "chat" | "stats" | "recipes" | "leaves";
-  onTabChange: (tab: "home" | "chat" | "stats" | "recipes" | "leaves") => void;
+  activeTab: "home" | "chat" | "stats" | "recipes" | "leaves" | "settings";
+  onTabChange: (tab: "home" | "chat" | "stats" | "recipes" | "leaves" | "settings") => void;
 }
 
 export default function AppLayout({ children, activeTab, onTabChange }: AppLayoutProps) {
@@ -30,16 +30,55 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
   const [n8nWebhookUrl, setN8nWebhookUrl] = useState(initialSettings.n8nWebhookUrl);
   const [chatProvider, setChatProvider] = useState(initialSettings.chatProvider);
 
+  // Define default visual settings first
+  const defaultVisualSettings = {
+    particlesEnabled: false,
+    parallaxEnabled: true,
+    animationsEnabled: true,
+    neonGlowEnabled: false, // Changed from true to false to disable glow by default
+    glowIntensity: 'medium' as const,
+    theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light' as 'light' | 'dark'
+  };
+
+  // Visual effects settings
+  const [visualSettings, setVisualSettings] = useState(() => {
+    // Load visual settings from localStorage if available
+    const savedVisualSettings = localStorage.getItem('visualEffectsSettings');
+    if (savedVisualSettings) {
+      try {
+        return { ...defaultVisualSettings, ...JSON.parse(savedVisualSettings) };
+      } catch (e) {
+        console.warn('Failed to parse visual settings from localStorage', e);
+        return defaultVisualSettings;
+      }
+    }
+    return defaultVisualSettings;
+  });
+
   const tabs = [
     { id: "home" as const, icon: Home, label: t('tabs.home') },
     { id: "chat" as const, icon: MessageCircle, label: t('tabs.chat') },
     { id: "stats" as const, icon: BarChart3, label: t('tabs.stats') },
     { id: "recipes" as const, icon: ChefHat, label: t('tabs.recipes') },
+    { id: "leaves" as const, icon: Leaf, label: t('tabs.leaves') },
+    { id: "settings" as const, icon: Settings, label: t('tabs.settings') },
   ];
 
   const handleSettingsClick = () => {
     setShowSettings(true);
   };
+
+  // Apply visual effects on mount and when visualSettings change
+  useEffect(() => {
+    applyVisualEffectsToBody();
+  }, [visualSettings]);
+
+  // Effect to show password modal when settings tab is active
+  useEffect(() => {
+    if (activeTab === 'settings' && !isSettingsUnlocked) {
+      setShowSettings(true);
+    }
+  }, [activeTab, isSettingsUnlocked]);
 
   const handlePasswordSubmit = () => {
     if (settingsPassword === "hidachi") {
@@ -49,6 +88,7 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
     } else {
       alert("Incorrect password");
       setSettingsPassword("");
+      // Keep the settings modal open and don't change the active tab
     }
   };
 
@@ -61,7 +101,80 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
       n8nWebhookUrl,
       chatProvider,
     });
+    
+    // Save visual effects settings
+    localStorage.setItem('visualEffectsSettings', JSON.stringify(visualSettings));
+    
+    // Apply theme
+    if (visualSettings.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    // Apply visual effects to body
+    applyVisualEffectsToBody();
+    
     toast.success("Settings saved. Changes apply immediately for this session.");
+    
+    // Close the settings panel after saving
+    setIsSettingsUnlocked(false);
+    onTabChange('home');
+  };
+
+  const applyVisualEffectsToBody = () => {
+    const body = document.body;
+    
+    // Remove existing glow classes
+    body.classList.remove('neon-glow-enabled', 'glow-subtle', 'glow-medium', 'glow-vibrant');
+    
+    // Apply current settings
+    if (visualSettings.neonGlowEnabled) {
+      body.classList.add('neon-glow-enabled', `glow-${visualSettings.glowIntensity}`);
+    }
+  };
+
+  // Visual effects toggle functions
+  const toggleNeonGlow = () => {
+    setVisualSettings((prev: typeof visualSettings) => ({
+      ...prev,
+      neonGlowEnabled: !prev.neonGlowEnabled
+    }));
+  };
+
+  const setGlowIntensity = (intensity: 'subtle' | 'medium' | 'vibrant') => {
+    setVisualSettings((prev: typeof visualSettings) => ({
+      ...prev,
+      glowIntensity: intensity
+    }));
+  };
+
+  const toggleParticles = () => {
+    setVisualSettings((prev: typeof visualSettings) => ({
+      ...prev,
+      particlesEnabled: !prev.particlesEnabled
+    }));
+  };
+
+  const toggleParallax = () => {
+    setVisualSettings((prev: typeof visualSettings) => ({
+      ...prev,
+      parallaxEnabled: !prev.parallaxEnabled
+    }));
+  };
+
+  const toggleAnimations = () => {
+    setVisualSettings((prev: typeof visualSettings) => ({
+      ...prev,
+      animationsEnabled: !prev.animationsEnabled
+    }));
+  };
+
+  const handleToggleTheme = () => {
+    setVisualSettings((prev: typeof defaultVisualSettings) => {
+      const newTheme = prev.theme === 'dark' ? 'light' : 'dark';
+      return { ...prev, theme: newTheme as 'light' | 'dark' };
+    });
   };
 
   const addDemoData = () => {
@@ -227,8 +340,14 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
               <span className="hidden dark:inline">☀️</span>
             </button>
       <button
-        onClick={handleSettingsClick}
-              className="p-2 rounded-full border border-border bg-background/80 hover:bg-muted transition"
+        onClick={() => {
+          setShowSettings(true);
+          onTabChange('settings');
+        }}
+              className={cn(
+                "p-2 rounded-full border border-border bg-background/80 hover:bg-muted transition",
+                activeTab === 'settings' ? 'bg-primary text-primary-foreground' : ''
+              )}
               title="Settings"
       >
               <Settings className="w-4 h-4" />
@@ -239,8 +358,8 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
 
       {/* Settings Password Modal */}
       {showSettings && !isSettingsUnlocked && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-3xl p-6 max-w-sm w-full">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="bg-background/90 rounded-3xl p-6 max-w-sm w-full border border-border shadow-2xl">
             <h3 className="text-lg font-semibold mb-4 text-foreground">Enter Settings Password</h3>
             <input
               type="password"
@@ -255,6 +374,7 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
                 onClick={() => {
                   setShowSettings(false);
                   setSettingsPassword("");
+                  onTabChange('home'); // Reset to home tab when canceling
                 }}
                 className="flex-1 p-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors"
               >
@@ -273,12 +393,15 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
 
       {/* Settings Panel */}
       {isSettingsUnlocked && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="bg-background/90 rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto border border-border shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-foreground">Settings</h3>
               <button
-                onClick={() => setIsSettingsUnlocked(false)}
+                onClick={() => {
+                  setIsSettingsUnlocked(false);
+                  onTabChange('home'); // Reset to home tab when closing settings
+                }}
                 className="p-2 rounded-full hover:bg-muted transition-colors"
               >
                 ✕
@@ -356,6 +479,165 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
                   <option value="n8n">N8N Webhook</option>
                 </select>
               </div>
+              
+              {/* Visual Effects Section */}
+              <div className="pt-4 border-t border-border">
+                <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Palette className="w-4 h-4" />
+                  Visual Effects
+                </h4>
+                
+                {/* Theme Toggle */}
+                <div className="flex items-center justify-between p-3 glass rounded-xl mb-2">
+                  <div className="flex items-center gap-2">
+                    {visualSettings.theme === 'dark' ? (
+                      <Moon className="w-4 h-4 text-foreground" />
+                    ) : (
+                      <Sun className="w-4 h-4 text-foreground" />
+                    )}
+                    <div>
+                      <div className="text-sm font-medium text-foreground">Theme</div>
+                      <div className="text-xs text-muted-foreground">Choose between light and dark mode</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleToggleTheme}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      visualSettings.theme === 'dark' ? "bg-primary" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                        visualSettings.theme === 'dark' ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Neon Glow Toggle */}
+                <div className="flex items-center justify-between p-3 glass rounded-xl mb-2">
+                  <div className="flex items-center gap-2">
+                    {visualSettings.neonGlowEnabled ? (
+                      <Zap className="w-4 h-4 text-primary animate-pulse" />
+                    ) : (
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
+                    )}
+                    <div>
+                      <div className="text-sm font-medium text-foreground">Neon Glow Effects</div>
+                      <div className="text-xs text-muted-foreground">Dynamic vibrant glow effects on UI elements</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleNeonGlow}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      visualSettings.neonGlowEnabled ? "bg-primary" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                        visualSettings.neonGlowEnabled ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Glow Intensity */}
+                {visualSettings.neonGlowEnabled && (
+                  <div className="p-3 glass rounded-xl mb-2">
+                    <div className="text-sm font-medium text-foreground mb-2">Glow Intensity</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { value: 'subtle' as const, label: 'Subtle', icon: Eye },
+                        { value: 'medium' as const, label: 'Medium', icon: Sparkles },
+                        { value: 'vibrant' as const, label: 'Vibrant', icon: Zap }
+                      ].map(({ value, label, icon: Icon }) => (
+                        <button
+                          key={value}
+                          onClick={() => setGlowIntensity(value)}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${
+                            visualSettings.glowIntensity === value
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-background/50 text-muted-foreground hover:border-primary/50"
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                          <span className="text-xs font-medium">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Particles Toggle */}
+                <div className="flex items-center justify-between p-3 glass rounded-xl mb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className={`w-4 h-4 ${visualSettings.particlesEnabled ? "text-primary" : "text-muted-foreground"}`} />
+                    <div>
+                      <div className="text-sm font-medium text-foreground">Floating Particles</div>
+                      <div className="text-xs text-muted-foreground">Animated leaf particles in the background</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleParticles}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      visualSettings.particlesEnabled ? "bg-primary" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                        visualSettings.particlesEnabled ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Parallax Toggle */}
+                <div className="flex items-center justify-between p-3 glass rounded-xl mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border-2 ${visualSettings.parallaxEnabled ? "border-primary bg-primary/20" : "border-muted-foreground"}`} />
+                    <div>
+                      <div className="text-sm font-medium text-foreground">Parallax Effects</div>
+                      <div className="text-xs text-muted-foreground">Depth scrolling effects for immersive experience</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleParallax}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      visualSettings.parallaxEnabled ? "bg-primary" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                        visualSettings.parallaxEnabled ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Animations Toggle */}
+                <div className="flex items-center justify-between p-3 glass rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded-full ${visualSettings.animationsEnabled ? "bg-primary animate-pulse" : "bg-muted-foreground"}`} />
+                    <div>
+                      <div className="text-sm font-medium text-foreground">Animations</div>
+                      <div className="text-xs text-muted-foreground">Smooth transitions and micro-interactions</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleAnimations}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      visualSettings.animationsEnabled ? "bg-primary" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                        visualSettings.animationsEnabled ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+              
               <div className="flex gap-3 mt-2">
                 <button onClick={handleSaveSettings} className="btn-organic px-4 py-2 font-medium">
                   Save

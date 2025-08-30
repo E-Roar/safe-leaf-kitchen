@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { safeStorage } from '@/lib/safeStorage';
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { safeStorage } from "@/lib/safeStorage";
 
 interface VisualEffectsSettings {
   particlesEnabled: boolean;
   parallaxEnabled: boolean;
   animationsEnabled: boolean;
+  neonGlowEnabled: boolean;
+  glowIntensity: 'subtle' | 'medium' | 'vibrant';
 }
 
 interface VisualEffectsContextValue {
@@ -16,12 +18,16 @@ interface VisualEffectsContextValue {
   toggleParticles: () => void;
   toggleParallax: () => void;
   toggleAnimations: () => void;
+  toggleNeonGlow: () => void;
+  setGlowIntensity: (intensity: 'subtle' | 'medium' | 'vibrant') => void;
 }
 
 const defaultSettings: VisualEffectsSettings = {
   particlesEnabled: false,
   parallaxEnabled: true,
   animationsEnabled: true,
+  neonGlowEnabled: false, // Changed from true to false to disable glow by default
+  glowIntensity: 'medium',
 };
 
 const VisualEffectsContext = createContext<VisualEffectsContextValue | undefined>(undefined);
@@ -59,12 +65,35 @@ export function VisualEffectsProvider({ children }: { children: React.ReactNode 
     updateSetting('animationsEnabled', !settings.animationsEnabled);
   }, [settings.animationsEnabled, updateSetting]);
 
+  const toggleNeonGlow = useCallback(() => {
+    updateSetting('neonGlowEnabled', !settings.neonGlowEnabled);
+  }, [settings.neonGlowEnabled, updateSetting]);
+
+  const setGlowIntensity = useCallback((intensity: 'subtle' | 'medium' | 'vibrant') => {
+    updateSetting('glowIntensity', intensity);
+  }, [updateSetting]);
+
+  // Apply CSS classes to document body based on settings
+  useEffect(() => {
+    const body = document.body;
+    
+    // Remove existing glow classes
+    body.classList.remove('neon-glow-enabled', 'glow-subtle', 'glow-medium', 'glow-vibrant');
+    
+    // Apply current settings
+    if (settings.neonGlowEnabled) {
+      body.classList.add('neon-glow-enabled', `glow-${settings.glowIntensity}`);
+    }
+  }, [settings.neonGlowEnabled, settings.glowIntensity]);
+
   const value = {
     settings,
     updateSetting,
     toggleParticles,
     toggleParallax,
     toggleAnimations,
+    toggleNeonGlow,
+    setGlowIntensity,
   };
 
   return (

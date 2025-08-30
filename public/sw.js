@@ -1,4 +1,5 @@
-const CACHE_NAME = 'safeleafkitchen-v1.0.0';
+const CACHE_NAME = 'safeleafkitchen-v1.1.0';
+const IMAGE_CACHE_NAME = 'safeleafkitchen-images-v1.0.0';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',
@@ -24,6 +25,38 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache when possible
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Handle image requests with dedicated caching strategy
+  if (event.request.destination === 'image' || 
+      url.pathname.startsWith('/images/') ||
+      /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(url.pathname)) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+            // Serve from cache
+            return cachedResponse;
+          }
+          
+          // Fetch and cache the image
+          return fetch(event.request).then(networkResponse => {
+            // Only cache successful responses
+            if (networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => {
+            // Return a placeholder or cached fallback if available
+            return cache.match('/icons/icon-192x192.png');
+          });
+        });
+      })
+    );
+    return;
+  }
+  
+  // Handle other requests normally
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -43,7 +76,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName !== IMAGE_CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }

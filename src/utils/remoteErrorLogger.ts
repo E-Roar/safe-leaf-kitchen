@@ -218,6 +218,13 @@ export class RemoteErrorLogger {
           return; // Skip logging chart library warnings
         }
         
+        // Filter out translation key warnings to prevent infinite loops
+        if (message.includes('Translation key not found:') ||
+            message.includes('landing.video.') ||
+            message.includes('useI18n.tsx')) {
+          return; // Skip logging translation warnings to prevent recursion
+        }
+        
         isLogging = true;
         try {
           this.log('warn', message);

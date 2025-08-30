@@ -224,6 +224,14 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
                   <MessageCircle className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
                   {t('landing.askAssistant')}
                 </button>
+                <button
+                  onClick={onNavigateToLeaves}
+                  className="px-8 py-4 rounded-2xl bg-gradient-primary hover:bg-gradient-primary/90 text-primary-foreground font-semibold flex items-center gap-3 justify-center hover:scale-105 transition-all duration-300 shadow-glow group"
+                >
+                  <Leaf className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+                  {t('landing.leavesEncyclopedia')}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </button>
               </div>
               
               <div className="flex flex-wrap gap-6 text-sm justify-center">
@@ -987,9 +995,11 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               </button>
               <button 
                 onClick={onNavigateToLeaves} 
-                className="px-6 py-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 text-sm font-medium"
+                className="group inline-flex items-center gap-2 px-6 py-3 bg-gradient-primary hover:bg-gradient-primary/90 text-primary-foreground font-medium rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-glow text-sm"
               >
+                <Leaf className="w-4 h-4 transition-transform group-hover:rotate-12" />
                 {t('landing.leavesEncyclopedia')}
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
           </div>
