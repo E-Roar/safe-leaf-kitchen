@@ -877,6 +877,7 @@ export default function StatsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {nutritionalInsights.map((insight, index) => (
             <div key={index} className="text-center p-3 sm:p-0">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">{insight.title}</p>
               <p className={`text-xl sm:text-2xl font-bold ${insight.color}`}>{insight.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{insight.description}</p>
             </div>

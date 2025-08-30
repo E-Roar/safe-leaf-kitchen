@@ -12,9 +12,10 @@ interface LandingPageProps {
   onNavigateToScan?: () => void;
   onNavigateToLeaves?: () => void;
   onToggleTheme?: () => void;
+  theme?: 'light' | 'dark'; // Add theme prop
 }
 
-export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves, onToggleTheme }: LandingPageProps) {
+export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves, onToggleTheme, theme = 'dark' }: LandingPageProps) {
   const { t } = useI18n();
   const { settings, toggleParticles } = useVisualEffects();
   
@@ -118,7 +119,19 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
   };
   
   return (
-    <div className="min-h-screen w-full flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12 relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12 relative overflow-hidden pt-24">
+      {/* Parallax Background Image */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{ 
+          backgroundImage: `url('/images/hero-leafy-background${theme === 'light' ? '-light' : ''}.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed'
+        }}
+      />
+      
       {/* Floating Leaves Particle System */}
       <FloatingLeaves 
         enabled={settings.particlesEnabled} 
@@ -147,7 +160,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       </div>
 
       {/* Theme Toggle and Particle Toggle */}
-      <div className="absolute top-4 left-16 z-20 flex gap-2">
+      <div className="absolute top-6 left-16 z-20 flex gap-2">
         <button
           onClick={onToggleTheme}
           className="p-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 group"
@@ -171,9 +184,10 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           }`} />
         </button>
       </div>
+      
       {/* Full-Width Hero Section with Vanilla-Tilt Title */}
-      <div className="w-full relative z-10 mt-16 sm:mt-20 mb-16">
-        {/* Hero Container with Green Gradient Background - Full Width */}
+      <div className="w-full relative z-10 mt-8 mb-16">
+        {/* Hero Content Container - No background image here */}
         <div className="hero-container">
           {/* Animated SafeLeafKitchen Title with Parallax Letters */}
           <div className="text-center mb-8">
@@ -746,7 +760,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.fao.desc')}</p>
             </div>
             
-            <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
+            <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/330 transition-all duration-300 group text-center hover:scale-105">
               <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
                 <img 
                   src="/images/logos/brightidea.svg" 
@@ -907,7 +921,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <div className="glass p-8 rounded-3xl border border-border/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300">
             <div className="absolute top-4 right-4 bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-medium">{t('landing.future.title')}</div>
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-8 h-8 text-primary-foreground" />
               </div>
               <div>
@@ -938,7 +952,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <div className="glass p-8 rounded-3xl border border-border/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300">
             <div className="absolute top-4 right-4 bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-medium">{t('landing.future.beta')}</div>
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
                 <TrendingUp className="w-8 h-8 text-primary-foreground" />
               </div>
               <div>

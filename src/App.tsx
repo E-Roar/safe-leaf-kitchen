@@ -9,6 +9,7 @@ import ChatPage from "@/components/pages/ChatPage";
 import StatsPage from "@/components/pages/StatsPage";
 import RecipePage from "@/components/pages/RecipePage";
 import LeavesPage from "@/components/pages/LeavesPage";
+import SettingsPage from "@/components/pages/SettingsPage";
 import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import { registerServiceWorker } from "@/utils/pwaUtils";
 import { safeStorage } from "@/lib/safeStorage";
@@ -133,6 +134,7 @@ const App = () => {
             onNavigateToLeaves={handleNavigateToLeaves}
             onToggleTheme={handleToggleTheme}
             onNavigateToScan={handleNavigateToScan}
+            theme={theme} // Pass theme to LandingPage
           />
         );
       case "chat":
@@ -144,7 +146,7 @@ const App = () => {
       case "leaves":
         return <LeavesPage selectedLeafId={selectedLeafId} />;
       case "settings":
-        return <div></div>; // Settings are now handled in the password-protected AppLayout
+        return <SettingsPage onBack={() => setActiveTab("home")} />;
       default:
         return (
           <LandingPage
@@ -153,10 +155,11 @@ const App = () => {
             onNavigateToLeaves={handleNavigateToLeaves}
             onToggleTheme={handleToggleTheme}
             onNavigateToScan={handleNavigateToScan}
+            theme={theme} // Pass theme to LandingPage
           />
         );
     }
-  }, [activeTab, selectedRecipeId, selectedLeafId, handleNavigateToChat, handleNavigateToRecipes, handleNavigateToLeaves, handleToggleTheme, handleNavigateToScan]);
+  }, [activeTab, selectedRecipeId, selectedLeafId, handleNavigateToChat, handleNavigateToRecipes, handleNavigateToLeaves, handleToggleTheme, handleNavigateToScan, theme]);
 
   return (
     <ErrorBoundary>

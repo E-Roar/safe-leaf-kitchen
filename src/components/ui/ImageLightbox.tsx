@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from './button';
+import { useI18n } from '@/hooks/useI18n';
 
 interface LightboxImage {
   src: string;
@@ -27,6 +28,7 @@ export function ImageLightbox({
   onNavigate,
   className
 }: ImageLightboxProps) {
+  const { t } = useI18n();
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -292,7 +294,7 @@ export function ImageLightbox({
         />
       </div>
 
-      {/* Instructions - removed */}
+      {/* Instructions - removed for cleaner interface */}
     </div>
   );
 }

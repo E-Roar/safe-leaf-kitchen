@@ -30,7 +30,7 @@ const defaultTranslations: Translations = {
   'landing.smartScanning': { EN: 'Smart Scanning', FR: 'Scan intelligent', AR: 'مسح ذكي' },
   'landing.recipeIdeas': { EN: 'Recipe Ideas', FR: 'Idées de recettes', AR: 'أفكار وصفات' },
   'landing.chatAndNutrition': { EN: 'Chat & Nutrition Facts', FR: 'Chat & Infos nutritionnelles', AR: 'دردشة ومعلومات غذائية' },
-  'landing.moroccanHouseholds': { EN: 'For Moroccan households', FR: 'Pour les ménages marocains', AR: 'للأسر المغربية' },
+  'landing.moroccanHouseholds': { EN: 'For Moroccan households', FR: 'Pour les ménages marocains', AR: 'للأسري المغربية' },
   'landing.globalImpact': { EN: 'Global impact', FR: 'Impact mondial', AR: 'الأثر العالمي' },
   'landing.scienceBacked': { EN: 'Science-backed', FR: 'Fondé sur la science', AR: 'مدعوم علميًا' },
   'landing.moroccanBody': { EN: 'Morocco cultivates ~8.7M hectares and supports ~4M agricultural jobs. Co-products reach ~2.1M tonnes/year, with a potential economic value near €420M. SafeLeafKitchen helps families valorize edible leaves using trusted recipes and safety guidance.', FR: 'Le Maroc cultive ~8,7 M d’hectares et soutient ~4 M d’emplois agricoles. Les coproduits atteignent ~2,1 M de tonnes/an, avec une valeur économique potentielle proche de 420 M€. SafeLeafKitchen aide les familles à valoriser les feuilles comestibles grâce à des recettes fiables et des conseils de sécurité.', AR: 'يزرع المغرب حوالي 8.7 ملايين هكتار ويدعم حوالي 4 ملايين وظيفة زراعية. تصل المنتجات الثانوية إلى حوالي 2.1 مليون طن/سنة بقيمة اقتصادية محتملة تبلغ 420 مليون يورو. يساعد SafeLeafKitchen العائلات على تثمين الأوراق الصالحة للأكل بوصفات موثوقة وتوجيهات السلامة.' },
@@ -321,6 +321,28 @@ const defaultTranslations: Translations = {
   'settings.performanceNote2': { EN: 'Effects are automatically reduced on mobile devices', FR: 'Les effets sont automatiquement réduits sur les appareils mobiles', AR: 'يتم تقليل التأثيرات تلقائياً على الأجهزة المحمولة' },
   'settings.performanceNote3': { EN: 'All settings are saved automatically and persist between sessions', FR: 'Tous les paramètres sont sauvegardés automatiquement et persistent entre les sessions', AR: 'يتم حفظ جميع الإعدادات تلقائياً وتستمر بين الجلسات' },
   'settings.performanceNote4': { EN: 'Reduced motion preferences are respected', FR: 'Les préférences de mouvement réduit sont respectées', AR: 'يتم احترام تفضيلات الحركة المخفضة' },
+  
+  // Settings page - Password protection
+  'settings.passwordTitle': { EN: 'Settings Access', FR: 'Accès aux paramètres', AR: 'وصول الإعدادات' },
+  'settings.passwordSubtitle': { EN: 'Enter password to access settings', FR: 'Entrez le mot de passe pour accéder aux paramètres', AR: 'أدخل كلمة المرور للوصول إلى الإعدادات' },
+  'settings.passwordPlaceholder': { EN: 'Enter settings password', FR: 'Entrez le mot de passe des paramètres', AR: 'أدخل كلمة مرور الإعدادات' },
+  'settings.unlock': { EN: 'Unlock Settings', FR: 'Déverrouiller les paramètres', AR: 'فتح الإعدادات' },
+  'settings.back': { EN: 'Back', FR: 'Retour', AR: 'رجوع' },
+  'settings.authSuccess': { EN: 'Settings unlocked successfully', FR: 'Paramètres déverrouillés avec succès', AR: 'تم فتح الإعدادات بنجاح' },
+  'settings.authFailed': { EN: 'Incorrect password', FR: 'Mot de passe incorrect', AR: 'كلمة المرور غير صحيحة' },
+  
+  // Settings page - API Settings
+  'settings.apiSettings': { EN: 'API Settings', FR: 'Paramètres API', AR: 'إعدادات API' },
+  'settings.roboflowApiKey': { EN: 'Roboflow API Key', FR: 'Clé API Roboflow', AR: 'مفتاح API Roboflow' },
+  'settings.roboflowEndpoint': { EN: 'Roboflow Endpoint', FR: 'Point de terminaison Roboflow', AR: 'نقطة نهاية Roboflow' },
+  'settings.openrouterApiKey': { EN: 'OpenRouter API Key', FR: 'Clé API OpenRouter', AR: 'مفتاح API OpenRouter' },
+  'settings.openrouterEndpoint': { EN: 'OpenRouter Endpoint', FR: 'Point de terminaison OpenRouter', AR: 'نقطة نهاية OpenRouter' },
+  'settings.n8nWebhookUrl': { EN: 'n8n Webhook URL', FR: 'URL du webhook n8n', AR: 'عنوان URL لـ webhook n8n' },
+  'settings.chatProvider': { EN: 'Chat Provider', FR: 'Fournisseur de chat', AR: 'مزود الدردشة' },
+  'settings.save': { EN: 'Save Settings', FR: 'Enregistrer les paramètres', AR: 'حفظ الإعدادات' },
+  'settings.reset': { EN: 'Reset to Defaults', FR: 'Réinitialiser aux valeurs par défaut', AR: 'إعادة تعيين إلى الإعدادات الافتراضية' },
+  'settings.saved': { EN: 'Settings saved successfully', FR: 'Paramètres enregistrés avec succès', AR: 'تم حفظ الإعدادات بنجاح' },
+  'settings.footer': { EN: 'Settings are stored locally in your browser and never sent to any server', FR: 'Les paramètres sont stockés localement dans votre navigateur et ne sont jamais envoyés à un serveur', AR: 'يتم تخزين الإعدادات محليًا في متصفحك ولا تُرسل أبدًا إلى أي خادم' }
 };
 
 interface I18nContextValue {

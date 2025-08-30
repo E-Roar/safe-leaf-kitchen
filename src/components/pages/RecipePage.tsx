@@ -48,12 +48,14 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
   };
 
   const getRecipeImage = (recipeTitle: string) => {
-    // Convert recipe title to filename format
-    const filename = recipeTitle
+    // Convert recipe title to folder format
+    const folderName = recipeTitle
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, '-');
-    return `/images/recipes/${filename}.png`;
+    
+    // Use the first image from the gallery folder (1.png)
+    return `/images/recipes/${folderName}/1.png`;
   };
 
   const handleRecipeSelect = (recipe: Recipe) => {

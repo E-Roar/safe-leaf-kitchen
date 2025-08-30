@@ -13,9 +13,9 @@ interface LeafGalleryProps {
 interface GalleryImage {
   src: string;
   alt: string;
-  aspectRatio?: number; // Make aspect ratio optional
+  aspectRatio?: number;
   loaded: boolean;
-  failed?: boolean; // Add failed state
+  failed?: boolean;
   naturalWidth?: number;
   naturalHeight?: number;
 }
@@ -72,7 +72,7 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
       
       // Add a fallback timeout in case some images never trigger events
       setTimeout(() => {
-        console.log('⏰ Fallback timeout triggered - forcing loading complete');
+        console.log('⏰ Leaf fallback timeout triggered - forcing loading complete');
         setIsLoading(false);
       }, 3000);
     };
@@ -112,7 +112,7 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
       return newImages;
     });
     
-    console.log(`✅ Image loaded successfully: ${img.src}`);
+    console.log(`✅ Leaf image loaded successfully: ${img.src}`);
   };
 
   const handleImageClick = (imageIndex: number) => {
@@ -150,8 +150,10 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
     return (
       <div className={cn("w-full", className)}>
         <div className="flex items-center gap-2 mb-4">
-          <ImageIcon className="w-5 h-5 text-primary" />
-          <h4 className="font-semibold text-foreground">Leaf Gallery</h4>
+          <div className="w-5 h-5 rounded-full bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/25">
+            <Leaf className="w-5 h-5 text-primary-foreground p-0.5" />
+          </div>
+          <h4 className="font-semibold text-foreground drop-shadow-sm">{t('gallery.leafGallery') || 'Leaf Gallery'}</h4>
           <span className="text-sm text-muted-foreground">Loading...</span>
         </div>
         <div className="text-center py-8">
@@ -164,8 +166,8 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
     );
   }
 
-  // Filter out only loaded images for display (exclude failed ones)
-  const loadedImages = images.filter(img => img.loaded && !img.failed);
+  // Filter to show images that have been attempted (loaded or failed) - includes all gallery images
+  const loadedImages = images.filter(img => img.loaded || img.failed);
   const hasAttemptedLoading = images.some(img => img.loaded || img.failed);
 
   // Temporary debug logging
@@ -177,6 +179,7 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
     imageStates: images.map(img => ({ src: img.src, loaded: img.loaded, failed: img.failed }))
   });
 
+  // Show loading state while images are being processed
   if (isLoading || (images.length > 0 && loadedImages.length === 0 && !hasAttemptedLoading)) {
     return (
       <div className={cn("w-full", className)}>
@@ -191,14 +194,17 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
               onLoad={(e) => handleImageLoad(index, e)}
               onError={() => handleImageError(index, image.src)}
               loading="eager"
+              fetchPriority="high"
               crossOrigin="anonymous"
             />
           ))}
         </div>
         
         <div className="flex items-center gap-2 mb-4">
-          <Leaf className="w-5 h-5 text-primary" />
-          <h4 className="font-semibold text-foreground">Leaf Gallery</h4>
+          <div className="w-5 h-5 rounded-full bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/25">
+            <Leaf className="w-5 h-5 text-primary-foreground p-0.5" />
+          </div>
+          <h4 className="font-semibold text-foreground drop-shadow-sm">{t('gallery.leafGallery') || 'Leaf Gallery'}</h4>
           <span className="text-sm text-muted-foreground">Loading...</span>
         </div>
         <div className="text-center py-8">
@@ -279,6 +285,13 @@ export function LeafGallery({ leafId, leafName, className }: LeafGalleryProps) {
         onClose={handleLightboxClose}
         onNavigate={handleLightboxNavigate}
       />
+      
+      {/* Gallery Footer */}
+      <div className="mt-6 p-4 glass rounded-xl text-center">
+        <p className="text-sm text-muted-foreground">
+          {t('gallery.dynamicLoadingMessage') || 'Images are dynamically loaded from the gallery folder'}
+        </p>
+      </div>
     </div>
   );
 }
