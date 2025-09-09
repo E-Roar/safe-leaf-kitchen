@@ -18,6 +18,7 @@ interface LandingPageProps {
 export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onNavigateToScan, onNavigateToLeaves, onToggleTheme, theme = 'dark' }: LandingPageProps) {
   const { t } = useI18n();
   const { settings, toggleParticles } = useVisualEffects();
+  const [showAbout, setShowAbout] = useState(false);
   
   // Vanilla-tilt effect for the hero title container
   const titleRef = useVanillaTilt<HTMLDivElement>({
@@ -284,6 +285,9 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               controls
               poster="/images/video-thumbnail.png"
               preload="metadata"
+              autoPlay
+              muted
+              playsInline
             >
               <source src="/videos/safeleafkitchen-tutorial.mp4" type="video/mp4" />
               <div className="absolute inset-0 flex items-center justify-center text-center p-8">
@@ -1019,13 +1023,56 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           </div>
         </div>
         
-        {/* Attribution */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-muted-foreground">
-            {t('landing.sources')}
-          </p>
-        </div>
+        {/* Attribution removed to keep a single footer */}
       </div>
+
+      {/* Footer */}
+      <footer className="w-full max-w-6xl mx-auto mt-10 mb-4 text-center relative z-20">
+        <div className="pt-4 text-sm text-foreground/80">
+          <span>© {new Date().getFullYear()} SafeLeafKitchen</span>
+          <span className="mx-2">•</span>
+          <button
+            onClick={() => setShowAbout(true)}
+            className="underline underline-offset-4 hover:text-primary transition-colors"
+          >
+            About
+          </button>
+        </div>
+      </footer>
+
+      {/* About Modal */}
+      {showAbout && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowAbout(false)}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="relative glass rounded-3xl border border-border/60 max-w-md w-full p-6 text-left shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3">
+              <h3 className="text-xl font-bold text-foreground">About SafeLeafKitchen</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              SafeLeafKitchen’s core vision and solution concept were invented and designed by
+              <span className="font-semibold text-foreground"> D. Jamila El Biyad</span> —
+              the driving creative force behind this application’s purpose and user experience.
+            </p>
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => setShowAbout(false)}
+                className="px-4 py-2 rounded-xl border border-border bg-background hover:bg-muted transition-colors text-sm"
+                aria-label="Close about dialog"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
