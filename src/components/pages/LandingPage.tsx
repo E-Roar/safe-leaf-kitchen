@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon, Sparkles, Heart, TrendingUp, CheckCircle, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon, Sparkles, Heart, TrendingUp, CheckCircle, Star, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useMultiParallax } from "@/hooks/useParallax";
 import { useVanillaTilt, useParallaxLetters } from "@/hooks/useVanillaTilt";
@@ -213,6 +213,14 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               <p className="text-lg md:text-xl leading-relaxed mb-6 max-w-3xl mx-auto text-muted-foreground">
                 {t('landing.tagline')}
               </p>
+              <a
+                href="/downloads/Recipes.pdf"
+                download
+                className="inline-block px-6 py-3 mt-4 bg-gradient-to-r from-green-600 to-amber-800 text-white rounded-md hover:opacity-90 transition-opacity"
+              >
+                <BookOpen className="w-4 h-4 mr-2 inline-block align-middle" />
+                Download Recipes Cookbook
+              </a>
               
               <div className="flex items-center gap-2 mb-8 justify-center">
                 <div className="flex items-center gap-1">
@@ -280,25 +288,20 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
         
         <div className="glass rounded-3xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-500 group">
           <div className="aspect-video bg-gradient-to-br from-muted/20 to-muted/40 flex items-center justify-center relative">
-            <video 
+            <video
+              onError={(e) => console.error('Video error', e)}
+              onCanPlay={() => console.log('Video can play')}
+              onLoadedData={() => console.log('Video loaded data')}
               className="w-full h-full object-cover"
               controls
               poster="/images/video-thumbnail.png"
-              preload="metadata"
+              preload="auto"
               autoPlay
               muted
               playsInline
+              src="/videos/safeleafkitchen-tutorial.mp4"
             >
               <source src="/videos/safeleafkitchen-tutorial.mp4" type="video/mp4" />
-              <div className="absolute inset-0 flex items-center justify-center text-center p-8">
-                <div>
-                  <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-4 mx-auto">
-                    <div className="w-0 h-0 border-l-[12px] border-l-primary border-y-[8px] border-y-transparent ml-1" />
-                  </div>
-                  <p className="text-foreground font-medium mb-2">Video not supported in your browser</p>
-                  <p className="text-sm text-muted-foreground">Please use a modern browser to view the tutorial</p>
-                </div>
-              </div>
             </video>
             
             {/* Video overlay for better visual integration */}
