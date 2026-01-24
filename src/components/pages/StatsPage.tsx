@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw, BarChart3, LineChart } from "lucide-react";
-import { APIService } from "@/services/apiService";
-import { AnalyticsService } from "@/services/analyticsService";
+import { APIService, DetectionResult } from "@/services/apiService";
+import { AnalyticsService, WeeklyStats } from "@/services/analyticsService";
 import { recipes } from "@/data/recipes";
 import { ImpactService, ImpactMetrics } from "@/services/impactService";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -41,8 +41,8 @@ export default function StatsPage() {
   const [analyticsData, setAnalyticsData] = useState({
     dailyScans: [] as { date: string; value: number }[],
     dailyChats: [] as { date: string; value: number }[],
-    weeklyStats: [] as any[],
-    leafTrends: [] as any[]
+    weeklyStats: [] as WeeklyStats[],
+    leafTrends: [] as Record<string, any>[]
   });
 
   const [debugInfo, setDebugInfo] = useState({
@@ -58,61 +58,61 @@ export default function StatsPage() {
   // Move loadStats outside useEffect so it can be called from addDemoData
   const loadStats = () => {
     try {
-      console.log('Loading stats - Starting...');
+      logger.debug('Loading stats - Starting...');
       RemoteErrorLogger.log('debug', 'Stats loading started');
-      
+
       // Get detected leaves with proper error handling
-      let detectedLeaves: Array<{ timestamp: number; leaves: any[] }> = [];
+      let detectedLeaves: Array<{ timestamp: number; leaves: DetectionResult[] }> = [];
       try {
         detectedLeaves = APIService.getDetectedLeaves() || [];
-        console.log('Detected leaves loaded:', detectedLeaves.length);
+        logger.debug('Detected leaves loaded:', detectedLeaves.length);
         RemoteErrorLogger.log('debug', 'Detected leaves loaded', { count: detectedLeaves.length });
       } catch (err) {
-        console.warn('Failed to load detected leaves:', err);
+        logger.warn('Failed to load detected leaves:', err);
         RemoteErrorLogger.log('warn', 'Failed to load detected leaves', err);
         detectedLeaves = [];
       }
-      
+
       // Get impact metrics with proper error handling
       let impactMetrics: ImpactMetrics = {} as ImpactMetrics;
       try {
         impactMetrics = ImpactService.getCumulativeImpact() || {} as ImpactMetrics;
-        console.log('Impact metrics loaded:', impactMetrics);
+        logger.debug('Impact metrics loaded:', impactMetrics);
         RemoteErrorLogger.log('debug', 'Impact metrics loaded', impactMetrics);
       } catch (err) {
-        console.warn('Failed to load impact metrics:', err);
+        logger.warn('Failed to load impact metrics:', err);
         RemoteErrorLogger.log('warn', 'Failed to load impact metrics', err);
         impactMetrics = {} as ImpactMetrics;
       }
-    
-    // Convert detected leaves to the expected format with error handling
-    const detectedLeavesRecord: Record<string, number> = {};
-    if (Array.isArray(detectedLeaves)) {
-      detectedLeaves.forEach((detection, index) => {
-        if (detection && detection.leaves && Array.isArray(detection.leaves)) {
-          detection.leaves.forEach(leaf => {
-            if (leaf && leaf.class) {
-              const leafType = leaf.class;
-              detectedLeavesRecord[leafType] = (detectedLeavesRecord[leafType] || 0) + 1;
-            }
-          });
-        }
-      });
-    }
+
+      // Convert detected leaves to the expected format with error handling
+      const detectedLeavesRecord: Record<string, number> = {};
+      if (Array.isArray(detectedLeaves)) {
+        detectedLeaves.forEach((detection, index) => {
+          if (detection && detection.leaves && Array.isArray(detection.leaves)) {
+            detection.leaves.forEach(leaf => {
+              if (leaf && leaf.class) {
+                const leafType = leaf.class;
+                detectedLeavesRecord[leafType] = (detectedLeavesRecord[leafType] || 0) + 1;
+              }
+            });
+          }
+        });
+      }
 
       // Get other stats with error handling
       let totalScans = 0;
       let totalChats = 0;
       let recipeSuggestions = 0;
       let savedConversations = 0;
-      
+
       try {
         totalScans = APIService.getScans() || 0;
         totalChats = APIService.getChats() || 0;
         recipeSuggestions = APIService.getRecipeSuggestions() || 0;
         savedConversations = APIService.getConversationList()?.length || 0;
       } catch (err) {
-        console.warn('Failed to load basic stats:', err);
+        logger.warn('Failed to load basic stats:', err);
         RemoteErrorLogger.log('warn', 'Failed to load basic stats', err);
       }
 
@@ -124,7 +124,7 @@ export default function StatsPage() {
         savedConversations,
         impactMetrics
       });
-      console.log('Stats updated successfully');
+      logger.debug('Stats updated successfully');
       RemoteErrorLogger.log('debug', 'Stats updated successfully', {
         totalScans,
         totalChats,
@@ -132,14 +132,14 @@ export default function StatsPage() {
       });
 
       // Load analytics data for charts with error handling
-      console.log('Loading analytics data...');
+      logger.debug('Loading analytics data...');
       let analyticsData = {
         dailyScans: [] as { date: string; value: number }[],
         dailyChats: [] as { date: string; value: number }[],
-        weeklyStats: [] as any[],
-        leafTrends: [] as any[]
+        weeklyStats: [] as WeeklyStats[],
+        leafTrends: [] as Record<string, any>[]
       };
-      
+
       try {
         analyticsData = {
           dailyScans: AnalyticsService.getScanTrend(14) || [], // Last 14 days
@@ -147,7 +147,7 @@ export default function StatsPage() {
           weeklyStats: AnalyticsService.getWeeklyStatsRange(8) || [], // Last 8 weeks
           leafTrends: AnalyticsService.getLeafDetectionTrend(7) || [] // Last 7 days
         };
-        console.log('Analytics data loaded:', analyticsData);
+        logger.debug('Analytics data loaded:', analyticsData);
         RemoteErrorLogger.log('debug', 'Analytics data loaded', {
           dailyScansCount: analyticsData.dailyScans.length,
           dailyChatsCount: analyticsData.dailyChats.length,
@@ -155,10 +155,10 @@ export default function StatsPage() {
           leafTrendsCount: analyticsData.leafTrends.length
         });
       } catch (err) {
-        console.warn('Failed to load analytics data:', err);
+        logger.warn('Failed to load analytics data:', err);
         RemoteErrorLogger.log('warn', 'Failed to load analytics data', err);
       }
-      
+
       setAnalyticsData(analyticsData);
 
       // Debug information with error handling
@@ -172,7 +172,7 @@ export default function StatsPage() {
         };
         setDebugInfo(debugInfo);
       } catch (err) {
-        console.warn('Failed to load debug info:', err);
+        logger.warn('Failed to load debug info:', err);
         RemoteErrorLogger.log('warn', 'Failed to load debug info', err);
         setDebugInfo({
           detectedLeavesRaw: '[]',
@@ -182,15 +182,15 @@ export default function StatsPage() {
           favoritesCount: 0
         });
       }
-      console.log('Stats loading completed successfully');
+      logger.debug('Stats loading completed successfully');
       RemoteErrorLogger.log('info', 'Stats loading completed successfully');
     } catch (error) {
-      console.error('Error loading stats:', error);
+      logger.error('Error loading stats:', error);
       RemoteErrorLogger.log('error', 'Error loading stats', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       });
-      
+
       // Set fallback values to prevent UI crashes
       setStats({
         totalScans: 0,
@@ -211,15 +211,15 @@ export default function StatsPage() {
 
   useEffect(() => {
     // Run Chrome compatibility check on mount
-    console.log('Running Chrome compatibility check...');
+    logger.debug('Running Chrome compatibility check...');
     RemoteErrorLogger.log('info', 'Stats page loaded - starting compatibility check');
-    
+
     const compatReport = ChromeCompatibilityChecker.generateReport();
     setChromeCompatibility(compatReport);
-    
+
     // Log compatibility issues if any
     if (compatReport.issues.length > 0) {
-      console.warn('Chrome compatibility issues detected:', compatReport.issues);
+      logger.warn('Chrome compatibility issues detected:', compatReport.issues);
       RemoteErrorLogger.log('warn', 'Chrome compatibility issues detected', {
         issueCount: compatReport.issues.length,
         issues: compatReport.issues,
@@ -229,14 +229,14 @@ export default function StatsPage() {
     } else {
       RemoteErrorLogger.log('info', 'No Chrome compatibility issues detected');
     }
-    
+
     // Run quick test for debugging
     ChromeCompatibilityChecker.runQuickTest();
-    
+
     loadStats();
     // Refresh stats when component becomes visible (reduced frequency)
     const interval = setInterval(() => {
-      console.log('Refreshing stats...');
+      logger.debug('Refreshing stats...');
       loadStats();
     }, 10000); // Increased from 2000ms to 10000ms
     return () => clearInterval(interval);
@@ -252,11 +252,11 @@ export default function StatsPage() {
   // Add demo leaf detection data for testing impact calculations
   const addDemoData = () => {
     RemoteErrorLogger.log('info', 'Adding demo leaf detection data');
-    console.log('Adding demo data...');
-    
+    logger.debug('Adding demo data...');
+
     // First check current state
-    console.log('Current localStorage keys:', Object.keys(localStorage).filter(key => key.includes('safeleaf')));
-    
+    logger.debug('Current localStorage keys:', Object.keys(localStorage).filter(key => key.includes('safeleaf')));
+
     // Create sample leaf detection data
     const demoDetections = [
       {
@@ -305,43 +305,43 @@ export default function StatsPage() {
         ]
       }
     ];
-    
+
     // Store in the same format as APIService
     localStorage.setItem('safeleafkitchen_detected_leaves', JSON.stringify(demoDetections));
-    console.log('Demo data stored:', demoDetections);
-    
+    logger.debug('Demo data stored:', demoDetections);
+
     // Add some basic stats
     localStorage.setItem('scans', '3');
     localStorage.setItem('chats', '2');
-    
+
     // Immediately test impact calculation
-    console.log('Testing impact calculation immediately...');
+    logger.debug('Testing impact calculation immediately...');
     const testImpact = ImpactService.getCumulativeImpact();
-    console.log('Immediate impact test result:', testImpact);
-    
+    logger.debug('Immediate impact test result:', testImpact);
+
     // Also test the parsing directly
     const rawData = localStorage.getItem('safeleafkitchen_detected_leaves');
-    console.log('Raw stored data:', rawData);
-    
+    logger.debug('Raw stored data:', rawData);
+
     // Refresh the page data instead of reloading
-    console.log('Refreshing stats data...');
+    logger.debug('Refreshing stats data...');
     loadStats();
   };
 
   // Debug helper function accessible from browser console
   useEffect(() => {
     // Make debug functions globally accessible
-    (window as any).safeLeafDebug = {
+    window.safeLeafDebug = {
       showLogs: () => RemoteErrorLogger.displayDebugInfo(),
       exportLogs: () => RemoteErrorLogger.exportLogs(),
       clearLogs: () => RemoteErrorLogger.clearLogs(),
       getCompatibility: () => chromeCompatibility,
       shareDebugUrl: () => {
         const url = RemoteErrorLogger.createShareableDebugInfo();
-        console.log('Debug URL:', url);
+        logger.debug('Debug URL:', url);
         if (navigator.clipboard) {
           navigator.clipboard.writeText(url);
-          console.log('Debug URL copied to clipboard');
+          logger.debug('Debug URL copied to clipboard');
         }
         return url;
       },
@@ -350,16 +350,16 @@ export default function StatsPage() {
         RemoteErrorLogger.displayDebugInfo();
       }
     };
-    
-    console.log('🔍 Safe Leaf Debug commands available:');
-    console.log('- safeLeafDebug.showLogs() - Show all error logs');
-    console.log('- safeLeafDebug.exportLogs() - Export logs as JSON');
-    console.log('- safeLeafDebug.shareDebugUrl() - Create shareable debug URL');
-    console.log('- safeLeafDebug.testFeatures() - Test browser features');
-    console.log('- safeLeafDebug.getCompatibility() - Get compatibility report');
-    
+
+    logger.debug('🔍 Safe Leaf Debug commands available:');
+    logger.debug('- safeLeafDebug.showLogs() - Show all error logs');
+    logger.debug('- safeLeafDebug.exportLogs() - Export logs as JSON');
+    logger.debug('- safeLeafDebug.shareDebugUrl() - Create shareable debug URL');
+    logger.debug('- safeLeafDebug.testFeatures() - Test browser features');
+    logger.debug('- safeLeafDebug.getCompatibility() - Get compatibility report');
+
     return () => {
-      delete (window as any).safeLeafDebug;
+      delete window.safeLeafDebug;
     };
   }, [chromeCompatibility]);
 
@@ -376,20 +376,20 @@ export default function StatsPage() {
 
   // Calculate recipe-based metrics with proper error handling
   const totalRecipes = recipes.length;
-  
+
   // Calculate averages only if there are recipes
-  const avgProteins = totalRecipes > 0 
-    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.proteins_g || 0), 0) / totalRecipes 
+  const avgProteins = totalRecipes > 0
+    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.proteins_g || 0), 0) / totalRecipes
     : 0;
-  
-  const avgPolyphenols = totalRecipes > 0 
-    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.polyphenols_mg || 0), 0) / totalRecipes 
+
+  const avgPolyphenols = totalRecipes > 0
+    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.polyphenols_mg || 0), 0) / totalRecipes
     : 0;
-  
-  const avgFlavonoids = totalRecipes > 0 
-    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.flavonoids_mg || 0), 0) / totalRecipes 
+
+  const avgFlavonoids = totalRecipes > 0
+    ? recipes.reduce((sum, recipe) => sum + (recipe.nutrition.flavonoids_mg || 0), 0) / totalRecipes
     : 0;
-  
+
   const highAntioxidantRecipes = recipes.filter(recipe => {
     const score = recipe.nutrition.antioxidant_score?.toLowerCase() || '';
     return score.includes('élevé') || score.includes('high') || score.includes('très élevé') || score.includes('very high');
@@ -525,11 +525,10 @@ export default function StatsPage() {
           </div>
           <div className="space-y-2 mb-4">
             {chromeCompatibility.issues.slice(0, 3).map((issue, index) => (
-              <div key={index} className={`p-2 rounded-lg text-sm ${
-                issue.type === 'error' ? 'bg-red-100 text-red-800' :
-                issue.type === 'warning' ? 'bg-orange-100 text-orange-800' :
-                'bg-blue-100 text-blue-800'
-              }`}>
+              <div key={index} className={`p-2 rounded-lg text-sm ${issue.type === 'error' ? 'bg-red-100 text-red-800' :
+                  issue.type === 'warning' ? 'bg-orange-100 text-orange-800' :
+                    'bg-blue-100 text-blue-800'
+                }`}>
                 <div className="font-medium">[{issue.category}] {issue.message}</div>
                 {issue.solution && (
                   <div className="text-xs mt-1 opacity-80">💡 {issue.solution}</div>
@@ -641,8 +640,8 @@ export default function StatsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsLineChart data={analyticsData.dailyScans} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     tick={{ fontSize: isMobile ? 10 : 12 }}
                     interval={isMobile ? 1 : 0}
                     tickFormatter={(value) => {
@@ -658,10 +657,10 @@ export default function StatsPage() {
                       return date.toLocaleDateString();
                     }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="var(--color-scans)" 
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="var(--color-scans)"
                     strokeWidth={isMobile ? 1.5 : 2}
                     dot={{ fill: "var(--color-scans)", strokeWidth: 2, r: isMobile ? 3 : 4 }}
                     activeDot={{ r: isMobile ? 4 : 6, fill: "var(--color-scans)" }}
@@ -690,8 +689,8 @@ export default function StatsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={analyticsData.dailyChats} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     tick={{ fontSize: isMobile ? 10 : 12 }}
                     interval={isMobile ? 1 : 0}
                     tickFormatter={(value) => {
@@ -707,10 +706,10 @@ export default function StatsPage() {
                       return date.toLocaleDateString();
                     }}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="var(--color-chats)" 
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="var(--color-chats)"
                     fill="var(--color-chats)"
                     fillOpacity={0.3}
                     strokeWidth={isMobile ? 1.5 : 2}
@@ -747,8 +746,8 @@ export default function StatsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsBarChart data={analyticsData.weeklyStats} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis 
-                    dataKey="week" 
+                  <XAxis
+                    dataKey="week"
                     tick={{ fontSize: isMobile ? 10 : 12 }}
                     interval={isMobile ? "preserveStartEnd" : 0}
                   />
@@ -787,8 +786,8 @@ export default function StatsPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsLineChart data={analyticsData.leafTrends} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis 
-                      dataKey="date" 
+                    <XAxis
+                      dataKey="date"
                       tick={{ fontSize: isMobile ? 10 : 12 }}
                       interval={isMobile ? 1 : 0}
                       tickFormatter={(value) => {
@@ -808,10 +807,10 @@ export default function StatsPage() {
                       .filter(key => key !== 'date')
                       .map((leaf, index) => {
                         return (
-                          <Line 
+                          <Line
                             key={leaf}
-                            type="monotone" 
-                            dataKey={leaf} 
+                            type="monotone"
+                            dataKey={leaf}
                             stroke={`var(--color-${leaf})`}
                             strokeWidth={isMobile ? 1.5 : 2}
                             dot={{ r: isMobile ? 2 : 3 }}
@@ -847,11 +846,10 @@ export default function StatsPage() {
             {topLeaves.map((leaf, index) => (
               <div key={leaf.name} className="flex items-center justify-between p-2 sm:p-0">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className={`w-6 sm:w-8 h-6 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                    index === 0 ? 'bg-primary text-primary-foreground' :
-                    index === 1 ? 'bg-accent text-accent-foreground' :
-                    'bg-secondary text-secondary-foreground'
-                  }`}>
+                  <div className={`w-6 sm:w-8 h-6 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold ${index === 0 ? 'bg-primary text-primary-foreground' :
+                      index === 1 ? 'bg-accent text-accent-foreground' :
+                        'bg-secondary text-secondary-foreground'
+                    }`}>
                     {index + 1}
                   </div>
                   <div>
@@ -1056,7 +1054,7 @@ export default function StatsPage() {
           </div>
         </details>
       )}
-      
+
       {/* Mobile Debug Panel */}
       {isMobile && <MobileDebugPanel />}
     </div>

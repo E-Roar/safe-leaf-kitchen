@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon, Sparkles, Heart, TrendingUp, CheckCircle, Star, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
+import { logger } from '@/lib/logger';
+import { Leaf, Scan, ChefHat, MessageCircle, Users, Globe2, ShieldCheck, Building2, ArrowRight, Sun, Moon, Sparkles, Heart, TrendingUp, CheckCircle, Star, ChevronLeft, ChevronRight, BookOpen, RefreshCw } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useMultiParallax } from "@/hooks/useParallax";
 import { useVanillaTilt, useParallaxLetters } from "@/hooks/useVanillaTilt";
@@ -19,7 +20,9 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
   const { t } = useI18n();
   const { settings, toggleParticles } = useVisualEffects();
   const [showAbout, setShowAbout] = useState(false);
-  
+  const [videoError, setVideoError] = useState(false);
+  const [videoKey, setVideoKey] = useState(0); // For forcing video reload
+
   // Vanilla-tilt effect for the hero title container
   const titleRef = useVanillaTilt<HTMLDivElement>({
     max: 8,
@@ -31,10 +34,10 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
     transition: true,
     easing: 'cubic-bezier(.03,.98,.52,.99)'
   });
-  
+
   // Parallax letters effect for the title text
   const lettersRef = useParallaxLetters('SafeLeafKitchen');
-  
+
   // Parallax configuration for different layers - Extremely subtle for better UX and stability
   const parallaxOffsets = useMultiParallax([
     { speed: 0.005, direction: 'down' }, // Background layer (barely perceptible)
@@ -43,11 +46,11 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
     { speed: 0.015, direction: 'down' }, // Floating elements
     { speed: 0.018, direction: 'down' }  // Front floating elements
   ]);
-  
+
   // Team carousel state - responsive items per slide
   const [currentTeamSlide, setCurrentTeamSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  
+
   // Check for mobile view
   useEffect(() => {
     const checkMobile = () => {
@@ -57,7 +60,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
+
   const teamMembers = [
     {
       name: "Prof. Rekia Belahsen",
@@ -102,29 +105,29 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       type: "online"
     }
   ];
-  
+
   // Responsive items per slide - calculate after teamMembers is defined
   const itemsPerSlide = isMobile ? 1 : 3;
   const totalSlides = Math.ceil(teamMembers.length / itemsPerSlide);
-  
+
   const nextSlide = () => {
     setCurrentTeamSlide((prev) => (prev + 1) % totalSlides);
   };
-  
+
   const prevSlide = () => {
     setCurrentTeamSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
-  
+
   const goToSlide = (index: number) => {
     setCurrentTeamSlide(index);
   };
-  
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12 relative overflow-hidden pt-24">
       {/* Parallax Background Image */}
-      <div 
+      <div
         className="fixed inset-0 z-0"
-        style={{ 
+        style={{
           backgroundImage: `url('/images/hero-leafy-background${theme === 'light' ? '-light' : ''}.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
@@ -132,15 +135,15 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           backgroundAttachment: 'fixed'
         }}
       />
-      
+
       {/* Floating Leaves Particle System */}
-      <FloatingLeaves 
-        enabled={settings.particlesEnabled} 
+      <FloatingLeaves
+        enabled={settings.particlesEnabled}
         particleCount={20}
         className="z-[1]"
       />
       {/* Enhanced background effects with parallax */}
-      <div 
+      <div
         className="absolute inset-0 overflow-hidden pointer-events-none z-0 parallax-bg"
         style={{ transform: `translateY(${parallaxOffsets[0]}px)` }}
       >
@@ -151,7 +154,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       </div>
 
       {/* Additional mid-background layer */}
-      <div 
+      <div
         className="absolute inset-0 overflow-hidden pointer-events-none z-5 parallax-bg"
         style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
       >
@@ -170,29 +173,27 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <Sun className="w-5 h-5 hidden dark:block text-primary group-hover:rotate-180 transition-transform duration-500" />
           <Moon className="w-5 h-5 dark:hidden text-primary group-hover:-rotate-180 transition-transform duration-500" />
         </button>
-        
+
         <button
           onClick={toggleParticles}
-          className={`p-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 group ${
-            settings.particlesEnabled ? 'bg-primary/20' : 'bg-muted/20'
-          }`}
+          className={`p-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 group ${settings.particlesEnabled ? 'bg-primary/20' : 'bg-muted/20'
+            }`}
           title="Toggle floating leaves"
         >
-          <Sparkles className={`w-5 h-5 transition-all duration-500 ${
-            settings.particlesEnabled 
-              ? 'text-primary group-hover:rotate-12' 
-              : 'text-muted-foreground group-hover:scale-110'
-          }`} />
+          <Sparkles className={`w-5 h-5 transition-all duration-500 ${settings.particlesEnabled
+            ? 'text-primary group-hover:rotate-12'
+            : 'text-muted-foreground group-hover:scale-110'
+            }`} />
         </button>
       </div>
-      
+
       {/* Full-Width Hero Section with Vanilla-Tilt Title */}
       <div className="w-full relative z-10 mt-8 mb-16">
         {/* Hero Content Container - No background image here */}
         <div className="hero-container">
           {/* Animated SafeLeafKitchen Title with Parallax Letters */}
           <div className="text-center mb-8">
-            <div 
+            <div
               ref={titleRef}
               className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-6 inline-block whitespace-nowrap"
               style={{ direction: 'ltr', unicodeBidi: 'bidi-override' }}
@@ -200,7 +201,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               <div ref={lettersRef} className="parallax-letters-container" />
             </div>
           </div>
-          
+
           {/* Content Section with Enhanced Readability */}
           <div className="hero-content">
             <div className="max-w-4xl mx-auto text-center">
@@ -209,7 +210,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
                 <Sparkles className="w-4 h-4 text-primary animate-pulse" />
                 <span className="text-sm font-medium text-foreground">{t('landing.hero.badge')}</span>
               </div>
-              
+
               <p className="text-lg md:text-xl leading-relaxed mb-6 max-w-3xl mx-auto text-muted-foreground">
                 {t('landing.tagline')}
               </p>
@@ -221,7 +222,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
                 <BookOpen className="w-4 h-4 mr-2 inline-block align-middle" />
                 Download Recipes Cookbook
               </a>
-              
+
               <div className="flex items-center gap-2 mb-8 justify-center">
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
@@ -230,7 +231,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
                 </div>
                 <span className="text-sm font-medium">{t('landing.hero.trusted')}</span>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center">
                 <button
                   onClick={onNavigateToScan}
@@ -256,7 +257,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </button>
               </div>
-              
+
               <div className="flex flex-wrap gap-6 text-sm justify-center">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-primary" />
@@ -277,7 +278,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       </div>
 
       {/* Video Tutorial Section */}
-      <div 
+      <div
         className="w-full max-w-4xl mb-20"
         style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
       >
@@ -285,29 +286,47 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.video.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.video.subtitle')}</p>
         </div>
-        
+
         <div className="glass rounded-3xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all duration-500 group">
           <div className="aspect-video bg-gradient-to-br from-muted/20 to-muted/40 flex items-center justify-center relative">
-            <video
-              onError={(e) => console.error('Video error', e)}
-              onCanPlay={() => console.log('Video can play')}
-              onLoadedData={() => console.log('Video loaded data')}
-              className="w-full h-full object-cover"
-              controls
-              poster="/images/video-thumbnail.png"
-              preload="auto"
-              autoPlay
-              muted
-              playsInline
-              src="/videos/safeleafkitchen-tutorial.mp4"
-            >
-              <source src="/videos/safeleafkitchen-tutorial.mp4" type="video/mp4" />
-            </video>
-            
+            {videoError ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/80 z-20">
+                <p className="text-muted-foreground mb-4">{t('landing.video.error')}</p>
+                <button
+                  onClick={() => {
+                    setVideoError(false);
+                    setVideoKey(prev => prev + 1);
+                  }}
+                  className="p-2 rounded-full bg-primary/20 hover:bg-primary/30 text-primary transition-colors"
+                >
+                  <RefreshCw className="w-6 h-6" />
+                </button>
+              </div>
+            ) : (
+              <video
+                key={videoKey}
+                onError={(e) => {
+                  logger.error('Video error:', e.currentTarget.error);
+                  setVideoError(true);
+                }}
+                onCanPlay={() => logger.debug('Video can play')}
+                onLoadedData={() => logger.debug('Video loaded data')}
+                className="w-full h-full object-cover"
+                controls
+                preload="auto"
+                autoPlay
+                muted
+                playsInline
+                src="/videos/safeleafkitchen-tutorial.mp4"
+              >
+                <source src="/videos/safeleafkitchen-tutorial.mp4" type="video/mp4" />
+              </video>
+            )}
+
             {/* Video overlay for better visual integration */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none ${videoError ? 'hidden' : ''}`} />
           </div>
-          
+
           {/* Video description */}
           <div className="p-6">
             <div className="flex items-start gap-4">
@@ -340,7 +359,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       </div>
 
       {/* The Problem Section with Subtle Parallax */}
-      <div 
+      <div
         className="w-full max-w-6xl mb-20"
         style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
       >
@@ -348,7 +367,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.problem.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{t('landing.problem.subtitle')}</p>
         </div>
-        
+
         <div className="grid md:grid-cols-4 gap-6">
           <div className="text-center group">
             <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
@@ -357,7 +376,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.problem.foodWasted.title')}</h3>
             <p className="text-sm text-muted-foreground">{t('landing.problem.foodWasted.desc')}</p>
           </div>
-          
+
           <div className="text-center group">
             <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
               <span className="text-2xl">🗑️</span>
@@ -365,7 +384,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.problem.leavesDiscarded.title')}</h3>
             <p className="text-sm text-muted-foreground">{t('landing.problem.leavesDiscarded.desc')}</p>
           </div>
-          
+
           <div className="text-center group">
             <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
               <span className="text-2xl">💰</span>
@@ -373,7 +392,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.problem.moneyLost.title')}</h3>
             <p className="text-sm text-muted-foreground">{t('landing.problem.moneyLost.desc')}</p>
           </div>
-          
+
           <div className="text-center group">
             <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
               <span className="text-2xl">❓</span>
@@ -385,7 +404,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       </div>
 
       {/* Enhanced Value Propositions with Subtle Parallax */}
-      <div 
+      <div
         className="w-full max-w-6xl grid md:grid-cols-3 gap-6 mb-20"
         style={{ transform: `translateY(${parallaxOffsets[2]}px)` }}
       >
@@ -396,7 +415,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.smartScanning')}</h3>
           <p className="text-sm text-muted-foreground">{t('landing.valueProps.scanning.desc')}</p>
         </button>
-        
+
         <button onClick={onNavigateToRecipes} className="glass p-6 rounded-3xl text-center group hover:scale-105 hover:shadow-glow transition-all duration-300 border border-border/50">
           <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:rotate-6 transition-transform duration-300 shadow-organic">
             <ChefHat className="w-10 h-10 text-primary-foreground" />
@@ -404,7 +423,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.recipeIdeas')}</h3>
           <p className="text-sm text-muted-foreground">{t('landing.valueProps.recipes.desc')}</p>
         </button>
-        
+
         <button onClick={onNavigateToChat} className="glass p-6 rounded-3xl text-center group hover:scale-105 hover:shadow-glow transition-all duration-300 border border-border/50">
           <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:rotate-6 transition-transform duration-300 shadow-organic">
             <MessageCircle className="w-10 h-10 text-primary-foreground" />
@@ -427,7 +446,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             {t('landing.moroccanBody')}
           </p>
         </div>
-        
+
         <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -439,7 +458,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             {t('landing.globalBody')}
           </p>
         </div>
-        
+
         <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -454,7 +473,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
       </div>
 
       {/* Success Metrics & Impact with Subtle Parallax */}
-      <div 
+      <div
         className="w-full max-w-6xl mb-20"
         style={{ transform: `translateY(${parallaxOffsets[1]}px)` }}
       >
@@ -462,7 +481,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.metrics.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.metrics.subtitle')}</p>
         </div>
-        
+
         <div className="grid md:grid-cols-3 gap-8">
           <div className="text-center glass p-8 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -473,7 +492,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <h3 className="text-lg font-semibold text-foreground">{t('landing.metrics.coproducts.title')}</h3>
             <p className="text-sm text-muted-foreground mt-2">{t('landing.metrics.coproducts.desc')}</p>
           </div>
-          
+
           <div className="text-center glass p-8 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
               <Heart className="w-8 h-8 text-primary-foreground" />
@@ -483,7 +502,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <h3 className="text-lg font-semibold text-foreground">{t('landing.metrics.nutritional.title')}</h3>
             <p className="text-sm text-muted-foreground mt-2">{t('landing.metrics.nutritional.desc')}</p>
           </div>
-          
+
           <div className="text-center glass p-8 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
               <CheckCircle className="w-8 h-8 text-primary-foreground" />
@@ -502,7 +521,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.howItWorks')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.howItWorks.subtitle')}</p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
@@ -510,21 +529,21 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.howItWorks.step1.title')}</h3>
             <p className="text-sm text-muted-foreground">{t('landing.hiw.1')}</p>
           </div>
-          
+
           <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground group-hover:rotate-12 transition-transform duration-300">2</div>
             <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.howItWorks.step2.title')}</h3>
             <p className="text-sm text-muted-foreground">{t('landing.hiw.2')}</p>
           </div>
-          
+
           <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground group-hover:rotate-12 transition-transform duration-300">3</div>
             <h3 className="text-lg font-semibold text-foreground mb-2">{t('landing.howItWorks.step3.title')}</h3>
             <p className="text-sm text-muted-foreground">{t('landing.hiw.3')}</p>
           </div>
-          
+
           <div className="glass p-6 rounded-3xl border border-border/50 text-center group hover:scale-105 transition-all duration-300 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-primary"></div>
             <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground group-hover:rotate-12 transition-transform duration-300">4</div>
@@ -540,7 +559,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.audience.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.audience.subtitle')}</p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <div className="glass p-8 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
             <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-3">
@@ -577,7 +596,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               </div>
             </div>
           </div>
-          
+
           <div className="glass p-8 rounded-3xl border border-border/50">
             <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-3">
               <Users className="w-6 h-6 text-accent" />
@@ -637,7 +656,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.team.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{t('landing.team.subtitle')}</p>
         </div>
-        
+
         {/* Carousel Container */}
         <div className="relative">
           {/* Navigation Buttons */}
@@ -648,7 +667,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           >
             <ChevronLeft className="w-6 h-6 text-primary group-hover:text-primary-foreground" />
           </button>
-          
+
           <button
             onClick={nextSlide}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-primary/20 hover:bg-primary/30 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group hidden sm:flex"
@@ -656,9 +675,9 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           >
             <ChevronRight className="w-6 h-6 text-primary group-hover:text-primary-foreground" />
           </button>
-          
+
           {/* Carousel Track */}
-          <div 
+          <div
             className="overflow-hidden mx-0 sm:mx-14"
             onTouchStart={(e) => {
               const touchStart = e.touches[0].clientX;
@@ -677,31 +696,28 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               document.addEventListener('touchend', handleTouchEnd);
             }}
           >
-            <div 
+            <div
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentTeamSlide * 100}%)` }}
             >
               {Array.from({ length: totalSlides }).map((_, slideIndex) => (
                 <div key={slideIndex} className="w-full flex-shrink-0">
-                  <div className={`grid gap-6 px-2 ${
-                    isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'
-                  }`}>
+                  <div className={`grid gap-6 px-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'
+                    }`}>
                     {teamMembers.slice(slideIndex * itemsPerSlide, slideIndex * itemsPerSlide + itemsPerSlide).map((member, memberIndex) => (
-                      <div 
+                      <div
                         key={member.name}
                         className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105 hover:shadow-glow"
                       >
-                        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold group-hover:scale-110 transition-transform duration-300 ${
-                          member.type === 'online' 
-                            ? 'bg-gradient-to-br from-accent to-accent/80 text-accent-foreground' 
-                            : 'bg-gradient-primary text-primary-foreground'
-                        }`}>
+                        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold group-hover:scale-110 transition-transform duration-300 ${member.type === 'online'
+                          ? 'bg-gradient-to-br from-accent to-accent/80 text-accent-foreground'
+                          : 'bg-gradient-primary text-primary-foreground'
+                          }`}>
                           {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
                         <h4 className="text-lg font-bold text-foreground mb-1">{member.name}</h4>
-                        <p className={`text-sm font-semibold mb-2 ${
-                          member.type === 'online' ? 'text-accent' : 'text-primary'
-                        }`}>{member.role}</p>
+                        <p className={`text-sm font-semibold mb-2 ${member.type === 'online' ? 'text-accent' : 'text-primary'
+                          }`}>{member.role}</p>
                         <p className="text-xs text-muted-foreground">{member.specialty}</p>
                         {member.type === 'online' && (
                           <div className="mt-3 inline-flex items-center gap-1 px-2 py-1 bg-accent/20 rounded-full">
@@ -716,18 +732,17 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               ))}
             </div>
           </div>
-          
+
           {/* Dot Indicators */}
           <div className="flex justify-center mt-8 gap-2">
             {Array.from({ length: totalSlides }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 ${
-                  currentTeamSlide === index 
-                    ? 'bg-primary shadow-glow' 
-                    : 'bg-border hover:bg-primary/50'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 ${currentTeamSlide === index
+                  ? 'bg-primary shadow-glow'
+                  : 'bg-border hover:bg-primary/50'
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -741,17 +756,17 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.acknowledgments.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">{t('landing.acknowledgments.subtitle')}</p>
         </div>
-        
+
         {/* Organizers & Sponsors */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold text-foreground mb-8 text-center">{t('landing.acknowledgments.organizers')}</h3>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
               <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
-                <img 
-                  src="/images/logos/fao.svg" 
-                  alt="FAO Logo" 
+                <img
+                  src="/images/logos/fao.svg"
+                  alt="FAO Logo"
                   className="w-full h-full object-contain rounded-lg"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -766,12 +781,12 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               <h4 className="text-lg font-bold text-foreground mb-2">FAO</h4>
               <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.fao.desc')}</p>
             </div>
-            
+
             <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/330 transition-all duration-300 group text-center hover:scale-105">
               <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
-                <img 
-                  src="/images/logos/brightidea.svg" 
-                  alt="BrightIdea Logo" 
+                <img
+                  src="/images/logos/brightidea.svg"
+                  alt="BrightIdea Logo"
                   className="w-full h-full object-contain rounded-lg"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -786,12 +801,12 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               <h4 className="text-lg font-bold text-foreground mb-2">BrightIdea</h4>
               <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.brightidea.desc')}</p>
             </div>
-            
+
             <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
               <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
-                <img 
-                  src="/images/logos/innovation-hub.svg" 
-                  alt="Innovation Hub Logo" 
+                <img
+                  src="/images/logos/innovation-hub.svg"
+                  alt="Innovation Hub Logo"
                   className="w-full h-full object-contain rounded-lg"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -806,12 +821,12 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               <h4 className="text-lg font-bold text-foreground mb-2">Innovation Hub</h4>
               <p className="text-sm text-muted-foreground">{t('landing.acknowledgments.innovationhub.desc')}</p>
             </div>
-            
+
             <div className="glass p-6 rounded-3xl border border-border/50 hover:border-primary/30 transition-all duration-300 group text-center hover:scale-105">
               <div className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
-                <img 
-                  src="/images/logos/universites.svg" 
-                  alt="Universités Logo" 
+                <img
+                  src="/images/logos/universites.svg"
+                  alt="Universités Logo"
                   className="w-full h-full object-contain rounded-lg"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -828,7 +843,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             </div>
           </div>
         </div>
-        
+
         {/* Special Thanks */}
         <div className="glass p-8 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent text-center">
           <h3 className="text-2xl font-bold text-foreground mb-6">{t('landing.acknowledgments.specialThanks')}</h3>
@@ -847,7 +862,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.access.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.access.subtitle')}</p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           <div className="glass p-8 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent relative">
             <div className="absolute -top-4 left-6 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-semibold">{t('landing.access.mostPopular')}</div>
@@ -874,14 +889,14 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
                 <span>{t('landing.access.features.basicTracking')}</span>
               </li>
             </ul>
-            <button 
+            <button
               onClick={onNavigateToScan}
               className="w-full btn-organic py-3 text-center font-semibold text-primary-foreground hover:scale-105 transition-all duration-300"
             >
               {t('landing.access.startFree')}
             </button>
           </div>
-          
+
           <div className="glass p-8 rounded-3xl border border-border/50">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-foreground mb-2">{t('landing.access.premiumFeatures')}</h3>
@@ -923,7 +938,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{t('landing.future.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.future.subtitle')}</p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           <div className="glass p-8 rounded-3xl border border-border/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300">
             <div className="absolute top-4 right-4 bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-medium">{t('landing.future.title')}</div>
@@ -955,7 +970,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
               </li>
             </ul>
           </div>
-          
+
           <div className="glass p-8 rounded-3xl border border-border/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300">
             <div className="absolute top-4 right-4 bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-medium">{t('landing.future.beta')}</div>
             <div className="flex items-center gap-4 mb-6">
@@ -996,26 +1011,26 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             {t('landing.bottomCtaQuote')}
           </blockquote>
           <div className="w-16 h-1 bg-gradient-primary mx-auto mb-8"></div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button 
-              onClick={onNavigateToScan} 
+            <button
+              onClick={onNavigateToScan}
               className="btn-organic px-8 py-4 text-lg font-semibold text-primary-foreground flex items-center gap-3 hover:scale-105 transition-all duration-300 shadow-glow group"
             >
               <TrendingUp className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
-              {t('landing.startScanning')} 
+              {t('landing.startScanning')}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </button>
-            
+
             <div className="flex gap-3">
-              <button 
-                onClick={onNavigateToRecipes} 
+              <button
+                onClick={onNavigateToRecipes}
                 className="px-6 py-3 rounded-2xl border border-border glass hover:scale-105 transition-all duration-300 text-sm font-medium"
               >
                 {t('landing.exploreRecipes')}
               </button>
-              <button 
-                onClick={onNavigateToLeaves} 
+              <button
+                onClick={onNavigateToLeaves}
                 className="group inline-flex items-center gap-2 px-6 py-3 bg-gradient-primary hover:bg-gradient-primary/90 text-primary-foreground font-medium rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-glow text-sm"
               >
                 <Leaf className="w-4 h-4 transition-transform group-hover:rotate-12" />
@@ -1025,7 +1040,7 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             </div>
           </div>
         </div>
-        
+
         {/* Attribution removed to keep a single footer */}
       </div>
 

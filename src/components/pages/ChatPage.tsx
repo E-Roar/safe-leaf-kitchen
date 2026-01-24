@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import { logger } from '@/lib/logger';
 import { Send, Mic, Camera, MicOff, Volume2, VolumeX, ChefHat, Plus, MessageSquare, Trash2, Search, Tag, Filter, Pause, Leaf as LeafIcon } from "lucide-react";
 import { APIService, ChatMessage } from "@/services/apiService";
+import { Analytics } from "@/services/analyticsEventService";
 import { leaves as leavesData } from "@/data/leaves";
 import CameraScanner from "@/components/features/CameraScanner";
 import { recipes } from "@/data/recipes";
@@ -48,8 +50,8 @@ export default function ChatPage() {
       localStorage.setItem('selectedRecipeId', recipe.id.toString());
       // Navigate to recipes tab (this will be handled by the parent component)
       // For now, we'll use a custom event
-      window.dispatchEvent(new CustomEvent('navigateToRecipe', { 
-        detail: { recipeId: recipe.id } 
+      window.dispatchEvent(new CustomEvent('navigateToRecipe', {
+        detail: { recipeId: recipe.id }
       }));
       // Removed toast notification
     }
@@ -78,16 +80,16 @@ export default function ChatPage() {
     const loadConversations = () => {
       const conversationList = APIService.getConversationList();
       setConversations(conversationList);
-      console.log('Available conversations:', conversationList.length);
-      
+      logger.debug('Available conversations:', conversationList.length);
+
       // Try to restore the last active conversation
       const lastConversationId = APIService.getCurrentConversation();
-      console.log('Last conversation ID:', lastConversationId);
-      
+      logger.debug('Last conversation ID:', lastConversationId);
+
       if (lastConversationId && conversationList.find(c => c.id === lastConversationId)) {
         const savedMessages = APIService.loadConversation(lastConversationId);
-        console.log('Loaded saved messages for conversation:', lastConversationId, savedMessages?.length || 0);
-        
+        logger.debug('Loaded saved messages for conversation:', lastConversationId, savedMessages?.length || 0);
+
         if (savedMessages) {
           // Convert ChatMessage[] to Message[]
           const convertedMessages: Message[] = savedMessages.map((msg, index) => ({
@@ -103,16 +105,16 @@ export default function ChatPage() {
           setMessages(convertedMessages);
           setCurrentConversationId(lastConversationId);
           setIsFirstMessage(false);
-          console.log('Restored last active conversation:', lastConversationId);
+          logger.debug('Restored last active conversation:', lastConversationId);
           return;
         }
       }
-      
+
       // Try to load the most recent conversation if no last active conversation
       if (!currentConversationId && conversationList.length > 0) {
         const mostRecentConversation = conversationList[0];
         const savedMessages = APIService.loadConversation(mostRecentConversation.id);
-        
+
         if (savedMessages) {
           // Convert ChatMessage[] to Message[]
           const convertedMessages: Message[] = savedMessages.map((msg, index) => ({
@@ -129,14 +131,14 @@ export default function ChatPage() {
           setCurrentConversationId(mostRecentConversation.id);
           setIsFirstMessage(false);
           APIService.setCurrentConversation(mostRecentConversation.id);
-          console.log('Loaded most recent conversation:', mostRecentConversation.id);
+          logger.debug('Loaded most recent conversation:', mostRecentConversation.id);
           return;
         }
       }
-      
+
       // If no conversations exist, start a new one
       if (conversationList.length === 0) {
-        console.log('No conversations found, starting new one');
+        logger.debug('No conversations found, starting new one');
         startNewConversation();
       }
     };
@@ -151,15 +153,15 @@ export default function ChatPage() {
   // Filter conversations based on search and tags
   useEffect(() => {
     let filteredConversations = APIService.getConversationList();
-    
+
     if (searchQuery.trim()) {
       filteredConversations = APIService.searchConversations(searchQuery);
     }
-    
+
     if (selectedTag) {
       filteredConversations = APIService.getConversationsByTag(selectedTag);
     }
-    
+
     setConversations(filteredConversations);
   }, [searchQuery, selectedTag]);
 
@@ -175,10 +177,10 @@ export default function ChatPage() {
         suggestedLeafName: msg.suggestedLeafName,
         suggestedLeaves: msg.suggestedLeaves
       }));
-      console.log('Saving conversation:', currentConversationId, 'with', chatMessages.length, 'messages');
+      logger.debug('Saving conversation:', currentConversationId, 'with', chatMessages.length, 'messages');
       const saveResult = APIService.saveConversation(currentConversationId, chatMessages);
-      console.log('Save result:', saveResult);
-      
+      logger.debug('Save result:', saveResult);
+
       // Refresh conversation list
       const conversationList = APIService.getConversationList();
       setConversations(conversationList);
@@ -240,7 +242,7 @@ What would you like to know today?`,
     APIService.deleteConversation(conversationId);
     const updatedConversations = APIService.getConversationList();
     setConversations(updatedConversations);
-    
+
     // If deleting current conversation, start a new one
     if (conversationId === currentConversationId) {
       APIService.clearCurrentConversation();
@@ -263,8 +265,8 @@ What would you like to know today?`,
   };
 
   const addMessage = (
-    type: 'user' | 'bot' | 'system', 
-    content: string, 
+    type: 'user' | 'bot' | 'system',
+    content: string,
     suggestedRecipe?: string,
     suggestedLeafId?: number,
     suggestedLeafName?: string,
@@ -289,10 +291,11 @@ What would you like to know today?`,
     addMessage('user', text);
     setInputText("");
     setIsLoading(true);
+    Analytics.trackChatMessage(text.length);
 
     try {
       const chatMessages: ChatMessage[] = [];
-      
+
       // ALWAYS add system message to maintain strict recipe response behavior
       chatMessages.push({
         role: "system",
@@ -1548,11 +1551,11 @@ and use these facts for onions :
       chatMessages.push(...conversationHistory);
       chatMessages.push({ role: 'user', content: text });
 
-      console.log('Final chatMessages being sent:', chatMessages);
-      console.log('Total message count:', chatMessages.length);
+      logger.debug('Final chatMessages being sent:', chatMessages);
+      logger.debug('Total message count:', chatMessages.length);
 
       const response = await APIService.sendChatMessage(chatMessages);
-      
+
       // Check if the response is a recipe title - more flexible matching
       const suggestedRecipe = recipeTitles.find(title => {
         const cleanResponse = response.trim().toLowerCase();
@@ -1560,27 +1563,27 @@ and use these facts for onions :
         // Exact match or response contains the title
         return cleanResponse === cleanTitle || cleanResponse.includes(cleanTitle) || cleanTitle.includes(cleanResponse);
       });
-      
+
       // Debug logging
-      console.log('Response:', response);
-      console.log('Found recipe:', suggestedRecipe);
-      
+      logger.debug('Response:', response);
+      logger.debug('Found recipe:', suggestedRecipe);
+
       addMessage('bot', response, suggestedRecipe);
       APIService.incrementChats();
-      
+
       // If a recipe was suggested, increment recipe suggestions metric
       if (suggestedRecipe) {
         APIService.incrementRecipeSuggestions();
       }
-      
+
       // Remove TTS functionality for now since it's not in the new API
       // APIService.speak(response);
     } catch (error) {
-      console.error("Chat error:", error);
-      
+      logger.error("Chat error:", error);
+
       // Provide a helpful fallback response
       let fallbackResponse = "I'm having trouble connecting to my AI assistant right now. ";
-      
+
       // If the user was asking for a recipe, suggest one anyway
       if (text.toLowerCase().includes('recipe')) {
         const randomRecipe = recipeTitles[Math.floor(Math.random() * recipeTitles.length)];
@@ -1591,7 +1594,7 @@ and use these facts for onions :
         fallbackResponse += "Please check your API configuration and try again.";
         addMessage('bot', fallbackResponse);
       }
-      
+
       // Removed toast notification
     } finally {
       setIsLoading(false);
@@ -1625,7 +1628,7 @@ and use these facts for onions :
             stopListeningRef.current = null;
           },
           (error: string) => {
-            console.error('Speech recognition error:', error);
+            logger.error('Speech recognition error:', error);
             setIsListening(false);
             stopListeningRef.current = null;
           }
@@ -1633,22 +1636,22 @@ and use these facts for onions :
         stopListeningRef.current = stopFn;
         setIsListening(true);
       } catch (error) {
-        console.error("Speech recognition error:", error);
+        logger.error("Speech recognition error:", error);
         // Removed toast notification
       }
     }
   };
 
-  const handleCameraDetection = async (detections: any[]) => {
+  const handleCameraDetection = async (detections: DetectionResult[]) => {
     if (detections.length > 0) {
       const detection = detections[0];
       const leafType = detection.class;
-      
+
       addMessage('system', `📸 Detected: ${leafType} (${(detection.confidence * 100).toFixed(1)}% confidence)`);
-      
+
       try {
         const chatMessages: ChatMessage[] = [];
-        
+
         // Add system message for camera detection
         chatMessages.push({
           role: "system" as const,
@@ -1675,12 +1678,12 @@ Examples:
         });
 
         const insight = await APIService.sendChatMessage(chatMessages);
-        
+
         // Check if the response is a recipe title
-        const suggestedRecipe = recipeTitles.find(title => 
+        const suggestedRecipe = recipeTitles.find(title =>
           insight.trim().toLowerCase() === title.toLowerCase()
         );
-        
+
         addMessage('bot', insight, suggestedRecipe);
 
         // Offer navigation to leaf profile when a known leaf is detected (match by name/aliases)
@@ -1698,15 +1701,15 @@ Examples:
         // Save detected leaves data
         APIService.saveDetectedLeaves(detections);
         APIService.incrementScans();
-        
+
         // If a recipe was suggested, increment recipe suggestions metric
         if (suggestedRecipe) {
           APIService.incrementRecipeSuggestions();
         }
-        
+
         // Removed toast notification
       } catch (error) {
-        console.error("Nutrition insight error:", error);
+        logger.error("Nutrition insight error:", error);
         addMessage('bot', `I've detected ${leafType} leaves, but I'm having trouble providing detailed information right now. Please try asking me about this plant directly.`);
       }
     } else {
@@ -1718,15 +1721,15 @@ Examples:
 
   const speakMessage = (content: string) => {
     // Always allow speaking individual messages, even if global TTS is muted
-            // Remove TTS functionality for now since it's not in the new API
-        // APIService.speak(content, true); // Force speak even when muted
+    // Remove TTS functionality for now since it's not in the new API
+    // APIService.speak(content, true); // Force speak even when muted
   };
 
   const toggleTTSMute = () => {
     const newMutedState = !isTTSMuted;
     setIsTTSMuted(newMutedState);
     APIService.setMuted(newMutedState);
-    
+
     // If muting, stop any current speech
     if (newMutedState) {
       // Remove TTS functionality for now since it's not in the new API
@@ -1738,7 +1741,7 @@ Examples:
   // Enhanced speak function for individual messages with toggle functionality
   const handleMessageSpeak = (messageId: string, content: string, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent event bubbling
-    
+
     if (playingMessages.has(messageId)) {
       // Stop speaking this message
       // Remove TTS functionality for now since it's not in the new API
@@ -1751,7 +1754,7 @@ Examples:
     } else {
       // Start speaking this message
       setPlayingMessages(prev => new Set([messageId])); // Only one message can play at a time
-      
+
       // Remove TTS functionality for now since it's not in the new API
       // APIService.speak(
       //   content, 
@@ -1797,11 +1800,10 @@ Examples:
           </button>
           <button
             onClick={toggleTTSMute}
-            className={`p-2 rounded-lg transition-all duration-300 ${
-              isTTSMuted 
-                ? 'bg-destructive/20 text-destructive hover:bg-destructive/30' 
-                : 'bg-accent/20 text-accent hover:bg-accent/30'
-            }`}
+            className={`p-2 rounded-lg transition-all duration-300 ${isTTSMuted
+              ? 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+              : 'bg-accent/20 text-accent hover:bg-accent/30'
+              }`}
             title={isTTSMuted ? "Unmute TTS" : "Mute TTS"}
           >
             {isTTSMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
@@ -1942,19 +1944,16 @@ Examples:
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div             className={`max-w-[85%] sm:max-w-[80%] relative group ${
-              message.type === 'user' 
-                ? 'bg-gradient-primary text-primary-foreground' 
-                : message.type === 'system'
+            <div className={`max-w-[85%] sm:max-w-[80%] relative group ${message.type === 'user'
+              ? 'bg-gradient-primary text-primary-foreground'
+              : message.type === 'system'
                 ? 'bg-primary/20 text-primary border-2 border-primary/30 shadow-lg'
                 : 'glass text-foreground'
-            } p-2 sm:p-3 rounded-2xl ${
-              message.type === 'user' ? 'rounded-br-md' : 'rounded-bl-md'
-            }`}>
-              <p className={`leading-relaxed ${
-                message.type === 'system' ? 'text-base font-medium' : 'text-sm sm:text-sm'
-              }`}>{message.content}</p>
-              
+              } p-2 sm:p-3 rounded-2xl ${message.type === 'user' ? 'rounded-br-md' : 'rounded-bl-md'
+              }`}>
+              <p className={`leading-relaxed ${message.type === 'system' ? 'text-base font-medium' : 'text-sm sm:text-sm'
+                }`}>{message.content}</p>
+
               {/* Recipe Suggestion Button */}
               {message.type === 'bot' && message.suggestedRecipe && (
                 <div className="mt-3">
@@ -1996,36 +1995,35 @@ Examples:
                   ))}
                 </div>
               )}
-              
+
               {message.type === 'bot' && (
                 <button
                   onClick={(e) => handleMessageSpeak(message.id, message.content, e)}
-                  className={`absolute -right-2 -top-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl ${
-                    playingMessages.has(message.id)
-                      ? 'bg-green-500 text-white hover:bg-green-600 animate-pulse'
-                      : isTTSMuted 
-                        ? 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground' 
-                        : 'bg-primary/20 hover:bg-primary/40 text-primary hover:scale-110 hover:bg-primary/30'
-                  }`}
+                  className={`absolute -right-2 -top-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl ${playingMessages.has(message.id)
+                    ? 'bg-green-500 text-white hover:bg-green-600 animate-pulse'
+                    : isTTSMuted
+                      ? 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                      : 'bg-primary/20 hover:bg-primary/40 text-primary hover:scale-110 hover:bg-primary/30'
+                    }`}
                   title={
-                    playingMessages.has(message.id) 
-                      ? "Click to stop speaking" 
-                      : isTTSMuted 
-                        ? "Click to speak (global TTS muted)" 
+                    playingMessages.has(message.id)
+                      ? "Click to stop speaking"
+                      : isTTSMuted
+                        ? "Click to speak (global TTS muted)"
                         : "Click to speak message"
                   }
                 >
-                  {playingMessages.has(message.id) 
+                  {playingMessages.has(message.id)
                     ? <Pause className="w-3.5 h-3.5" />
-                    : isTTSMuted 
-                      ? <VolumeX className="w-3.5 h-3.5" /> 
+                    : isTTSMuted
+                      ? <VolumeX className="w-3.5 h-3.5" />
                       : <Volume2 className="w-3.5 h-3.5" />
                   }
                 </button>
               )}
-              
+
               <span className="text-xs opacity-70 block mt-1">
-                {message.timestamp instanceof Date 
+                {message.timestamp instanceof Date
                   ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                   : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 }
@@ -2033,7 +2031,7 @@ Examples:
             </div>
           </div>
         ))}
-        
+
         {isLoading && (
           <div className="flex justify-start">
             <div className="glass p-3 rounded-2xl rounded-bl-md">
@@ -2045,7 +2043,7 @@ Examples:
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} data-messages-end />
       </div>
 
@@ -2063,32 +2061,30 @@ Examples:
               disabled={isLoading}
             />
           </div>
-          
+
           <button
             onClick={toggleTTSMute}
-            className={`p-2 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0 ${
-              isTTSMuted 
-                ? 'bg-destructive/20 text-destructive hover:bg-destructive/30' 
-                : 'bg-primary/20 text-primary hover:bg-primary/30'
-            }`}
+            className={`p-2 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0 ${isTTSMuted
+              ? 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+              : 'bg-primary/20 text-primary hover:bg-primary/30'
+              }`}
             disabled={isLoading}
             title={isTTSMuted ? "Unmute TTS" : "Mute TTS"}
           >
             {isTTSMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
-          
+
           <button
             onClick={toggleListening}
-            className={`p-2 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0 ${
-              isListening 
-                ? 'bg-destructive text-destructive-foreground scale-110' 
-                : 'bg-secondary text-secondary-foreground hover:scale-105'
-            }`}
+            className={`p-2 sm:p-3 rounded-xl transition-all duration-300 flex-shrink-0 ${isListening
+              ? 'bg-destructive text-destructive-foreground scale-110'
+              : 'bg-secondary text-secondary-foreground hover:scale-105'
+              }`}
             disabled={isLoading}
           >
             {isListening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
-          
+
           <button
             onClick={() => setShowCamera(true)}
             className="p-2 sm:p-3 bg-accent text-accent-foreground rounded-xl hover:scale-105 transition-all duration-300 flex-shrink-0"
@@ -2096,7 +2092,7 @@ Examples:
           >
             <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
-          
+
           <button
             onClick={handleSendClick}
             disabled={!inputText.trim() || isLoading}

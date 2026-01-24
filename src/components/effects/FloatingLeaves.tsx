@@ -90,7 +90,7 @@ const FloatingLeaves: React.FC<FloatingLeavesProps> = ({
       setParticles(prevParticles => 
         prevParticles.map(particle => {
           let newY = particle.y + particle.speed;
-          let newRotation = particle.rotation + particle.rotationSpeed;
+          const newRotation = particle.rotation + particle.rotationSpeed;
           
           // Reset particle when it goes off screen
           if (newY > window.innerHeight + 100) {

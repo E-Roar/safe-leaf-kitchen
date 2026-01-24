@@ -8,7 +8,7 @@ export interface RemoteLog {
   userAgent: string;
   url: string;
   sessionId: string;
-  extra?: any;
+  extra?: unknown;
 }
 
 export class RemoteErrorLogger {
@@ -16,28 +16,28 @@ export class RemoteErrorLogger {
   private static logs: RemoteLog[] = [];
   private static maxLogs = 100;
   private static isLogging = false; // Prevent recursion
-  
+
   static initialize() {
     // Override console methods
     this.interceptConsole();
-    
+
     // Capture unhandled errors
     this.captureUnhandledErrors();
-    
+
     // Log initialization
-    this.log('info', 'RemoteErrorLogger initialized', { 
+    this.log('info', 'RemoteErrorLogger initialized', {
       browser: this.getBrowserInfo(),
       features: this.getFeatureSupport()
     });
   }
 
-  static log(level: 'error' | 'warn' | 'info' | 'debug', message: string, extra?: any) {
+  static log(level: 'error' | 'warn' | 'info' | 'debug', message: string, extra?: unknown) {
     // Prevent infinite recursion
     if (this.isLogging) return;
-    
+
     try {
       this.isLogging = true;
-      
+
       const remoteLog: RemoteLog = {
         timestamp: new Date().toISOString(),
         level,
@@ -53,7 +53,7 @@ export class RemoteErrorLogger {
       if (this.logs.length > this.maxLogs) {
         this.logs = this.logs.slice(-this.maxLogs);
       }
-      
+
       // Store in localStorage with error handling
       try {
         localStorage.setItem('safeleaf_remote_logs', JSON.stringify(this.logs));
@@ -64,7 +64,7 @@ export class RemoteErrorLogger {
       // Log to console with special formatting for easy identification
       const prefix = `[SAFELEAF-${level.toUpperCase()}]`;
       const formatted = `${prefix} ${message}`;
-      
+
       // Use original console methods to avoid recursion
       const originalMethods = (window as any)._originalConsole || {
         error: console.error,
@@ -72,7 +72,7 @@ export class RemoteErrorLogger {
         info: console.info,
         debug: console.debug
       };
-      
+
       switch (level) {
         case 'error':
           originalMethods.error(formatted, extra);
@@ -90,7 +90,7 @@ export class RemoteErrorLogger {
 
       // Try to send to remote endpoint if available
       this.sendToRemote(remoteLog);
-      
+
     } finally {
       this.isLogging = false;
     }
@@ -104,7 +104,7 @@ export class RemoteErrorLogger {
         return JSON.parse(stored);
       }
     } catch (e) {
-      console.warn('Failed to retrieve logs from localStorage');
+      logger.warn('Failed to retrieve logs from localStorage');
     }
     return this.logs;
   }
@@ -118,7 +118,7 @@ export class RemoteErrorLogger {
       features: this.getFeatureSupport(),
       logs: allLogs
     };
-    
+
     return JSON.stringify(exportData, null, 2);
   }
 
@@ -133,7 +133,7 @@ export class RemoteErrorLogger {
     const logs = this.getLogs();
     const recentErrors = logs.filter(log => log.level === 'error').slice(-5);
     const recentWarnings = logs.filter(log => log.level === 'warn').slice(-3);
-    
+
     const debugInfo = {
       browser: this.getBrowserInfo(),
       timestamp: new Date().toISOString(),
@@ -141,22 +141,22 @@ export class RemoteErrorLogger {
       warnings: recentWarnings,
       features: this.getFeatureSupport()
     };
-    
+
     // Create a base64 encoded shareable string
     const encoded = btoa(JSON.stringify(debugInfo));
     return `${window.location.origin}?debug=${encoded}`;
   }
 
   // Decode debug info from URL
-  static loadDebugFromUrl(): any {
+  static loadDebugFromUrl(): Record<string, unknown> | null {
     const urlParams = new URLSearchParams(window.location.search);
     const debugParam = urlParams.get('debug');
-    
+
     if (debugParam) {
       try {
         return JSON.parse(atob(debugParam));
       } catch (e) {
-        console.warn('Failed to decode debug info from URL');
+        logger.warn('Failed to decode debug info from URL');
       }
     }
     return null;
@@ -172,7 +172,7 @@ export class RemoteErrorLogger {
     const originalWarn = console.warn;
     const originalInfo = console.info;
     const originalDebug = console.debug;
-    
+
     // Store them globally for access in log method
     (window as any)._originalConsole = {
       error: originalError,
@@ -180,16 +180,16 @@ export class RemoteErrorLogger {
       info: originalInfo,
       debug: originalDebug
     };
-    
+
     // Prevent infinite recursion by checking if we're already logging
     let isLogging = false;
-    
+
     console.error = (...args) => {
       originalError.apply(console, args);
       if (!isLogging && args.length > 0 && !String(args[0]).includes('[SAFELEAF-ERROR]')) {
         isLogging = true;
         try {
-          this.log('error', args.map(arg => 
+          this.log('error', args.map(arg =>
             typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
           ).join(' '));
         } catch (e) {
@@ -199,32 +199,32 @@ export class RemoteErrorLogger {
         }
       }
     };
-    
+
     console.warn = (...args) => {
       originalWarn.apply(console, args);
       if (!isLogging && args.length > 0 && !String(args[0]).includes('[SAFELEAF-WARN]')) {
         // Filter out repetitive Recharts ResponsiveContainer warnings
         const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
-        
+
         // Enhanced filter for ResponsiveContainer warnings
         if ((message.includes('width') && message.includes('height') && message.includes('ResponsiveContainer')) ||
-            (message.includes('fixed numbers') && message.includes('ResponsiveContainer')) ||
-            message.includes('maybe you don\'t need to use a ResponsiveContainer')) {
+          (message.includes('fixed numbers') && message.includes('ResponsiveContainer')) ||
+          message.includes('maybe you don\'t need to use a ResponsiveContainer')) {
           return; // Skip logging this repetitive warning
         }
-        
+
         // Filter out other common chart library warnings
         if (message.includes('recharts') && (message.includes('Warning:') || message.includes('warn2'))) {
           return; // Skip logging chart library warnings
         }
-        
+
         // Filter out translation key warnings to prevent infinite loops
         if (message.includes('Translation key not found:') ||
-            message.includes('landing.video.') ||
-            message.includes('useI18n.tsx')) {
+          message.includes('landing.video.') ||
+          message.includes('useI18n.tsx')) {
           return; // Skip logging translation warnings to prevent recursion
         }
-        
+
         isLogging = true;
         try {
           this.log('warn', message);
@@ -333,31 +333,31 @@ export class RemoteErrorLogger {
     const logs = this.getLogs();
     const errors = logs.filter(log => log.level === 'error');
     const warnings = logs.filter(log => log.level === 'warn');
-    
+
     console.group('🔍 Safe Leaf Kitchen Debug Summary');
-    console.log('Session ID:', this.sessionId);
-    console.log('Total Logs:', logs.length);
-    console.log('Errors:', errors.length);
-    console.log('Warnings:', warnings.length);
-    
+    logger.debug('Session ID:', this.sessionId);
+    logger.debug('Total Logs:', logs.length);
+    logger.debug('Errors:', errors.length);
+    logger.debug('Warnings:', warnings.length);
+
     if (errors.length > 0) {
       console.group('Recent Errors');
       errors.slice(-5).forEach(error => {
-        console.error(`[${error.timestamp}] ${error.message}`, error.extra);
+        logger.error(`[${error.timestamp}] ${error.message}`, error.extra);
       });
       console.groupEnd();
     }
-    
+
     if (warnings.length > 0) {
       console.group('Recent Warnings');
       warnings.slice(-3).forEach(warning => {
-        console.warn(`[${warning.timestamp}] ${warning.message}`, warning.extra);
+        logger.warn(`[${warning.timestamp}] ${warning.message}`, warning.extra);
       });
       console.groupEnd();
     }
-    
-    console.log('Browser Info:', this.getBrowserInfo());
-    console.log('Feature Support:', this.getFeatureSupport());
+
+    logger.debug('Browser Info:', this.getBrowserInfo());
+    logger.debug('Feature Support:', this.getFeatureSupport());
     console.groupEnd();
   }
 }

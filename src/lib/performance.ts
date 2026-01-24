@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 
 // Debounce hook for expensive operations
@@ -141,7 +143,7 @@ export function usePerformanceMonitor(componentName: string) {
     lastRenderTime.current = now;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`${componentName} rendered ${renderCount.current} times, ${timeSinceLastRender.toFixed(2)}ms since last render`);
+      logger.debug(`${componentName} rendered ${renderCount.current} times, ${timeSinceLastRender.toFixed(2)}ms since last render`);
     }
   });
 }

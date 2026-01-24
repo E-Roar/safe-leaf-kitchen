@@ -155,7 +155,7 @@ export default function MobileDebugPanel() {
     const testStatsPageFeatures = () => {
       try {
         // Test chart library imports
-        if (typeof (window as any).recharts === 'undefined') {
+        if (typeof window.recharts === 'undefined') {
           logError('warn', ['Recharts library not found in window object']);
         }
 
@@ -275,7 +275,7 @@ Recent Errors: ${errorLogs.slice(-3).map(log => `${log.level}: ${log.message}`).
       }
       
       // Check if in private/incognito mode
-      if (typeof (window as any).chrome !== 'undefined' && (window as any).chrome.runtime && (window as any).chrome.runtime.onStartup) {
+      if (typeof window.chrome !== 'undefined' && window.chrome.runtime && window.chrome.runtime.onStartup) {
         // Likely in incognito mode
         issues.push('Possible incognito/private mode');
       }

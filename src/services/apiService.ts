@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { supabase } from '@/lib/supabaseClient';
 import { logger } from '@/lib/logger';
 import { AnalyticsService } from '@/services/analyticsService';
 
-// Settings are managed via SettingsService (with hardcoded defaults)
+// Settings are managed via SettingsService (env vars required)
 import { SettingsService } from "@/services/settingsService";
 
 export interface DetectionResult {
@@ -65,17 +66,17 @@ export class APIService {
 
   static async detectLeaf(imageBase64: string): Promise<RoboflowResponse> {
     try {
-      const { roboflowEndpoint, roboflowApiKey } = SettingsService.getSettings();
-      const response = await axios({
-        method: "POST",
-        url: roboflowEndpoint,
-        params: { api_key: roboflowApiKey },
-        data: imageBase64,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      // Use Supabase Secure Edge Function
+      const { data, error } = await supabase.functions.invoke('roboflow-scan', {
+        body: { imageBase64 }
       });
 
+      if (error) {
+        throw new Error(`Edge Function Error: ${error.message}`);
+      }
+
       // Track scan in analytics
-      const result = response.data;
+      const result = data as RoboflowResponse;
       if (result.predictions && result.predictions.length > 0) {
         const detectedLeaf = result.predictions[0].class;
         AnalyticsService.recordScan(detectedLeaf);
@@ -93,7 +94,7 @@ export class APIService {
   static async sendChatMessage(messages: ChatMessage[]): Promise<string> {
     try {
       const settings = SettingsService.getSettings();
-      
+
       let result: string;
       // Choose provider based on settings
       if (settings.chatProvider === 'n8n') {
@@ -101,10 +102,10 @@ export class APIService {
       } else {
         result = await this.sendChatMessageToOpenRouter(messages);
       }
-      
+
       // Track chat in analytics
       AnalyticsService.recordChat();
-      
+
       return result;
     } catch (error) {
       logger.error("Chat API error:", error);
@@ -114,55 +115,26 @@ export class APIService {
 
   static async sendChatMessageToOpenRouter(messages: ChatMessage[]): Promise<string> {
     try {
-      const requestBody = {
-        model: "meta-llama/llama-3.1-8b-instruct",
-        messages: messages,
-        temperature: 0.3,
-        max_tokens: 200
-      };
+      logger.debug("Sending request to Secure Chat Edge Function");
 
-      const { openrouterEndpoint, openrouterApiKey } = SettingsService.getSettings();
-      
-      logger.debug("Sending request to OpenRouter:", { endpoint: openrouterEndpoint, messages: messages.length });
-      
-      const response = await axios.post(openrouterEndpoint, requestBody, {
-        headers: {
-          "Authorization": `Bearer ${openrouterApiKey}`,
-          "Content-Type": "application/json"
-        }
+      // Use Supabase Secure Edge Function with RAG
+      const { data, error } = await supabase.functions.invoke('chat-completion', {
+        body: { messages }
       });
 
-      logger.debug("OpenRouter response:", response.data);
-
-      // Validate response structure
-      if (!response.data) {
-        throw new Error("No data received from OpenRouter API");
+      if (error) {
+        throw new Error(`Edge Function Error: ${error.message}`);
       }
 
-      if (!response.data.choices || !Array.isArray(response.data.choices)) {
-        logger.error("Invalid response structure:", response.data);
-        throw new Error("Invalid response structure from OpenRouter API");
+      logger.debug("Chat response received:", data);
+
+      if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error("Invalid response format from chat function");
       }
 
-      if (!response.data.choices[0] || !response.data.choices[0].message) {
-        logger.error("No message content in response:", response.data.choices[0]);
-        throw new Error("No message content in OpenRouter API response");
-      }
-
-      return response.data.choices[0].message.content;
+      return data.choices[0].message.content;
     } catch (error) {
-      logger.error("OpenRouter API error:", error);
-      
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          logger.error("API Response Error:", { status: error.response.status, data: error.response.data });
-          throw new Error(`API Error: ${error.response.status} - ${error.response.data?.error || 'Unknown error'}`);
-        } else if (error.request) {
-          logger.error("Network Error:", error.request);
-          throw new Error("Network error: Unable to reach the API");
-        }
-      }
-      
+      logger.error("Chat API error:", error);
       throw new Error("Failed to send chat message");
     }
   }
@@ -170,7 +142,7 @@ export class APIService {
   static async sendChatMessageToN8N(messages: ChatMessage[]): Promise<string> {
     try {
       const { n8nWebhookUrl } = SettingsService.getSettings();
-      
+
       if (!n8nWebhookUrl) {
         throw new Error("N8N webhook URL not configured");
       }
@@ -201,7 +173,7 @@ export class APIService {
       return response.data.response;
     } catch (error) {
       logger.error("N8N webhook error:", error);
-      
+
       if (axios.isAxiosError(error)) {
         if (error.response) {
           logger.error("N8N Response Error:", { status: error.response.status, data: error.response.data });
@@ -211,7 +183,7 @@ export class APIService {
           throw new Error("Network error: Unable to reach N8N webhook");
         }
       }
-      
+
       throw new Error("Failed to send chat message via N8N");
     }
   }
@@ -265,22 +237,22 @@ export class APIService {
   static startSpeechRecognition(onResult: (text: string) => void, onError: (error: string) => void): () => void {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       onError("Speech recognition not supported in this browser");
-      return () => {};
+      return () => { };
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionStatic;
     const recognition = new SpeechRecognition();
 
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       onResult(transcript);
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       logger.error("Speech recognition error:", event.error);
       onError(`Speech recognition error: ${event.error}`);
     };
@@ -327,18 +299,18 @@ export class APIService {
   // Detected leaves tracking
   static saveDetectedLeaves(leaves: DetectionResult[]): boolean {
     const key = this.getStorageKey('detected_leaves');
-    let stored: Array<{ timestamp: number; leaves: DetectionResult[] }> = this.getStorage(key) || [];
+    const stored: Array<{ timestamp: number; leaves: DetectionResult[] }> = this.getStorage(key) || [];
     const newEntry = {
       timestamp: Date.now(),
       leaves: leaves
     };
-    
+
     stored.push(newEntry);
     // Keep only last 100 detections
     if (stored.length > 100) {
       stored.splice(0, stored.length - 100);
     }
-    
+
     return this.setStorage(key, stored);
   }
 
@@ -371,16 +343,16 @@ export class APIService {
     const key = this.getStorageKey('recipe_views');
     const stored = this.getStorage<RecipeView[]>(key) || [];
     const newEntry: RecipeView = { id: recipeId, timestamp: new Date() };
-    
+
     stored.push(newEntry);
     // Keep only last 200 views
     if (stored.length > 200) {
       stored.splice(0, stored.length - 200);
     }
-    
+
     // Track recipe view in analytics
     AnalyticsService.recordRecipeView();
-    
+
     return this.setStorage(key, stored);
   }
 
@@ -394,13 +366,13 @@ export class APIService {
     const key = this.getStorageKey('favorite_recipes');
     const stored = this.getStorage<FavoriteRecipe[]>(key) || [];
     const existingIndex = stored.findIndex(fav => fav.id === recipeId);
-    
+
     if (existingIndex >= 0) {
       stored.splice(existingIndex, 1);
     } else {
       stored.push({ id: recipeId, timestamp: new Date() });
     }
-    
+
     return this.setStorage(key, stored);
   }
 
@@ -422,18 +394,18 @@ export class APIService {
       messages: messages,
       timestamp: Date.now()
     };
-    
-    console.log('Saving conversation with key:', key, 'messages:', messages.length);
-    
+
+    logger.debug('Saving conversation', { key, messageCount: messages.length });
+
     if (!this.setStorage(key, conversationData)) {
-      console.error('Failed to save conversation data');
+      logger.error('Failed to save conversation data');
       return false;
     }
 
     // Update conversation list
     const listKey = this.getStorageKey('conversation_list');
     const conversationList = this.getStorage<ConversationData[]>(listKey) || [];
-    
+
     const existingIndex = conversationList.findIndex(conv => conv.id === conversationId);
     const conversationInfo: ConversationData = {
       id: conversationId,
@@ -451,16 +423,16 @@ export class APIService {
 
     // Keep only last 50 conversations
     const limitedConversations = conversationList.slice(0, 50);
-    
+
     return this.setStorage(listKey, limitedConversations);
   }
 
   static loadConversation(conversationId: string): ChatMessage[] | null {
     const key = this.getStorageKey(`conversation_${conversationId}`);
-    console.log('Loading conversation with key:', key);
+    logger.debug('Loading conversation with key:', key);
     const conversationData = this.getStorage<{ messages: ChatMessage[] }>(key);
     const result = conversationData?.messages || null;
-    console.log('Loaded messages:', result?.length || 0);
+    logger.debug('Loaded messages count:', result?.length || 0);
     return result;
   }
 
@@ -472,8 +444,8 @@ export class APIService {
   static searchConversations(query: string): ConversationData[] {
     const conversations = this.getConversationList();
     const lowerQuery = query.toLowerCase();
-    
-    return conversations.filter(conv => 
+
+    return conversations.filter(conv =>
       conv.title.toLowerCase().includes(lowerQuery) ||
       conv.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
     );
@@ -482,8 +454,8 @@ export class APIService {
   static getConversationsByTag(tag: string): ConversationData[] {
     const conversations = this.getConversationList();
     const lowerTag = tag.toLowerCase();
-    
-    return conversations.filter(conv => 
+
+    return conversations.filter(conv =>
       conv.tags.some(t => t.toLowerCase().includes(lowerTag))
     );
   }
@@ -503,7 +475,7 @@ export class APIService {
     const listKey = this.getStorageKey('conversation_list');
     const conversationList = this.getConversationList();
     const filteredConversations = conversationList.filter(conv => conv.id !== conversationId);
-    
+
     return this.setStorage(listKey, filteredConversations);
   }
 
@@ -569,19 +541,19 @@ export class APIService {
   private static generateConversationTitle(messages: ChatMessage[]): string {
     const userMessages = messages.filter(msg => msg.role === 'user');
     if (userMessages.length === 0) return 'New Conversation';
-    
+
     const firstUserMessage = userMessages[0].content;
     if (firstUserMessage.length <= 50) {
       return firstUserMessage;
     }
-    
+
     return firstUserMessage.substring(0, 50) + '...';
   }
 
   private static extractConversationTags(messages: ChatMessage[]): string[] {
     const tags: string[] = [];
     const content = messages.map(msg => msg.content).join(' ').toLowerCase();
-    
+
     if (content.includes('recipe') || content.includes('cook') || content.includes('ingredient')) {
       tags.push('recipe');
     }
@@ -591,7 +563,7 @@ export class APIService {
     if (content.includes('nutrition') || content.includes('health') || content.includes('vitamin')) {
       tags.push('nutrition');
     }
-    
+
     return tags;
   }
 }

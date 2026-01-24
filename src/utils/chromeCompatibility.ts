@@ -246,13 +246,13 @@ export class ChromeCompatibilityChecker {
 
   private static isLowMemoryDevice(): boolean {
     // Check if device has limited memory
-    const memory = (navigator as any).deviceMemory;
+    const memory = navigator.deviceMemory;
     return memory && memory < 4; // Less than 4GB RAM
   }
 
   private static isDataSaverEnabled(): boolean {
     // Check for Chrome's Data Saver
-    const connection = (navigator as any).connection;
+    const connection = navigator.connection;
     return connection && connection.saveData === true;
   }
 
@@ -346,12 +346,12 @@ export class ChromeCompatibilityChecker {
     const report = this.generateReport();
     
     console.group('🔍 Chrome Compatibility Report');
-    console.log('Browser:', report.isChrome ? `Chrome ${report.version}` : 'Not Chrome');
-    console.log('Mobile:', report.isMobile ? 'Yes' : 'No');
+    logger.debug('Browser:', report.isChrome ? `Chrome ${report.version}` : 'Not Chrome');
+    logger.debug('Mobile:', report.isMobile ? 'Yes' : 'No');
     
     console.group('Feature Support');
     Object.entries(report.features).forEach(([feature, supported]) => {
-      console.log(`${feature}:`, supported ? '✅' : '❌');
+      logger.debug(`${feature}:`, supported ? '✅' : '❌');
     });
     console.groupEnd();
     
@@ -359,9 +359,9 @@ export class ChromeCompatibilityChecker {
       console.group('Issues Found');
       report.issues.forEach(issue => {
         const icon = issue.type === 'error' ? '🚨' : issue.type === 'warning' ? '⚠️' : 'ℹ️';
-        console.log(`${icon} [${issue.category}] ${issue.message}`);
+        logger.debug(`${icon} [${issue.category}] ${issue.message}`);
         if (issue.solution) {
-          console.log(`   💡 Solution: ${issue.solution}`);
+          logger.debug(`   💡 Solution: ${issue.solution}`);
         }
       });
       console.groupEnd();
@@ -369,7 +369,7 @@ export class ChromeCompatibilityChecker {
     
     if (report.recommendations.length > 0) {
       console.group('Recommendations');
-      report.recommendations.forEach(rec => console.log(`• ${rec}`));
+      report.recommendations.forEach(rec => logger.debug(`• ${rec}`));
       console.groupEnd();
     }
     

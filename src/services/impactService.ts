@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 export interface ImpactMetrics {
   amount_g: number;
   polyphenols_mg: number;
@@ -42,6 +44,16 @@ export interface ImpactConfig {
   messages: ImpactMessage[];
 }
 
+interface ParsedLeaf {
+  class: string;
+  confidence?: number;
+}
+
+interface ParsedDetection {
+  timestamp: number;
+  leaves: ParsedLeaf[];
+}
+
 class ImpactService {
   private static config: ImpactConfig = {
     meta: {
@@ -81,12 +93,12 @@ class ImpactService {
 
     // Economic impact
     const price_saved_MAD = (amount_g / 1000) * this.config.defaults.price_per_kg_leaves_MAD;
-    
+
     // Environmental impact
     const co2e_kg_avoided = (amount_g / 1000) * this.config.defaults.co2e_factor_kg_per_kg;
     const methane_kg_avoided = (amount_g / 1000) * this.config.defaults.methane_factor_kg_per_kg;
     const water_liters_saved = (amount_g / 1000) * this.config.defaults.water_factor_liters_per_kg;
-    
+
     // Nutritional metrics (based on research data for leafy greens)
     const calories_saved = amount_g * 0.23; // ~23 calories per 100g of leafy greens
     const fiber_g = amount_g * 0.025; // ~2.5g fiber per 100g
@@ -115,13 +127,13 @@ class ImpactService {
     if (!message) return '';
 
     let text = message.texts[language];
-    
+
     // Replace variables with actual values
     text = text.replace('{amount_g}', metrics.amount_g.toString());
     text = text.replace('{polyphenols_mg}', metrics.polyphenols_mg.toString());
     text = text.replace('{price_saved_MAD}', metrics.price_saved_MAD.toString());
     text = text.replace('{co2e_kg_avoided}', metrics.co2e_kg_avoided.toString());
-    
+
     return text;
   }
 
@@ -129,54 +141,54 @@ class ImpactService {
   static getCumulativeImpact(): ImpactMetrics {
     try {
       const detectedLeaves = this.getDetectedLeavesData();
-      console.log('ImpactService: Calculating impact for detected leaves:', detectedLeaves);
-      
+      logger.debug('ImpactService: Calculating impact for detected leaves:', detectedLeaves);
+
       // Validate the detected leaves data
       if (!detectedLeaves || typeof detectedLeaves !== 'object') {
-        console.warn('ImpactService: Invalid detected leaves data:', detectedLeaves);
+        logger.warn('ImpactService: Invalid detected leaves data:', detectedLeaves);
         return this.calculateImpact(0, 0);
       }
-      
+
       const leafEntries = Object.entries(detectedLeaves);
       if (leafEntries.length === 0) {
-        console.log('ImpactService: No detected leaves found, returning zero impact');
+        logger.debug('ImpactService: No detected leaves found, returning zero impact');
         return this.calculateImpact(0, 0);
       }
-      
+
       let totalAmount_g = 0;
       let totalPolyphenols_mg = 0;
-      
+
       leafEntries.forEach(([leafType, count]) => {
         if (!leafType || typeof leafType !== 'string') {
-          console.warn(`ImpactService: Invalid leaf type: ${leafType}`);
+          logger.warn(`ImpactService: Invalid leaf type: ${leafType}`);
           return;
         }
-        
+
         const numCount = Number(count);
         if (isNaN(numCount) || numCount <= 0) {
-          console.warn(`ImpactService: Invalid count for ${leafType}: ${count}`);
+          logger.warn(`ImpactService: Invalid count for ${leafType}: ${count}`);
           return;
         }
-        
+
         // Estimate leaf weight based on type (more realistic estimates)
         const leafWeight_g = this.getLeafWeightEstimate(leafType);
         const leafAmount_g = numCount * leafWeight_g;
         totalAmount_g += leafAmount_g;
-        
+
         // Estimate polyphenols based on leaf type (more accurate estimates)
         const polyphenolsPerLeaf_mg = this.getPolyphenolsPerLeaf(leafType);
         const leafPolyphenols_mg = numCount * polyphenolsPerLeaf_mg;
         totalPolyphenols_mg += leafPolyphenols_mg;
-        
-        console.log(`ImpactService: ${leafType} (${numCount}x) → ${leafAmount_g}g, ${leafPolyphenols_mg}mg polyphenols`);
+
+        logger.debug(`ImpactService: ${leafType} (${numCount}x) → ${leafAmount_g}g, ${leafPolyphenols_mg}mg polyphenols`);
       });
-      
+
       const result = this.calculateImpact(totalAmount_g, totalPolyphenols_mg);
-      console.log('ImpactService: Final impact metrics:', result);
-      
+      logger.debug('ImpactService: Final impact metrics:', result);
+
       return result;
     } catch (error) {
-      console.error('ImpactService: Error calculating cumulative impact:', error);
+      logger.error('ImpactService: Error calculating cumulative impact:', error);
       return this.calculateImpact(0, 0);
     }
   }
@@ -191,7 +203,7 @@ class ImpactService {
       'Chive Leaves': 20,
       'Scallion Leaves': 35,
       'Shallot Leaves': 30,
-      
+
       // Alternative names for flexibility
       'onion': 30,      // Onion leaves are typically 25-35g
       'garlic': 25,     // Garlic leaves are 20-30g
@@ -219,7 +231,7 @@ class ImpactService {
     if (weightMap[leafType]) {
       return weightMap[leafType];
     }
-    
+
     // Find best match for leaf type (case insensitive partial match)
     const lowerLeafType = leafType.toLowerCase();
     for (const [key, value] of Object.entries(weightMap)) {
@@ -227,8 +239,8 @@ class ImpactService {
         return value;
       }
     }
-    
-    console.log(`ImpactService: No weight match found for '${leafType}', using default: 30g`);
+
+    logger.debug(`ImpactService: No weight match found for '${leafType}', using default: 30g`);
     return 30; // Default average weight
   }
 
@@ -242,7 +254,7 @@ class ImpactService {
       'Chive Leaves': 180,
       'Scallion Leaves': 150,
       'Shallot Leaves': 170,
-      
+
       // Alternative names for flexibility
       'onion': 140,     // Onion leaves are rich in quercetin
       'garlic': 220,    // Garlic leaves have high allicin content
@@ -270,7 +282,7 @@ class ImpactService {
     if (polyphenolsMap[leafType]) {
       return polyphenolsMap[leafType];
     }
-    
+
     // Find best match for leaf type (case insensitive partial match)
     const lowerLeafType = leafType.toLowerCase();
     for (const [key, value] of Object.entries(polyphenolsMap)) {
@@ -278,8 +290,8 @@ class ImpactService {
         return value;
       }
     }
-    
-    console.log(`ImpactService: No polyphenols match found for '${leafType}', using default: 160mg`);
+
+    logger.debug(`ImpactService: No polyphenols match found for '${leafType}', using default: 160mg`);
     return 160; // Default average polyphenols content
   }
 
@@ -289,90 +301,90 @@ class ImpactService {
     try {
       // Use the same key format as APIService
       const data = localStorage.getItem('safeleafkitchen_detected_leaves');
-      console.log('ImpactService: Raw localStorage data:', data);
-      
+      logger.debug('ImpactService: Raw localStorage data:', data);
+
       if (!data) {
-        console.log('ImpactService: No detected leaves data found in localStorage');
+        logger.debug('ImpactService: No detected leaves data found in localStorage');
         return {};
       }
-      
+
       const parsed = JSON.parse(data);
-      console.log('ImpactService: Parsed data:', parsed, 'Type:', typeof parsed, 'IsArray:', Array.isArray(parsed));
-      
+      logger.debug('ImpactService: Parsed data:', parsed, 'Type:', typeof parsed, 'IsArray:', Array.isArray(parsed));
+
       // Handle the array format: [{timestamp, leaves: [{class: "Onion Leaves", ...}]}]
       if (Array.isArray(parsed)) {
         const leafCounts: Record<string, number> = {};
-        
-        parsed.forEach((detection: any, index: number) => {
-          console.log(`ImpactService: Processing detection ${index}:`, detection);
-          
+
+        parsed.forEach((detection: ParsedDetection, index: number) => {
+          logger.debug(`ImpactService: Processing detection ${index}`, detection);
+
           if (!detection || typeof detection !== 'object') {
-            console.warn(`ImpactService: Invalid detection object at index ${index}:`, detection);
+            logger.warn(`ImpactService: Invalid detection object at index ${index}`, detection);
             return;
           }
-          
+
           if (!detection.leaves || !Array.isArray(detection.leaves)) {
-            console.warn(`ImpactService: No leaves array in detection ${index}:`, detection);
+            logger.warn(`ImpactService: No leaves array in detection ${index}:`, detection);
             return;
           }
-          
-          detection.leaves.forEach((leaf: any, leafIndex: number) => {
+
+          detection.leaves.forEach((leaf: ParsedLeaf, leafIndex: number) => {
             if (!leaf || typeof leaf !== 'object') {
-              console.warn(`ImpactService: Invalid leaf object at detection ${index}, leaf ${leafIndex}:`, leaf);
+              logger.warn(`ImpactService: Invalid leaf object at detection ${index}, leaf ${leafIndex}:`, leaf);
               return;
             }
-            
+
             if (!leaf.class || typeof leaf.class !== 'string') {
-              console.warn(`ImpactService: Invalid leaf class at detection ${index}, leaf ${leafIndex}:`, leaf.class);
+              logger.warn(`ImpactService: Invalid leaf class at detection ${index}, leaf ${leafIndex}:`, leaf.class);
               return;
             }
-            
+
             const leafType = leaf.class.trim();
             if (leafType) {
               leafCounts[leafType] = (leafCounts[leafType] || 0) + 1;
-              console.log(`ImpactService: Counted leaf: ${leafType}, new count: ${leafCounts[leafType]}`);
+              logger.debug(`ImpactService: Counted leaf: ${leafType}, new count: ${leafCounts[leafType]}`);
             }
           });
         });
-        
-        console.log('ImpactService: Final parsed leaf counts:', leafCounts);
+
+        logger.debug('ImpactService: Final parsed leaf counts:', leafCounts);
         return leafCounts;
       }
-      
+
       // Handle legacy object format: {"Onion Leaves": 1}
       if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-        console.log('ImpactService: Processing legacy object format');
+        logger.debug('ImpactService: Processing legacy object format');
         const cleaned: Record<string, number> = {};
-        
+
         Object.entries(parsed).forEach(([key, value]) => {
           if (typeof key === 'string' && key.trim()) {
             const numValue = Number(value);
             if (!isNaN(numValue) && numValue >= 0) {
               cleaned[key.trim()] = numValue;
-              console.log(`ImpactService: Legacy format - ${key.trim()}: ${numValue}`);
+              logger.debug(`ImpactService: Legacy format - ${key.trim()}: ${numValue}`);
             } else {
-              console.warn(`ImpactService: Invalid value in legacy format for ${key}:`, value);
+              logger.warn(`ImpactService: Invalid value in legacy format for ${key}:`, value);
             }
           }
         });
-        
-        console.log('ImpactService: Final cleaned legacy data:', cleaned);
+
+        logger.debug('ImpactService: Final cleaned legacy data:', cleaned);
         return cleaned;
       }
-      
-      console.warn('ImpactService: Unrecognized data format:', parsed);
+
+      logger.warn('ImpactService: Unrecognized data format:', parsed);
       return {};
     } catch (error) {
-      console.error('ImpactService: Error parsing detected leaves data:', error);
-      
+      logger.error('ImpactService: Error parsing detected leaves data:', error);
+
       // Try to salvage any data that might be there
       try {
         const rawData = localStorage.getItem('safeleafkitchen_detected_leaves');
-        console.log('ImpactService: Attempting to salvage data, raw:', rawData);
+        logger.debug('ImpactService: Attempting to salvage data, raw:', rawData);
       } catch (salvageError) {
-        console.error('ImpactService: Could not even access raw data:', salvageError);
+        logger.error('ImpactService: Could not even access raw data:', salvageError);
       }
-      
+
       return {};
     }
   }
@@ -415,9 +427,9 @@ class ImpactService {
       price_saved_MAD: Math.max(0, current.price_saved_MAD * 0.7),
       co2e_kg_avoided: Math.max(0, current.co2e_kg_avoided * 0.7)
     };
-    
+
     const change = current.amount_g > 0 ? ((current.amount_g - previous.amount_g) / previous.amount_g) * 100 : 0;
-    
+
     return { current, previous, change };
   }
 
@@ -428,16 +440,16 @@ class ImpactService {
     water_bottles_saved: number; // Equivalent water bottles
   } {
     const impact = this.getCumulativeImpact();
-    
+
     // 1 kg CO2 = ~4.6 km by car (average fuel consumption)
     const co2_equivalent_km = impact.co2e_kg_avoided * 4.6;
-    
+
     // 1 tree absorbs ~22 kg CO2 per year, so we calculate equivalent trees
     const trees_equivalent = impact.co2e_kg_avoided / 22;
-    
+
     // 1 liter of water saved = ~0.5 water bottles (500ml)
     const water_bottles_saved = impact.water_liters_saved * 0.5;
-    
+
     return {
       co2_equivalent_km: Math.round(co2_equivalent_km * 10) / 10,
       trees_equivalent: Math.round(trees_equivalent * 100) / 100,

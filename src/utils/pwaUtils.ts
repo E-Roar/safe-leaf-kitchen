@@ -1,10 +1,12 @@
+import { logger } from '@/lib/logger';
+
 // PWA Registration and Utilities
 
 export const registerServiceWorker = async (): Promise<void> => {
   if ('serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('ServiceWorker registration successful:', registration);
+      logger.debug('ServiceWorker registration successful:', registration);
       
       // Check for updates
       registration.addEventListener('updatefound', () => {
@@ -19,7 +21,7 @@ export const registerServiceWorker = async (): Promise<void> => {
         }
       });
     } catch (error) {
-      console.log('ServiceWorker registration failed:', error);
+      logger.debug('ServiceWorker registration failed:', error);
     }
   }
 };

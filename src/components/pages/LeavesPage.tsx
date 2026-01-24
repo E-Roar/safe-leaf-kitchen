@@ -1,7 +1,9 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import { X, Menu, Leaf, Search, Star, ArrowRight } from "lucide-react";
-import { leaves, LeafInfo } from "@/data/leaves";
+import { X, Menu, Leaf, Search, Star } from "lucide-react";
+// import { leaves, LeafInfo } from "@/data/leaves"; // Removed static import
+import { supabase } from "@/lib/supabaseClient";
+import { Analytics } from "@/services/analyticsEventService";
 import { cn } from "@/lib/utils";
 import { LeafGallery } from "@/components/ui/LeafGallery";
 import nutritionRaw from "../../../tableau_nutritionnel 9 feuilles.json";
@@ -25,6 +27,25 @@ import {
   PolarAngleAxis,
   Radar,
 } from "recharts";
+
+// Define Interface locally or import from a shared type file
+interface LeafInfo {
+  id: any; // Allow UUID or number
+  name: { en: string; fr: string };
+  aliases: string[];
+  highlights: {
+    proteins_percent?: number;
+    antioxidant_classification?: string;
+    calcium_mg_per_100g?: number;
+    flavonoids_mg_per_100g?: number;
+    polyphenols_mg_per_100g?: number;
+  };
+  compounds?: string[];
+  safety?: string;
+  summary: string;
+  image_url?: string;
+  gallery_images?: string[]; // Add gallery_images support
+}
 
 // Lightweight bubbles simulation for compounds
 function CompoundsBubbleSimulation({ compounds }: { compounds: string[] }) {
@@ -53,9 +74,43 @@ interface LeavesPageProps {
 export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
   const { t } = useI18n();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [leaves, setLeaves] = useState<LeafInfo[]>([]); // Dynamic state
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedLeaf, setSelectedLeaf] = useState<LeafInfo | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [query, setQuery] = useState("");
+
+  // Fetch leaves from Supabase
+  useEffect(() => {
+    const fetchLeaves = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('leaves')
+        .select('*')
+        .order('name->en'); // Order by English name
+
+      if (error) {
+        console.error('Error fetching leaves:', error);
+      } else {
+        console.log('Fetched leaves:', data); // Debug
+        setLeaves(data || []);
+        // Select first leaf if none selected and not loading
+        if (data && data.length > 0 && !selectedLeaf) {
+          // If selectedLeafId is passed via props, find it
+          if (selectedLeafId) {
+            const found = data.find((l: any) => l.id === selectedLeafId);
+            if (found) setSelectedLeaf(found);
+            else setSelectedLeaf(data[0]);
+          } else {
+            setSelectedLeaf(data[0]);
+          }
+        }
+      }
+      setIsLoading(false);
+    };
+
+    fetchLeaves();
+  }, [selectedLeafId]); // Re-run if ID prop changes (though logic handles internal check)
 
   // Build lookup maps (by French leaf name as in datasets)
   const nutritionByFr: Record<string, any> = useMemo(() => {
@@ -101,11 +156,11 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
           };
         }
       }
-    } catch {}
+    } catch { }
     return out;
   }, []);
 
-  const parseNum = (val: any): number | null => {
+  const parseNum = (val: unknown): number | null => {
     if (val === undefined || val === null || val === "") return null;
     const n = Number(val);
     return isNaN(n) ? null : n;
@@ -129,20 +184,6 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
     return key || null;
   };
 
-  useEffect(() => {
-    if (!selectedLeaf && leaves.length > 0) {
-      setSelectedLeaf(leaves[0]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedLeafId) {
-      const found = leaves.find(l => l.id === selectedLeafId);
-      if (found) {
-        setSelectedLeaf(found);
-      }
-    }
-  }, [selectedLeafId]);
 
   const filtered = leaves.filter(l =>
     l.name.en.toLowerCase().includes(query.toLowerCase()) ||
@@ -150,50 +191,51 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
     l.aliases.some(a => a.toLowerCase().includes(query.toLowerCase()))
   );
 
-  const getLeafImage = (leafEn: string) => {
-    const filename = leafEn
+  const getLeafImage = (leaf: LeafInfo) => {
+    if (leaf.image_url) return leaf.image_url;
+    if (leaf.gallery_images && leaf.gallery_images.length > 0) return leaf.gallery_images[0];
+
+    // Fallback to local files for legacy/default items
+    const filename = leaf.name.en
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, '-');
-    // Use the first image from the gallery folder instead of main image
     return `/images/leaves/${filename}/1.png`;
   };
 
   const Card = ({ leaf }: { leaf: LeafInfo }) => (
     <button
-      onClick={() => { setSelectedLeaf(leaf); setIsSidebarOpen(false); }}
+      onClick={() => { setSelectedLeaf(leaf); setIsSidebarOpen(false); Analytics.trackLeafView(leaf.id); }}
       className={cn(
-        "w-full p-4 rounded-2xl text-left transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative border backdrop-blur-sm",
-        selectedLeaf?.id === leaf.id 
-          ? "glass bg-primary/10 border-primary/30 shadow-lg shadow-primary/20" 
+        "w-full rounded-2xl text-left transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 relative border backdrop-blur-sm overflow-hidden flex flex-col h-full",
+        selectedLeaf?.id === leaf.id
+          ? "glass bg-primary/10 border-primary/30 shadow-lg shadow-primary/20"
           : "glass hover:bg-primary/5 border-primary/10 hover:border-primary/20"
       )}
     >
-      <div className="absolute top-2 right-2">
+      <div className="absolute top-2 right-2 z-10">
         <Star className="w-4 h-4 text-yellow-400 opacity-0" />
       </div>
-      <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-organic flex items-center justify-center">
-          <img
-            src={getLeafImage(leaf.name.en)}
-            alt={leaf.name.en}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              (target.nextElementSibling as HTMLElement)?.classList.remove('hidden');
-            }}
-          />
-          <Leaf className="w-8 h-8 text-primary hidden" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground text-sm line-clamp-2">
-            {leaf.name[selectedLanguage]}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            {leaf.aliases.slice(0, 3).join(', ')}
-          </p>
-        </div>
+      <div className="w-full aspect-[4/3] relative bg-gradient-organic">
+        <img
+          src={getLeafImage(leaf)}
+          alt={leaf.name.en}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            (target.nextElementSibling as HTMLElement)?.classList.remove('hidden');
+          }}
+        />
+        <Leaf className="w-8 h-8 text-primary hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+      </div>
+      <div className="p-3 flex-1 flex flex-col">
+        <h3 className="font-semibold text-foreground text-sm line-clamp-2 leading-tight">
+          {leaf.name[selectedLanguage]}
+        </h3>
+        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-1">
+          {leaf.aliases.slice(0, 2).join(', ')}
+        </p>
       </div>
     </button>
   );
@@ -202,7 +244,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
     <div className="h-screen flex overflow-hidden">
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-40 w-80 bg-background/90 backdrop-blur-2xl border-r border-primary/20 shadow-2xl shadow-primary/10 flex flex-col transform transition-transform duration-300 ease-in-out",
+        "fixed inset-y-0 left-0 z-40 w-full sm:w-80 bg-background/90 backdrop-blur-2xl border-r border-primary/20 shadow-2xl shadow-primary/10 flex flex-col transform transition-transform duration-300 ease-in-out",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         "lg:translate-x-0 lg:border-r lg:border-primary/20"
       )}>
@@ -229,11 +271,13 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
           </div>
         </div>
 
-        {/* Leaf List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {filtered.map((leaf) => (
-            <Card key={leaf.id} leaf={leaf} />
-          ))}
+        {/* Leaf List - Responsive Grid */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="grid grid-cols-2 gap-3">
+            {filtered.map((leaf) => (
+              <Card key={leaf.id} leaf={leaf} />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -269,7 +313,7 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                 </h1>
                 <div className="mx-auto mb-4 w-full max-w-xl aspect-video rounded-3xl overflow-hidden bg-gradient-organic border border-primary/20 shadow-2xl shadow-primary/10 hover:shadow-primary/20 transition-all duration-300">
                   <img
-                    src={getLeafImage(selectedLeaf.name.en)}
+                    src={getLeafImage(selectedLeaf)}
                     alt={selectedLeaf.name.en}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -500,15 +544,14 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
                   <p className="text-sm text-muted-foreground">{selectedLeaf.safety}</p>
                 </div>
               )}
-              
+
               {/* Leaf Gallery - Pinterest-style Masonry */}
-              <div className="mt-8" data-gallery-section>
-                <LeafGallery 
-                  leafId={selectedLeaf.id}
-                  leafName={selectedLeaf.name.en}
-                  className=""
-                />
-              </div>
+              <LeafGallery
+                leafId={selectedLeaf.id}
+                leafName={selectedLeaf.name.en}
+                galleryImages={selectedLeaf.gallery_images}
+                className=""
+              />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">
@@ -523,12 +566,14 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
       </div>
 
       {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      {
+        isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )
+      }
     </div>
   );
 }
