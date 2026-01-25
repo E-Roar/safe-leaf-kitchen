@@ -1,29 +1,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+// PDF libs are now lazy loaded
+// import { pdf } from '@react-pdf/renderer';
+// import QRCode from 'qrcode';
+// import { RecipeBooklet } from '@/components/pdf/RecipeBooklet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Plus, Save, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Loader2, Plus, Save, Trash2, Upload, Image as ImageIcon, BookOpen, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PDFGenerationProgress, PDFGenerationStep } from './PDFGenerationProgress';
+import { compressImageForPDF } from '@/utils/imageCompression';
 
-// Simplified interface for prototype
-interface Recipe {
-    id: string;
-    title: { en: string; fr: string; ar: string };
-    ingredients: { en: string[]; fr: string[]; ar: string[] };
-    steps: { en: string[]; fr: string[]; ar: string[] };
-    nutrition: any;
-    image_url: string;
-    gallery_images?: string[];
-    // Metadata (Phase 5)
-    origin?: string;
-    dietary_tags?: string[];
-    sources?: { title: string; url?: string; doi?: string }[];
-    created_at?: string;
-    updated_at?: string;
-}
+// Simplified interface for prototype - REPLACED by shared type
+import { Recipe } from '@/data/recipes';
 
 export const ManageRecipes = () => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -31,9 +24,242 @@ export const ManageRecipes = () => {
     const [editingRecipe, setEditingRecipe] = useState<Partial<Recipe> | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [isGeneratingBooklet, setIsGeneratingBooklet] = useState(false);
+    const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+    const [generatedPdfUrl, setGeneratedPdfUrl] = useState<string>('');
+    const [generatedPdfName, setGeneratedPdfName] = useState<string>('');
+    const [generatedPdfBlob, setGeneratedPdfBlob] = useState<Blob | null>(null);
+    const [savedBooklets, setSavedBooklets] = useState<any[]>([]);
+    const [isSavingPdf, setIsSavingPdf] = useState(false);
+
+    // PDF Generation State
+    const [pdfProgressOpen, setPdfProgressOpen] = useState(false);
+    const [pdfProgress, setPdfProgress] = useState(0);
+    const [pdfCurrentStep, setPdfCurrentStep] = useState('');
+    const [pdfSteps, setPdfSteps] = useState<PDFGenerationStep[]>([
+        { id: 'init', label: 'Initializing...', status: 'pending' },
+        { id: 'images', label: 'Optimizing Images', status: 'pending' },
+        { id: 'pages', label: 'Generating Pages', status: 'pending' },
+        { id: 'preview', label: 'Preparing Preview', status: 'pending' }
+    ]);
+
+    const updatePdfStep = (stepId: string, status: 'active' | 'complete') => {
+        setPdfSteps(prev => prev.map(s => s.id === stepId ? { ...s, status } : s));
+        if (status === 'active') {
+            const stepLabels: Record<string, string> = {
+                'init': 'Preparing resources...',
+                'images': 'Compressing and optimizing recipe images...',
+                'pages': 'Layouting cookbook pages...',
+                'preview': 'Finalizing for preview...'
+            };
+            setPdfCurrentStep(stepLabels[stepId] || 'Processing...');
+        }
+    };
+
+    const handleGenerateBooklet = async () => {
+        if (recipes.length === 0) return;
+
+        setIsGeneratingBooklet(true);
+        setPdfProgressOpen(true);
+        setPdfProgress(0);
+
+        // Reset steps
+        setPdfSteps(prev => prev.map(s => ({ ...s, status: 'pending' })));
+
+        try {
+            // STEP 1: INIT
+            updatePdfStep('init', 'active');
+            setPdfProgress(5);
+
+            // Lazy load dependencies to reduce bundle size
+            const [{ pdf }, { RecipeBooklet }, QRCode] = await Promise.all([
+                import('@react-pdf/renderer'),
+                import('@/components/pdf/RecipeBooklet'),
+                import('qrcode')
+            ]);
+
+            updatePdfStep('init', 'complete');
+            setPdfProgress(10);
+
+            // STEP 2: IMAGES
+            updatePdfStep('images', 'active');
+
+            // Generate QR Code
+            const qrCodeUrl = await QRCode.toDataURL('https://safe-leaf-kitchen.solvefactory.fun/');
+            setPdfProgress(15);
+
+            // Clone recipes to not affect the UI state
+            const recipesForPdf = JSON.parse(JSON.stringify(recipes));
+
+            // Compress images for each recipe to reduce PDF size
+            let processedCount = 0;
+            const totalImages = recipesForPdf.length; // Approximate (1 main image per recipe)
+
+            // Compress images in parallel
+            const compressionPromises = recipesForPdf.map(async (recipe: any) => {
+                // Compress main image
+                if (recipe.image_url) {
+                    try {
+                        const compressed = await compressImageForPDF(recipe.image_url, 600, 0.7);
+                        if (compressed) recipe.image_url = compressed;
+                    } catch (e) {
+                        console.warn('Failed to compress image:', recipe.image_url);
+                    }
+                }
+
+                // Compress gallery
+                if (recipe.gallery_images && recipe.gallery_images.length > 0) {
+                    const compressedGallery = [];
+                    // Process gallery images up to limit, also in parallel if needed, but sequential per recipe is fine for now
+                    // actually let's just do top 4
+                    for (const img of recipe.gallery_images.slice(0, 4)) {
+                        try {
+                            const compressed = await compressImageForPDF(img, 400, 0.6);
+                            if (compressed) compressedGallery.push(compressed);
+                        } catch (e) { }
+                    }
+                    recipe.gallery_images = compressedGallery;
+                }
+
+                // Update progress atomically
+                processedCount++;
+                const newProgress = 15 + Math.round((processedCount / totalImages) * 35);
+                setPdfProgress(prev => Math.max(prev, newProgress)); // Ensure progress only goes up
+            });
+
+            await Promise.all(compressionPromises);
+
+            updatePdfStep('images', 'complete');
+            setPdfProgress(50);
+
+            // STEP 3: PAGES
+            updatePdfStep('pages', 'active');
+
+            // Artificial small delay to allow UI to update
+            await new Promise(r => setTimeout(r, 100));
+
+            const blob = await pdf(
+                <RecipeBooklet
+                    recipes={recipesForPdf}
+                    qrCodeDataUrl={qrCodeUrl}
+                    origin={window.location.origin}
+                />
+            ).toBlob();
+
+            updatePdfStep('pages', 'complete');
+            setPdfProgress(90);
+
+            // STEP 4: PREVIEW (No auto-upload)
+            updatePdfStep('preview', 'active');
+
+            const fileName = `SafeLeafKitchen_Booklet_${new Date().toISOString().split('T')[0]}.pdf`;
+
+            // Create local blob URL for preview
+            const blobUrl = URL.createObjectURL(blob);
+
+            setGeneratedPdfUrl(blobUrl);
+            setGeneratedPdfName(fileName);
+            setGeneratedPdfBlob(blob); // Store blob for manual save to DB
+
+            updatePdfStep('preview', 'complete');
+            setPdfProgress(100);
+
+            // Brief delay to show 100%
+            await new Promise(r => setTimeout(r, 500));
+            setPdfProgressOpen(false);
+
+            toast.success('Booklet Generated! Save to DB when ready.');
+
+            // Open automatically in new tab
+            window.open(blobUrl, '_blank');
+            setPdfDialogOpen(true);
+
+        } catch (error: any) {
+            console.error('Booklet Generation Error:', error);
+            setPdfProgressOpen(false);
+            toast.error('Failed to generate booklet: ' + error.message);
+        } finally {
+            setIsGeneratingBooklet(false);
+        }
+    };
+
+    const fetchSavedBooklets = async () => {
+        try {
+            const { data, error } = await supabase.storage.from('content').list('booklets', {
+                limit: 100,
+                offset: 0,
+                sortBy: { column: 'created_at', order: 'desc' },
+            });
+
+            if (error) throw error;
+            setSavedBooklets(data || []);
+        } catch (error) {
+            console.log('Error fetching booklets:', error);
+        }
+    };
+
+    const handleSavePdfToDb = async () => {
+        console.log("Saving PDF to DB...", { generatedPdfName, blobSize: generatedPdfBlob?.size });
+
+        if (!generatedPdfBlob || !generatedPdfName) {
+            toast.error("No PDF data found to save. Please regenerate.");
+            return;
+        }
+
+        setIsSavingPdf(true);
+        toast.info('Saving booklet to database...');
+
+        try {
+            const filePath = `booklets/${generatedPdfName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('content')
+                .upload(filePath, generatedPdfBlob, {
+                    contentType: 'application/pdf',
+                    upsert: true
+                });
+
+            if (uploadError) throw uploadError;
+
+            toast.success('Booklet saved to database successfully!');
+            fetchSavedBooklets(); // Refresh list
+
+        } catch (error: any) {
+            console.error('Save PDF Error:', error);
+            toast.error('Failed to save booklet: ' + error.message);
+        } finally {
+            setIsSavingPdf(false);
+        }
+    };
+
+    const handleDeleteBooklet = async (fileName: string) => {
+        if (!confirm(`Delete ${fileName}?`)) return;
+
+        try {
+            const { error } = await supabase.storage.from('content').remove([`booklets/${fileName}`]);
+            if (error) throw error;
+            toast.success('Booklet deleted');
+            fetchSavedBooklets();
+        } catch (error: any) {
+            toast.error('Failed to delete booklet');
+        }
+    };
+
+    const handleDownloadBooklet = async (fileName: string) => {
+        const { data } = supabase.storage.from('content').getPublicUrl(`booklets/${fileName}`);
+        window.open(data.publicUrl, '_blank');
+    };
+
+
+
+
+    const handleOpenInNewTab = () => {
+        window.open(generatedPdfUrl, '_blank');
+    };
 
     useEffect(() => {
         fetchRecipes();
+        fetchSavedBooklets();
     }, []);
 
     const fetchRecipes = async () => {
@@ -91,7 +317,7 @@ export const ManageRecipes = () => {
                     table: 'recipes',
                     action: 'upsert',
                     data: editingRecipe,
-                    id: editingRecipe.id
+                    id: editingRecipe.id ? parseInt(editingRecipe.id.toString()) : undefined
                 }
             });
 
@@ -148,9 +374,25 @@ export const ManageRecipes = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-emerald-800">Recipes Database</h3>
-                <Button onClick={() => setEditingRecipe({ title: { en: '', fr: '', ar: '' }, ingredients: { en: [], fr: [], ar: [] }, steps: { en: [], fr: [], ar: [] } })} className="bg-emerald-600">
-                    <Plus className="w-4 h-4 mr-2" /> Add Recipe
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        onClick={handleGenerateBooklet}
+                        variant="outline"
+                        disabled={isGeneratingBooklet || recipes.length === 0}
+                        className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                    >
+                        {isGeneratingBooklet ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookOpen className="w-4 h-4 mr-2" />}
+                        Generate Booklet
+                    </Button>
+                    <a href="#saved-booklets">
+                        <Button variant="outline" className="border-slate-300 text-slate-700">
+                            Saved Booklets
+                        </Button>
+                    </a>
+                    <Button onClick={() => setEditingRecipe({ title: { en: '', fr: '', ar: '' }, ingredients: { en: [], fr: [], ar: [] }, steps: { en: [], fr: [], ar: [] } })} className="bg-emerald-600">
+                        <Plus className="w-4 h-4 mr-2" /> Add Recipe
+                    </Button>
+                </div>
             </div>
 
             {editingRecipe && (
@@ -339,11 +581,104 @@ export const ManageRecipes = () => {
                         </CardHeader>
                         <CardContent className="p-4 pt-0 flex justify-end gap-2">
                             <Button variant="ghost" size="sm" onClick={() => setEditingRecipe(recipe)}>Edit</Button>
-                            <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50" onClick={() => handleDelete(recipe.id)}><Trash2 className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50" onClick={() => handleDelete(recipe.id.toString())}><Trash2 className="w-4 h-4" /></Button>
                         </CardContent>
                     </Card>
                 ))}
             </div>
+
+            {/* Saved Booklets List */}
+            <div id="saved-booklets" className="mt-12 pt-8 border-t border-slate-200">
+                <h3 className="text-lg font-semibold text-emerald-800 mb-6 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" /> Saved Booklets
+                </h3>
+
+                {savedBooklets.length === 0 ? (
+                    <div className="text-center py-12 bg-slate-50 rounded-lg text-slate-500">
+                        No saved booklets found. Generate one above!
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-500 font-medium">
+                                <tr>
+                                    <th className="px-4 py-3">Filename</th>
+                                    <th className="px-4 py-3">Created</th>
+                                    <th className="px-4 py-3">Size</th>
+                                    <th className="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {savedBooklets.map((file) => (
+                                    <tr key={file.id} className="hover:bg-slate-50">
+                                        <td className="px-4 py-3 font-medium text-slate-700 flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded bg-red-50 flex items-center justify-center text-red-500">
+                                                <BookOpen className="w-4 h-4" />
+                                            </div>
+                                            {file.name}
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-500">
+                                            {new Date(file.created_at).toLocaleDateString()} {new Date(file.created_at).toLocaleTimeString()}
+                                        </td>
+                                        <td className="px-4 py-3 text-slate-500">
+                                            {(file.metadata?.size / 1024 / 1024).toFixed(2)} MB
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Button size="sm" variant="outline" onClick={() => handleDownloadBooklet(file.name)}>
+                                                    <ExternalLink className="w-4 h-4 mr-1" /> View
+                                                </Button>
+                                                <Button size="sm" variant="ghost" className="text-red-500 hover:bg-red-50" onClick={() => handleDeleteBooklet(file.name)}>
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+            {/* PDF Generated Dialog */}
+            <Dialog open={pdfDialogOpen} onOpenChange={setPdfDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-emerald-700">
+                            <CheckCircle2 className="w-5 h-5" />
+                            Cookbook Generated Successfully!
+                        </DialogTitle>
+                        <DialogDescription>
+                            Your Safe Leaf Kitchen cookbook has been created and saved. The PDF has opened in a new tab.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-4 py-4">
+                        <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 text-center">
+                            <p className="text-sm font-medium text-emerald-800 truncate">{generatedPdfName}</p>
+                            <p className="text-xs text-emerald-600 mt-1">Booklet generated successfully</p>
+                        </div>
+                    </div>
+                    <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                        <Button variant="outline" onClick={handleOpenInNewTab} className="flex-1">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Open in New Tab
+                        </Button>
+                        <Button onClick={handleSavePdfToDb} disabled={isSavingPdf} className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                            {isSavingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                            Save to Database
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Progress Dialog */}
+            <PDFGenerationProgress
+                isOpen={pdfProgressOpen}
+                progress={pdfProgress}
+                currentStep={pdfCurrentStep}
+                steps={pdfSteps}
+            />
         </div>
     );
 };

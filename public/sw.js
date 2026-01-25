@@ -1,9 +1,8 @@
-const CACHE_NAME = 'safeleafkitchen-v1.1.0';
+const CACHE_NAME = 'safeleafkitchen-v1.2.0';
 const IMAGE_CACHE_NAME = 'safeleafkitchen-images-v1.0.0';
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
+  '/index.html',
   '/manifest.json',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png'
@@ -11,6 +10,7 @@ const urlsToCache = [
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
+  self.skipWaiting(); // Activate immediately
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -23,50 +23,51 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch event - serve from cache when possible
+// Fetch event - Stale-while-revalidate strategy
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  
-  // Handle image requests with dedicated caching strategy
-  if (event.request.destination === 'image' || 
-      url.pathname.startsWith('/images/') ||
-      /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(url.pathname)) {
+
+  // Handle image requests
+  if (event.request.destination === 'image' ||
+    url.pathname.startsWith('/images/') ||
+    /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(url.pathname)) {
     event.respondWith(
       caches.open(IMAGE_CACHE_NAME).then(cache => {
         return cache.match(event.request).then(cachedResponse => {
-          if (cachedResponse) {
-            // Serve from cache
-            return cachedResponse;
-          }
-          
-          // Fetch and cache the image
-          return fetch(event.request).then(networkResponse => {
-            // Only cache successful responses
+          // Return cached response immediately if available, but also update it in background
+          const fetchPromise = fetch(event.request).then(networkResponse => {
             if (networkResponse.status === 200) {
               cache.put(event.request, networkResponse.clone());
             }
             return networkResponse;
-          }).catch(() => {
-            // Return a placeholder or cached fallback if available
-            return cache.match('/icons/icon-192x192.png');
-          });
+          }).catch(() => null); // Eat errors for background fetch
+
+          return cachedResponse || fetchPromise;
         });
       })
     );
     return;
   }
-  
-  // Handle other requests normally
+
+  // Stale-while-revalidate for other resources
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-      .catch(() => {
-        // Fallback for offline scenarios
+    caches.match(event.request).then(cachedResponse => {
+      const fetchPromise = fetch(event.request).then(networkResponse => {
+        // Update cache
+        if (networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // If offline and no cache, try fallback
         return caches.match('/');
-      })
+      });
+
+      return cachedResponse || fetchPromise;
+    })
   );
 });
 
@@ -107,7 +108,7 @@ self.addEventListener('push', (event) => {
         primaryKey: 1
       }
     };
-    
+
     event.waitUntil(
       self.registration.showNotification('SafeLeafKitchen', options)
     );

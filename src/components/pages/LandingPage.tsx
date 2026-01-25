@@ -1074,11 +1074,18 @@ export default function LandingPage({ onNavigateToChat, onNavigateToRecipes, onN
             <div className="mb-3">
               <h3 className="text-xl font-bold text-foreground">About SafeLeafKitchen</h3>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              SafeLeafKitchen’s core vision and solution concept were invented and designed by
-              <span className="font-semibold text-foreground"> D. Jamila El Biyad</span> —
-              the driving creative force behind this application’s purpose and user experience.
-            </p>
+
+            <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+              <p>
+                SafeLeafKitchen is a research-driven initiative founded on the scientific vision of
+                <a href="https://www.researchgate.net/profile/Jamila-Elbiyad" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline ml-1">
+                  Dr. Jamila El Biyad
+                </a>, whose work is the primary driver behind the application. Her research at the intersection of food safety, nutrition, ecology, and resource valuation directly inspired the creation of this platform.
+              </p>
+              <p>
+                By translating scientific research into an accessible digital tool, SafeLeafKitchen serves consumers, researchers, and nutrition professionals, while contributing to improved public health, ecological sustainability, and the economic valorization of Moroccan natural resources.
+              </p>
+            </div>
             <div className="mt-5 flex justify-end">
               <button
                 onClick={() => setShowAbout(false)}

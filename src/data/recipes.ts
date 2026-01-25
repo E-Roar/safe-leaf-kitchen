@@ -24,6 +24,7 @@ export interface RecipeNutrition {
   polyphenols_mg: number;
   flavonoids_mg: number;
   antioxidant_score: string;
+  calories_kcal?: number;
 }
 
 export interface Recipe {
@@ -32,6 +33,8 @@ export interface Recipe {
   ingredients: RecipeIngredients;
   steps: RecipeSteps;
   nutrition: RecipeNutrition;
+  image_url?: string;
+  gallery_images?: string[];
 }
 
 export const recipes: Recipe[] = [
