@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { X, Menu, Leaf, Search, Star } from "lucide-react";
-// import { leaves, LeafInfo } from "@/data/leaves"; // Removed static import
+import { leaves as staticLeaves } from "@/data/leaves";
 import { supabase } from "@/lib/supabaseClient";
 import { Analytics } from "@/services/analyticsEventService";
 import { cn } from "@/lib/utils";
@@ -91,18 +91,20 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
 
       if (error) {
         console.error('Error fetching leaves:', error);
+        setLeaves(staticLeaves);
+        if (!selectedLeaf) setSelectedLeaf(staticLeaves.find(l => l.id === selectedLeafId) || staticLeaves[0]);
       } else {
         console.log('Fetched leaves:', data); // Debug
-        setLeaves(data || []);
+        const fallbackData = (data && data.length > 0) ? data : staticLeaves;
+        setLeaves(fallbackData);
         // Select first leaf if none selected and not loading
-        if (data && data.length > 0 && !selectedLeaf) {
-          // If selectedLeafId is passed via props, find it
+        if (fallbackData && fallbackData.length > 0 && !selectedLeaf) {
           if (selectedLeafId) {
-            const found = data.find((l: any) => l.id === selectedLeafId);
+            const found = fallbackData.find((l: any) => l.id === selectedLeafId);
             if (found) setSelectedLeaf(found);
-            else setSelectedLeaf(data[0]);
+            else setSelectedLeaf(fallbackData[0]);
           } else {
-            setSelectedLeaf(data[0]);
+            setSelectedLeaf(fallbackData[0]);
           }
         }
       }
@@ -180,8 +182,24 @@ export default function LeavesPage({ selectedLeafId }: LeavesPageProps) {
       8: 'navet',
       9: 'artichaut',
     };
-    const key = mapById[leaf.id];
-    return key || null;
+    if (typeof leaf.id === 'number') {
+      return mapById[leaf.id] || null;
+    }
+    
+    // Fallback for UUIDs - Try matching by french name exact match
+    const nameFr = leaf.name.fr.toLowerCase();
+    const reverseMap: Record<string, string> = {
+      "feuilles d’oignon": "oignon", "feuille d'oignon": "oignon", "oignon": "oignon",
+      "feuille de fenouil": "fenouil", "fenouil": "fenouil",
+      "feuille de carotte": "carotte", "carotte": "carotte",
+      "feuille de chou rave": "chou rave", "chou rave": "chou rave",
+      "feuille de betterave rouge": "betterave rouge", "betterave rouge": "betterave rouge",
+      "feuille de radis": "radis", "radis": "radis",
+      "feuille de poireau": "poireau", "poireau": "poireau",
+      "feuille de navet": "navet", "navet": "navet",
+      "feuille d’artichaut": "artichaut", "feuille d'artichaut": "artichaut", "artichaut": "artichaut"
+    };
+    return reverseMap[nameFr] || null;
   };
 
 

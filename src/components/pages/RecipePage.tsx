@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { logger } from '@/lib/logger';
 import { useI18n } from "@/hooks/useI18n";
 import { ChevronDown, ChevronUp, ChefHat, Clock, Users, Leaf, Zap, BookOpen, Star, Menu, X, Play, Loader2 } from "lucide-react";
-// import { recipes, Recipe } from "@/data/recipes"; // Removed static import
+import { recipes as staticRecipes } from "@/data/recipes";
 import { supabase } from "@/lib/supabaseClient";
 import { Analytics } from "@/services/analyticsEventService";
 import { APIService } from "@/services/apiService";
@@ -83,21 +83,26 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
 
       if (error) {
         console.error('Error fetching recipes:', error);
+        setRecipes(staticRecipes as any[]);
+        if (selectedRecipeId) {
+          const found = staticRecipes.find((r: any) => r.id === selectedRecipeId);
+          if (found) {
+            setSelectedRecipe(found as any);
+            setExpandedRecipe(found.id);
+          }
+        }
       } else {
         console.log('Fetched recipes:', data);
-        setRecipes(data || []);
+        const fallbackData = (!data || data.length === 0) ? (staticRecipes as any[]) : data;
+        setRecipes(fallbackData);
 
         // Auto-select if selectedRecipeId is present
-        if (selectedRecipeId && data) {
-          const found = data.find((r: any) => r.id === selectedRecipeId);
+        if (selectedRecipeId && fallbackData) {
+          const found = fallbackData.find((r: any) => r.id === selectedRecipeId);
           if (found) {
             setSelectedRecipe(found);
             setExpandedRecipe(found.id);
           }
-        } else if (data && data.length > 0 && !selectedRecipeId) {
-          // If no pre-selection, maybe don't select anything by default to show the "Favorites/Ranking" view?
-          // Or follow original logic? Original logic had null selectedRecipe -> shows ranking.
-          // So do nothing here unless we want to force selection.
         }
       }
       setIsLoading(false);
