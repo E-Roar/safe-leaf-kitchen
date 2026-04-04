@@ -66,25 +66,36 @@ export class APIService {
 
   static async detectLeaf(imageBase64: string): Promise<RoboflowResponse> {
     try {
-      // Use Supabase Secure Edge Function
-      const { data, error } = await supabase.functions.invoke('roboflow-scan', {
-        body: { imageBase64 }
-      });
-
-      if (error) {
-        throw new Error(`Edge Function Error: ${error.message}`);
+      const settings = SettingsService.getSettings();
+      if (!settings.roboflowApiKey) {
+        throw new Error("Roboflow API key not configured in settings.");
       }
 
-      // Track scan in analytics
-      const result = data as RoboflowResponse;
-      if (result.predictions && result.predictions.length > 0) {
-        const detectedLeaf = result.predictions[0].class;
+      logger.debug("Sending request to Roboflow API directly");
+
+      const response = await axios({
+        method: "POST",
+        url: settings.roboflowEndpoint,
+        params: {
+          api_key: settings.roboflowApiKey
+        },
+        data: imageBase64,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      });
+
+      const data = response.data as RoboflowResponse;
+
+      // Track scan in analytics natively
+      if (data.predictions && data.predictions.length > 0) {
+        const detectedLeaf = data.predictions[0].class;
         AnalyticsService.recordScan(detectedLeaf);
       } else {
         AnalyticsService.recordScan();
       }
 
-      return result;
+      return data;
     } catch (error) {
       logger.error("Roboflow API error:", error);
       throw new Error("Failed to detect leaf in image");
