@@ -113,29 +113,64 @@ export class APIService {
     }
   }
 
+  static async getDatabaseContext(): Promise<string> {
+    try {
+      const { data: leaves } = await supabase.from('leaves').select('name, highlights, safety, summary');
+      const { data: recipes } = await supabase.from('recipes').select('title, ingredients, steps');
+
+      const leavesContext = (leaves || []).map(leaf => JSON.stringify(leaf)).join('\n');
+      const recipesContext = (recipes || []).map(recipe => JSON.stringify(recipe)).join('\n');
+
+      return `Data for leaves:\n${leavesContext}\n\nData for related recipes:\n${recipesContext}`;
+    } catch (e) {
+      logger.warn("Failed to retrieve Supabase context for chatbot", e);
+      return "No database context available.";
+    }
+  }
+
   static async sendChatMessageToOpenRouter(messages: ChatMessage[]): Promise<string> {
     try {
-      logger.debug("Sending request to Secure Chat Edge Function");
-
-      // Use Supabase Secure Edge Function with RAG
-      const { data, error } = await supabase.functions.invoke('chat-completion', {
-        body: { messages }
-      });
-
-      if (error) {
-        throw new Error(`Edge Function Error: ${error.message}`);
+      const settings = SettingsService.getSettings();
+      if (!settings.openrouterApiKey) {
+        throw new Error("OpenRouter API key not configured in settings.");
       }
 
-      logger.debug("Chat response received:", data);
+      logger.debug("Generating prompt context from live Supabase Tables...");
+      const context = await this.getDatabaseContext();
+      const SYSTEM_PROMPT = `You are the SafeLeafKitchen AI Assistant. 
+Your goal is to help users identify safely edible plants using the context provided.
+Answer ONLY based on the context. If the answer is not in the context, say you don't know.\n\nContext:\n${context}`;
+
+      logger.debug("Sending request to OpenRouter API directly");
+
+      const response = await axios.post(
+        settings.openrouterEndpoint,
+        {
+          model: "meta-llama/llama-3.1-8b-instruct",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...messages.map(m => ({ role: m.role, content: m.content }))
+          ]
+        },
+        {
+          headers: {
+            "Authorization": `Bearer ${settings.openrouterApiKey}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      const data = response.data;
+      logger.debug("Chat response received natively:", data);
 
       if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error("Invalid response format from chat function");
+        throw new Error("Invalid response format from OpenRouter API.");
       }
 
       return data.choices[0].message.content;
     } catch (error) {
       logger.error("Chat API error:", error);
-      throw new Error("Failed to send chat message");
+      throw new Error("Failed to send chat message.");
     }
   }
 
