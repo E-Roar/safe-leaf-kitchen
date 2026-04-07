@@ -402,3 +402,74 @@ import { APIService } from '@/services/apiService';
 import { recipes } from '@/data/recipes';
 ```
 This is configured in `tsconfig.app.json` and `vite.config.ts`.
+
+---
+
+## 19. Roadmap — Planned Architecture (MCP + Modular Expansion)
+
+> **⚠️ IMPORTANT**: The features below are **PLANNED — NOT YET IMPLEMENTED**.
+> Do NOT reference these tables, tools, or modules in code as if they exist.
+> This section exists so AI models understand the project's direction when asked
+> to build new features.
+
+### 19.1 Target Architecture: AI-Native with MCP Integration
+
+The next major version transitions to a modular AI-native architecture using
+**MCP (Model Context Protocol)** for structured, injection-safe tool calls.
+
+#### Planned Tech Stack Additions
+
+| Layer | Current | Planned |
+|---|---|---|
+| AI Agent | OpenRouter / n8n (raw prompt) | Supabase Edge Functions + MCP tools |
+| AI Vision | Roboflow (single model) | YOLOv8 (multi-model: leaf health + logo detection) |
+| Maps | None | Mapbox GL JS / Leaflet + PostGIS spatial queries |
+| Auth/Backend | Supabase (basic) | Supabase (PostgreSQL + GoTrue + Storage + Edge Functions) |
+
+### 19.2 MCP Tool Definitions (Planned)
+
+The AI Agent will interact with the database through secure **MCP Tools**
+to prevent prompt injection and ensure context-aware suggestions.
+
+| Tool Name | Action | Data Source |
+|---|---|---|
+| `get_local_partners` | Find Coops/Restaurants within X km | `partners` table (PostGIS) |
+| `check_availability` | Real-time booking check for restaurants | `bookings` table |
+| `get_product_details` | Fetch bio-product info/price for marketplace | `products` table |
+| `verify_recipe` | Check if a recipe uses a "Scientific Seal" leaf | `scientific_data` table |
+
+### 19.3 Database Schema Expansion (Planned)
+
+These tables will be added to Supabase alongside the existing `recipes` and `leaves` tables:
+
+| Table | Purpose | Key Columns |
+|---|---|---|
+| `profiles` | User metadata, "Leaf Points," membership tier | `user_id`, `points`, `tier` |
+| `partners` | Cooperatives & restaurants | `name`, `type`, `location` (PostGIS Point), `bio_certs`, `admin_id` |
+| `products` | Bio-products linked to partners | `partner_id`, `price`, `stock`, `affiliate_link` |
+| `bookings` | Restaurant reservations | `user_id`, `partner_id`, `status`, `date_time` |
+| `scientific_data` | Verified scientific leaf analysis | Referenced by `verify_recipe` MCP tool |
+
+### 19.4 Planned Modular Features
+
+#### A. Partner Directory & Map
+- Interactive map view with filter by "Cooperative" or "Restaurant"
+- Cross-exposure: Restaurant pages show "Cooperative Suppliers"; Cooperative pages show "Our Chefs"
+- Admin-only partner creation (Manual Trust Verification)
+
+#### B. Community Hub
+- Social feed with likes, comments, and external sharing (`?ref=` tracking)
+- Gamification: Users earn "Leaf Points" for scanning leaves and trying partner recipes
+
+#### C. Smart Marketplace
+- Booking system integrated into chatbot feed ("Book a table where this leaf is served")
+- Affiliate engine tracking sales of local bio-products to partners and users
+
+### 19.5 Security & Scaling Plan
+
+| Concern | Implementation |
+|---|---|
+| Data isolation | Row Level Security (RLS) — user/partner sees only their own sensitive data |
+| Prompt safety | Structured JSON output for MCP calls to prevent "Chatbot Jailbreaking" |
+| Offline support | IndexedDB caching of leaf database for use in rural fields with poor connectivity |
+| PWA | Full offline mode with service worker (currently partial via `pwaUtils.ts`) |
