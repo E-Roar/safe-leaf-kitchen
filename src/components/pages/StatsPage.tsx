@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { logger } from "@/lib/logger";
 import { useI18n } from "@/hooks/useI18n";
 import { Scan, MessageCircle, Leaf, TrendingUp, Calendar, Award, ChefHat, Zap, Coins, TreePine, RefreshCw, BarChart3, LineChart } from "lucide-react";
 import { APIService, DetectionResult } from "@/services/apiService";

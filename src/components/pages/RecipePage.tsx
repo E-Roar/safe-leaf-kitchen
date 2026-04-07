@@ -72,38 +72,55 @@ export default function RecipePage({ selectedRecipeId }: RecipePageProps) {
     setFavorites(favorites.map(fav => fav.id));
   }, []);
 
-  // Fetch recipes from Supabase
+  // Immediately set recipe from static data when selectedRecipeId is provided
+  // This ensures the user sees the recipe instantly (before async Supabase fetch)
+  useEffect(() => {
+    if (selectedRecipeId) {
+      // Always populate recipes from static data first so UI is never empty
+      if (recipes.length === 0) {
+        setRecipes(staticRecipes as any[]);
+      }
+      const found = staticRecipes.find((r: any) => r.id === selectedRecipeId);
+      if (found) {
+        setSelectedRecipe(found as any);
+        setExpandedRecipe(found.id);
+        logger.debug('Immediately selected recipe from static data:', found.title?.en);
+      }
+    }
+  }, [selectedRecipeId]);
+
+  // Fetch recipes from Supabase (enhances static data if available)
   useEffect(() => {
     const fetchRecipes = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .order('created_at', { ascending: false }); // Show newest first? Or alphabetical?
+      try {
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching recipes:', error);
+        if (error) {
+          logger.warn('Supabase fetch failed, using static recipes:', error.message);
+          setRecipes(staticRecipes as any[]);
+        } else if (data && data.length > 0) {
+          logger.debug('Fetched recipes from Supabase:', data.length);
+          setRecipes(data);
+          // Re-select the recipe from Supabase data if one was selected
+          if (selectedRecipeId) {
+            const found = data.find((r: any) => r.id === selectedRecipeId);
+            if (found) {
+              setSelectedRecipe(found);
+              setExpandedRecipe(found.id);
+            }
+          }
+        } else {
+          // Empty Supabase response — keep static recipes
+          logger.debug('No Supabase recipes, using static data');
+          setRecipes(staticRecipes as any[]);
+        }
+      } catch (err) {
+        logger.warn('Supabase fetch exception, using static recipes:', err);
         setRecipes(staticRecipes as any[]);
-        if (selectedRecipeId) {
-          const found = staticRecipes.find((r: any) => r.id === selectedRecipeId);
-          if (found) {
-            setSelectedRecipe(found as any);
-            setExpandedRecipe(found.id);
-          }
-        }
-      } else {
-        console.log('Fetched recipes:', data);
-        const fallbackData = (!data || data.length === 0) ? (staticRecipes as any[]) : data;
-        setRecipes(fallbackData);
-
-        // Auto-select if selectedRecipeId is present
-        if (selectedRecipeId && fallbackData) {
-          const found = fallbackData.find((r: any) => r.id === selectedRecipeId);
-          if (found) {
-            setSelectedRecipe(found);
-            setExpandedRecipe(found.id);
-          }
-        }
       }
       setIsLoading(false);
     };
