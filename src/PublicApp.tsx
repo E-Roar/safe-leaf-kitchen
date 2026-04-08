@@ -6,6 +6,14 @@ import StatsPage from "@/components/pages/StatsPage";
 import RecipePage from "@/components/pages/RecipePage";
 import LeavesPage from "@/components/pages/LeavesPage";
 import SettingsPage from "@/components/pages/SettingsPage";
+
+// Dummy pages
+import DirectoryPage from "@/components/pages/DirectoryPage";
+import CommunityHubPage from "@/components/pages/CommunityHubPage";
+import RecipeDiscussionPage from "@/components/pages/RecipeDiscussionPage";
+import CooperativePage from "@/components/pages/CooperativePage";
+import RestaurantPage from "@/components/pages/RestaurantPage";
+
 import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import { registerServiceWorker } from "@/utils/pwaUtils";
 import { safeStorage } from "@/lib/safeStorage";
@@ -13,7 +21,7 @@ import { logger } from "@/lib/logger";
 import { RemoteErrorLogger } from "@/utils/remoteErrorLogger";
 
 export const PublicApp = () => {
-    const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats" | "recipes" | "leaves" | "settings">("home");
+    const [activeTab, setActiveTab] = useState<"home" | "chat" | "stats" | "recipes" | "leaves" | "settings" | "directory" | "community" | "recipe_discussion" | "cooperative" | "restaurant">("home");
     const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
     const [selectedLeafId, setSelectedLeafId] = useState<number | null>(null);
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -130,6 +138,16 @@ export const PublicApp = () => {
                 return <LeavesPage selectedLeafId={selectedLeafId} />;
             case "settings":
                 return <SettingsPage onBack={() => setActiveTab("home")} />;
+            case "directory":
+                return <DirectoryPage />;
+            case "community":
+                return <CommunityHubPage />;
+            case "recipe_discussion":
+                return <RecipeDiscussionPage />;
+            case "cooperative":
+                return <CooperativePage />;
+            case "restaurant":
+                return <RestaurantPage />;
             default:
                 return (
                     <LandingPage
@@ -143,6 +161,7 @@ export const PublicApp = () => {
                 );
         }
     }, [activeTab, selectedRecipeId, selectedLeafId, handleNavigateToChat, handleNavigateToRecipes, handleNavigateToLeaves, handleToggleTheme, handleNavigateToScan, theme]);
+
 
     return (
         <>

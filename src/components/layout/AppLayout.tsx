@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Home, MessageCircle, BarChart3, ChefHat, Leaf, Plus, X, Zap, Eye, EyeOff, Palette, Sparkles, Moon, Sun, Settings } from "lucide-react";
+import { Home, MessageCircle, BarChart3, ChefHat, Leaf, Plus, X, Map, Users, BookOpen, Store, Coffee, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SettingsService } from "@/services/settingsService";
 import { toast } from "sonner";
@@ -9,8 +9,8 @@ import { ImpactService } from "@/services/impactService";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  activeTab: "home" | "chat" | "stats" | "recipes" | "leaves" | "settings";
-  onTabChange: (tab: "home" | "chat" | "stats" | "recipes" | "leaves" | "settings") => void;
+  activeTab: "home" | "chat" | "stats" | "recipes" | "leaves" | "settings" | "directory" | "community" | "recipe_discussion" | "cooperative" | "restaurant";
+  onTabChange: (tab: "home" | "chat" | "stats" | "recipes" | "leaves" | "settings" | "directory" | "community" | "recipe_discussion" | "cooperative" | "restaurant") => void;
 }
 
 export default function AppLayout({ children, activeTab, onTabChange }: AppLayoutProps) {
@@ -58,6 +58,14 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
     { id: "stats" as const, icon: BarChart3, label: t('tabs.stats') },
     { id: "recipes" as const, icon: ChefHat, label: t('tabs.recipes') },
     { id: "leaves" as const, icon: Leaf, label: t('tabs.leaves') }
+  ];
+
+  const topTabs = [
+    { id: "directory" as const, icon: Map, label: "Directory" },
+    { id: "community" as const, icon: Users, label: "Community" },
+    { id: "recipe_discussion" as const, icon: BookOpen, label: "Discussions" },
+    { id: "cooperative" as const, icon: Store, label: "Cooperative" },
+    { id: "restaurant" as const, icon: Coffee, label: "Restaurant" }
   ];
 
   // Apply visual effects on mount and when visualSettings change
@@ -130,63 +138,36 @@ export default function AppLayout({ children, activeTab, onTabChange }: AppLayou
       </div>
 
       {/* Top Bar (sticky) */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-background/70 backdrop-blur-md border-b border-border">
-        <div className="px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* Embedded Top-Left Circular Menu inside top bar */}
-            <div className="relative w-14 h-14">
-              {tabs.map(({ id, icon: Icon, label }, index) => {
-                const total = tabs.length;
-                const isRtl = lang === 'AR';
-                // RTL: expand left-down (90°→180°), LTR: right-down (0°→90°)
-                const startDeg = isRtl ? 90 : 0;
-                const endDeg = isRtl ? 180 : 90;
-                const step = total > 1 ? (endDeg - startDeg) / (total - 1) : 0;
-                const angle = (startDeg + step * index) * Math.PI / 180;
-                const radius = isTopMenuOpen ? 170 : 0;
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => { onTabChange(id); setIsTopMenuOpen(false); }}
-                    className={cn(
-                      "absolute flex items-center gap-2 px-4 py-1 rounded-tl-2xl rounded-br-2xl shadow-lg backdrop-blur-md transition-all duration-300 transform hover:scale-105", // Leaf shape with two round corners and two sharp corners
-                      isTopMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-0",
-                      activeTab === id ? "bg-primary text-primary-foreground" : "glass text-foreground hover:bg-muted/60"
-                    )}
-                    style={{ 
-                      left: '50%', 
-                      top: '50%', 
-                      transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                      minWidth: '100px' // Thinner and longer
-                    }}
-                    aria-label={label}
-                  >
-                    <span className={cn(
-                      "w-6 h-6 rounded-full flex items-center justify-center",
-                      activeTab === id ? "bg-primary-foreground/20" : "bg-background/70"
-                    )}>
-                      <Icon className={cn("w-3 h-3", activeTab === id ? "text-primary-foreground" : "text-foreground")} />
-                    </span>
-                    <span className="text-sm font-medium whitespace-nowrap">
-                      {label}
-                    </span>
-                  </button>
-                );
-              })}
-              <button
-                onClick={() => setIsTopMenuOpen(!isTopMenuOpen)}
-                className={cn(
-                  "w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform duration-300",
-                  isTopMenuOpen ? "animate-wobble bg-primary text-primary-foreground" : "bg-primary text-primary-foreground hover:scale-105"
-                )}
-                aria-label="Menu"
-                style={{ position: 'absolute', left: 0, top: 0 }}
-              >
-                {isTopMenuOpen ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
-              </button>
-            </div>
+      <div className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border">
+        <div className="px-4 py-2 flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-1">
+            {/* Home button */}
+            <button
+              onClick={() => onTabChange('home' as any)}
+              className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center mr-2 hover:opacity-90 transition-opacity shrink-0"
+              aria-label="Home"
+            >
+              <Leaf className="w-4 h-4" />
+            </button>
+
+            {/* Inline horizontal nav tabs */}
+            <nav className="flex items-center gap-0.5 overflow-x-auto scrollbar-none">
+              {topTabs.map(({ id, icon: Icon, label }) => (
+                <button
+                  key={id}
+                  onClick={() => onTabChange(id)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
+                    activeTab === id
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
           <div className="flex items-center gap-2">
             {/* Language selector (right group) */}
