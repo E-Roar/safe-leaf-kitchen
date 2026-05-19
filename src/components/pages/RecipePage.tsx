@@ -227,7 +227,7 @@ export default function RecipePage() {
   };
 
   const filteredRecipes = recipes.filter(r => {
-    if (r.published === false) return false;
+    if (r.published !== true) return false;
     if (speciesFilter !== 'all' && getSpeciesCategory(r) !== speciesFilter) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
