@@ -1,7 +1,7 @@
 // Analytics Event Tracker - Lightweight service for tracking app usage
 import { supabase } from '@/lib/supabaseClient';
 
-type EventType = 'scan' | 'leaf_view' | 'recipe_view' | 'recipe_use' | 'chat_message';
+type EventType = 'scan' | 'leaf_view' | 'recipe_view' | 'recipe_use' | 'chat_message' | 'share';
 
 interface EventData {
     leaf_id?: string | number;
@@ -37,4 +37,5 @@ export const Analytics = {
     trackRecipeView: (recipeId: string | number) => trackEvent('recipe_view', { recipe_id: recipeId }),
     trackRecipeUse: (recipeId: string | number) => trackEvent('recipe_use', { recipe_id: recipeId }),
     trackChatMessage: (messageLength?: number) => trackEvent('chat_message', messageLength ? { message_length: messageLength } : undefined),
+    trackShare: (recipeId: string | number, platform: string) => trackEvent('share', { recipe_id: recipeId, platform }),
 };

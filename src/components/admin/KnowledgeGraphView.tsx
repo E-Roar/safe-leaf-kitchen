@@ -3,7 +3,7 @@ import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Leaf, GitBranch, Network as NetworkIcon, ExternalLink } from 'lucide-react';
+import { Loader2, Leaf, GitBranch, Network as NetworkIcon, ExternalLink, Database } from 'lucide-react';
 
 interface GraphNode {
   id: string;
@@ -46,8 +46,15 @@ export default function KnowledgeGraphView() {
           supabase.from('leaves').select('*'),
         ]);
 
-        const recipes = recipesRes.data || [];
-        const leaves = leavesRes.data || [];
+        let recipes = recipesRes.data || [];
+        let leaves = leavesRes.data || [];
+
+        if (recipes.length === 0 && leaves.length === 0) {
+          const { leaves: staticLeaves } = await import('@/data/leaves');
+          const { recipes: staticRecipes } = await import('@/data/recipes');
+          recipes = staticRecipes as any[];
+          leaves = staticLeaves as any[];
+        }
         const nodes: GraphNode[] = [];
         const edges: GraphEdge[] = [];
 

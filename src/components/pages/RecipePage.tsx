@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { logger } from '@/lib/logger';
 import { useI18n } from "@/hooks/useI18n";
 import { Search, ChefHat, Star, BookOpen, Play, Loader2, ArrowLeft, Upload, Trash2, X, Image as ImageIcon } from "lucide-react";
@@ -9,6 +10,7 @@ import { Analytics } from "@/services/analyticsEventService";
 import { APIService } from "@/services/apiService";
 import { UserStatsService } from "@/services/userStatsService";
 import { useAuth } from "@/contexts/AuthContext";
+import { SocialShare } from "@/components/ui/SocialShare";
 
 import { cn } from "@/lib/utils";
 
@@ -251,8 +253,31 @@ export default function RecipePage() {
 
   // ── Detail Modal ──
   if (selectedRecipe) {
+    const shareUrl = `${window.location.origin}/recipes?recipeId=${selectedRecipe.id}`;
+    const shareImage = getRecipeImage(selectedRecipe).startsWith('http')
+      ? getRecipeImage(selectedRecipe)
+      : `${window.location.origin}${getRecipeImage(selectedRecipe)}`;
+    const shareTitle = selectedRecipe.title?.en || selectedRecipe.title?.fr || 'Recipe';
+    const shareDesc = `Check out this ${selectedRecipe.origin || ''} recipe: ${shareTitle}`;
+
     return (
       <div>
+        <Helmet>
+          <title>{shareTitle} | SafeLeafKitchen</title>
+          <meta name="description" content={shareDesc} />
+          <meta property="og:title" content={shareTitle} />
+          <meta property="og:description" content={shareDesc} />
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content={shareUrl} />
+          <meta property="og:image" content={shareImage} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:site_name" content="SafeLeafKitchen" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={shareTitle} />
+          <meta name="twitter:description" content={shareDesc} />
+          <meta name="twitter:image" content={shareImage} />
+        </Helmet>
         <div className="max-w-4xl mx-auto px-4 md:px-8 py-6">
           {/* Back button */}
           <button onClick={() => navigate('/recipes')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
@@ -291,7 +316,7 @@ export default function RecipePage() {
                 </p>
               )}
 
-              <div className="flex gap-2 mb-5">
+              <div className="flex flex-wrap gap-2 mb-3">
                 <button onClick={() => handleUseRecipe(selectedRecipe)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-green-500 text-white hover:bg-green-600 transition-all">
                   <Play className="w-4 h-4" /> {t('recipes.useRecipe') || 'Use Recipe'}
                 </button>
@@ -301,6 +326,16 @@ export default function RecipePage() {
                   <Star className={cn("w-4 h-4", favorites.includes(selectedRecipe.id) && "fill-current")} />
                   {favorites.includes(selectedRecipe.id) ? 'Favorited' : 'Favorite'}
                 </button>
+              </div>
+
+              <div className="mb-5">
+                <SocialShare
+                  url={shareUrl}
+                  title={shareTitle}
+                  description={shareDesc}
+                  image={shareImage}
+                  recipeId={selectedRecipe.id}
+                />
               </div>
 
               {/* Nutrition Quick View */}
