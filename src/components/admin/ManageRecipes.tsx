@@ -58,6 +58,18 @@ export const ManageRecipes = () => {
     }, [editingRecipe?.id]);
 
     const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'hidden' | 'pending'>('all');
+    const [leafFilter, setLeafFilter] = useState<string>('all');
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+    const uniqueLeaves = [...new Set(recipes.map(r => (r as any).leafType).filter(Boolean))] as string[];
+    const uniqueCategories = [...new Set(
+        recipes.flatMap(r => {
+            const tags: string[] = [];
+            if ((r as any).origin) tags.push((r as any).origin);
+            if ((r as any).dietary_tags) tags.push(...(r as any).dietary_tags);
+            return tags;
+        }).filter(Boolean)
+    )] as string[];
 
     const filteredRecipes = recipes.filter(r => {
         if (filterStatus === 'all') return true;
@@ -65,6 +77,14 @@ export const ManageRecipes = () => {
         if (filterStatus === 'hidden') return r.published === false;
         if (filterStatus === 'pending') return (r as any).status === 'pending';
         return true;
+    }).filter(r => {
+        if (leafFilter === 'all') return true;
+        return (r as any).leafType === leafFilter || (r as any).leafIds?.includes(parseInt(leafFilter));
+    }).filter(r => {
+        if (categoryFilter === 'all') return true;
+        const origin = (r as any).origin;
+        const tags = (r as any).dietary_tags || [];
+        return origin === categoryFilter || tags.includes(categoryFilter);
     });
 
     // PDF Generation State
@@ -430,6 +450,7 @@ export const ManageRecipes = () => {
 
     const handleTogglePublished = async (recipe: Recipe) => {
         const newPublished = recipe.published === false;
+        setRecipes(prev => prev.map(r => r.id === recipe.id ? { ...r, published: newPublished } : r));
         try {
             const { error } = await supabase.functions.invoke('manage-content', {
                 headers: { 'x-admin-key': 'hidachi' },
@@ -440,9 +461,11 @@ export const ManageRecipes = () => {
                     id: parseInt(recipe.id.toString())
                 }
             });
-            if (error) throw error;
+            if (error) {
+                setRecipes(prev => prev.map(r => r.id === recipe.id ? { ...r, published: recipe.published } : r));
+                throw error;
+            }
             toast.success(`Recipe ${newPublished ? 'published' : 'hidden'}`);
-            fetchRecipes();
         } catch (error: any) {
             toast.error('Failed to update published state');
         }
@@ -729,7 +752,33 @@ export const ManageRecipes = () => {
                         <div>
                             <Label className="block mb-2">Image</Label>
                             <div className="flex items-center gap-4">
-                                {editingRecipe && (
+            {/* Leaf & Category filters */}
+            <div className="flex flex-wrap gap-2 items-center">
+                <select
+                    value={leafFilter}
+                    onChange={e => setLeafFilter(e.target.value)}
+                    className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                >
+                    <option value="all">All Leaves</option>
+                    {uniqueLeaves.map(l => (
+                        <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>
+                    ))}
+                </select>
+                {uniqueCategories.length > 0 && (
+                    <select
+                        value={categoryFilter}
+                        onChange={e => setCategoryFilter(e.target.value)}
+                        className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    >
+                        <option value="all">All Categories</option>
+                        {uniqueCategories.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </select>
+                )}
+            </div>
+
+            {editingRecipe && (
                                     <img
                                         src={getRecipeImage(editingRecipe as Recipe) || "/manual_upload_preview.png"}
                                         alt="Preview"
