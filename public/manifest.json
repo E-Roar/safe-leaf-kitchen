@@ -1,27 +1,48 @@
 {
-  "name": "SafeLeafKitchen",
-  "short_name": "SafeLeaf",
-  "description": "Moroccan vegetable leaf nutrition and identification app",
+  "name": "SafeLeafKitchen - Smart Leaf Nutrition Scanner",
+  "short_name": "SafeLeafKitchen",
+  "description": "AI-powered leaf scanning and nutrition insights app",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0f0a",
-  "theme_color": "#4ade80",
-  "orientation": "portrait-primary",
+  "background_color": "#0f1419",
+  "theme_color": "#22C55E",
+  "orientation": "portrait",
+  "categories": ["food", "health", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png", 
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["health", "food", "utilities"],
-  "lang": "en",
-  "dir": "ltr"
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "SafeLeafKitchen Home Screen"
+    },
+    {
+      "src": "/screenshots/chat.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "AI Chat Assistant"
+    }
+  ],
+  "prefer_related_applications": false,
+  "scope": "/",
+  "permissions": ["camera", "microphone", "storage"],
+  "protocol_handlers": [],
+  "edge_side_panel": {}
 }

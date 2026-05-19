@@ -1,0 +1,32 @@
+# Graphify ignore patterns
+node_modules/
+.git/
+dist/
+build/
+.venv/
+venv/
+.yarn/
+.next/
+.nuxt/
+coverage/
+.turbo/
+.cache/
+*.lockb
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+Thumbs.db
+
+# Project-specific noise (bloats graph with 6000+ junk nodes)
+datasets/
+public/
+supabase/
+hermes/
+graphify-out/
+scripts/
+*.csv
+*.xlsx
+tableau_*.json
+vertopal_*.json

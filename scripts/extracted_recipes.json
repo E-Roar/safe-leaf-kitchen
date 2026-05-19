@@ -1,0 +1,2334 @@
+[
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles finement hachées, sautées à l’ail et mélangées à des œufs."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Bakoula locale : feuilles cuites vapeur, citron confit, huile d’olive."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Séchées puis utilisées en infusion digestive."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Feuilles utilisées en ragoût de lentilles ou infusion après repas."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Bouillies puis mélangées à l’ail, cumin et huile d’olive."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Non utilisée traditionnellement."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles externes bouillies, décoction bue pour digestion."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Hachées, ajoutées aux tajines ou ragoûts de légumes."
+  },
+  {
+    "N°": 1,
+    "Répondant": "Khadija El Amrani",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Ajoutées à une soupe traditionnelle avec pommes de terre et huile d’olive."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Sauté à l’huile avec coriandre et paprika, puis servi avec œufs."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Mélangées à de la tomate, cuites à la vapeur avec épices."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Hachées crues dans des salades marocaines."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane digestive avec graines et feuilles fraîches."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles sautées avec tomates, ail, et cumin."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Bouillies avec pois chiches et coriandre dans une soupe."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Utilisées dans tajine aux olives et citron confit."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Ajoutées à la chorba ou couscous."
+  },
+  {
+    "N°": 2,
+    "Répondant": "Youssef Marzak",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "En gratin avec béchamel ou en soupe."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Hachées et mélangées à une pâte pour beignets."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles braisées avec citron, huile d’olive et épices."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Utilisées séchées pour infusion médicinale."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "En soupe avec vermicelles et huile d’olive."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Cuites avec pommes de terre dans une salade tiède."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Bouillies avec lentilles noires et curcuma."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles utilisées pour extraire une infusion contre les ballonnements."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Cuisson vapeur puis incorporées dans un plat de semoule."
+  },
+  {
+    "N°": 3,
+    "Répondant": "Aicha Boukhris",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Sauté avec carottes et sauce tomate, servi avec du riz."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles incorporées dans la “bissara” de fèves pour enrichir le goût, servies avec huile d’olive et cumin."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Bakoula : feuilles bouillies, citron confit, ail, épices, huile d’olive et olives noires."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles frites avec khlii (viande confite) et œufs, servies au petit déjeuner."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Infusion de feuilles et graines contre les ballonnements et les coliques."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles cuisinées en tajine avec viande de chèvre, pommes de terre et carottes."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Feuilles utilisées dans une soupe épaisse avec semoule d’orge et coriandre."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles externes utilisées pour une tisane amère nettoyante du foie."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles cuites avec lentilles rouges et huile d’olive."
+  },
+  {
+    "N°": 4,
+    "Répondant": "Rachid El Hadi",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Tajine de poireaux aux pois chiches et tomates râpées."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles hachées et farcies dans des galettes de semoule (“msemmen bel bsla”)."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Mélangées à des sardines pour des boulettes à la chermoula et cuites au four."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Pulvérisées, séchées et incorporées dans des sauces thérapeutiques maison."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Feuilles intégrées dans la rfissa bel fenouil, avec lentilles et poulet."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles revenues à l’huile d’olive avec cumin, citron et ail, servies avec du pain."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Soupe traditionnelle “harira” aux feuilles de carotte et pois cassés."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles hachées ajoutées à un tajine de viande et petits pois."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles cuites à la vapeur puis préparées en salade avec citron et cumin."
+  },
+  {
+    "N°": 5,
+    "Répondant": "Latifa El Idrissi",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles braisées à la tomate, ail, et piment doux."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles intégrées à une omelette aux herbes avec menthe séchée et poivre noir."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles sautées avec oignons rouges, curcuma, et paprika puis servies tièdes."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Tisane des feuilles avec miel et cannelle pour le rhume."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Mélange de feuilles, menthe et anis vert pour infusion digestive post-repas."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Tajine aux boulettes de sardines et feuilles de navet hachées."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Feuilles de carotte mixées dans un velouté de légumes avec lait et beurre."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles bouillies et servies avec vinaigrette à l’harissa."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles braisées dans huile d’olive avec poivrons et coriandre."
+  },
+  {
+    "N°": 6,
+    "Répondant": "Jamal Othmani",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles cuites à la vapeur, puis farcies de riz et épices."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce",
+    "Recette ou méthode de préparation": "Recette ou méthode de préparation"
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles de jeunes oignons mélangées à de la semoule d’orge dans une soupe rustique."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Cuites puis sautées avec olives, ail, paprika et vinaigre : servies froides."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles utilisées dans le pain maison (“khobz bel wraqat”) pour un goût poivré."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Mélange feuilles de fenouil + menthe dans le thé traditionnel contre ballonnements."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Préparées comme les feuilles de choux : braisées avec huile, tomate, cumin et paprika."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Ajoutées à la soupe de semoule verte (“smida” verte) aux légumes."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles bouillies, puis macérées dans huile d’olive et citron : servies en entrée."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Sautées avec tomates confites et ail : plat végétarien local."
+  },
+  {
+    "N°": 7,
+    "Répondant": "Hafsa Belhaj",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Tajine de poireaux aux olives, citron confit et morceaux de veau."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Ajoutées à la \"tchicha\" (bouillie d’orge) pour renforcer le goût."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles utilisées dans des pastillas végétariennes parfumées à la cannelle."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles frites avec huile d’argan et servies avec œufs durs."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Infusion de feuilles fraîches pour calmer les douleurs menstruelles."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Braisées avec piment doux, ail et cumin dans de l’huile d’olive."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Feuilles mixées en soupe crème avec courgettes et lait."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Tisane de feuilles amères bue à jeun pour purifier le foie."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles utilisées dans un tajine berbère avec pommes de terre."
+  },
+  {
+    "N°": 8,
+    "Répondant": "Mohammed Bakkali",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Gratin de feuilles de poireaux à la béchamel et fromage râpé."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles cuites dans une sauce au citron avec pois chiches et ail."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Mélangées à de la chermoula et utilisées comme farce pour “maakouda”."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Infusion au gingembre avec feuilles séchées pour calmer la toux."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Préparées avec œufs, lait, farine et fromage en galettes."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles bouillies, pressées, puis cuites avec huile et citron confit."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Soupe de carottes au cumin avec feuilles ajoutées à la fin."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Tajine d’artichauts aux petits pois, feuilles conservées pour infusion."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Sautés avec pois chiches et curcuma."
+  },
+  {
+    "N°": 9,
+    "Répondant": "Fatima Zahra Khair",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles utilisées dans une quiche traditionnelle salée."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles incorporées dans la pâte à msemen salé pour petit-déjeuner."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles cuites vapeur, mixées avec citron, ail, huile d’olive, servies en salade froide."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles hachées, mises en pickles avec vinaigre et sel."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Préparées avec des lentilles noires et épices douces dans un ragoût."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Souvent associées aux sardines grillées : servies en salade tiède."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Feuilles incorporées dans un tajine sucré-salé aux pruneaux."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles séchées, broyées, utilisées dans les potions médicinales locales."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles cuites dans un couscous au khlii."
+  },
+  {
+    "N°": 10,
+    "Répondant": "Soufiane Naji",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles longuement mijotées avec viande hachée et sauce tomate."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles cuites avec pois cassés, cumin et menthe séchée."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Mélangées à haricots blancs dans une sauce tomate épicée."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Séchées puis utilisées en poudre dans une sauce piquante."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Feuilles ajoutées à la soupe de vermicelles."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Préparées en bouillie épaisse avec huile d’olive et épices."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Mixées dans une soupe verte avec oignon, ail, pommes de terre."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles bouillies avec sel, bues pour purifier le foie."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles mijotées avec semoule d’orge et tomate."
+  },
+  {
+    "N°": 11,
+    "Répondant": "Ahmed Ait Ouali",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles dans un tajine aux lentilles et ail."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles sautées avec khlii et œufs, servies au petit déjeuner."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles cuites à la vapeur, citronnées et servies froides."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles hachées crues dans une salade de carottes."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane de feuilles fraîches et graines."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles dans une soupe de légumes riche en cumin."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Feuilles dans une crème de carotte sucrée-salée."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles cuites et mixées dans une purée au cumin."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles frites dans huile d’olive et citron confit."
+  },
+  {
+    "N°": 12,
+    "Répondant": "Rachida Marouane",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Gratin de feuilles de poireaux avec lait, ail, œufs."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles bouillies puis sautées à l’huile d’olive avec ail et poivre."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles mélangées à du riz et des petits pois dans un tajine."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles séchées puis ajoutées à la soupe “harira”."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Utilisées comme herbe aromatique dans les tajines de légumes."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles ajoutées à la semoule de couscous à la vapeur."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Crème de carottes aux feuilles et au cumin."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles dans une décoction pour digestion difficile."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles en salade tiède avec vinaigre, ail et coriandre."
+  },
+  {
+    "N°": 13,
+    "Répondant": "Karim Tazi",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles mijotées avec tomates, pommes de terre, et paprika."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce",
+    "Recette ou méthode de préparation": "Recette ou méthode de préparation"
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Tajine de feuilles d’oignon et œufs au cumin."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles dans salade vapeur avec carvi et citron."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles hachées et cuites avec khlii."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane digestive avec graines."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles sautées dans huile d’olive, ail et tomate."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Soupe traditionnelle avec feuilles."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Infusion de feuilles."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Salade de feuilles à l’ail et vinaigre."
+  },
+  {
+    "N°": 14,
+    "Répondant": "Salima Fassi",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Purée de poireaux aux pommes de terre."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles dans harira."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Cuites à la vapeur puis mélangées à olives noires."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles séchées dans soupe du soir."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane du soir."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles dans couscous végétarien."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Crème de carottes enrichie."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Décoction amère."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles braisées à l’huile."
+  },
+  {
+    "N°": 15,
+    "Répondant": "Mohamed Regragui",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles en gratin salé."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Omelette aux feuilles d'oignon hachées, coriandre et cumin."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Bakoula aux feuilles de betterave, citron confit, ail, huile d’olive."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles frites avec ail et paprika."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane avec graines de fenouil et menthe sèche."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Soupe de légumes rustique avec feuilles de navet."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Soupe mixée avec pommes de terre et feuilles."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Décoction de feuilles pour purifier le foie."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles sautées avec épices et tomates."
+  },
+  {
+    "N°": 16,
+    "Répondant": "Loubna Idrissi",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles farcies au riz et légumes."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles sautées dans huile d’olive, sel, poivre."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Mélangées au couscous avec pois chiches et épices."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles séchées puis infusées comme tisane."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Ajoutées à une soupe aux légumes."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Tajine de poulet avec feuilles de navet."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Soupe de carottes et feuilles avec cumin."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Tisane de feuilles contre la fatigue."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles hachées avec œufs au plat."
+  },
+  {
+    "N°": 17,
+    "Répondant": "Brahim Moutchou",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Tajine végétarien aux feuilles de poireau."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Soupe verte avec feuilles, ail et semoule."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles à la vapeur, citron et huile d’olive."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles utilisées en décoction pour digestion."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Feuilles fraîches infusées contre les ballonnements."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles en tajine avec olives noires."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Ajoutées au pain maison pour coloration."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Infusion amère purifiante."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles mijotées avec sauce tomate."
+  },
+  {
+    "N°": 18,
+    "Répondant": "Naima Bennis",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Gratin avec feuilles de poireaux, œufs et lait."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles dans une omelette berbère."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Bakoula simplifiée avec ail et carvi."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Feuilles séchées dans soupe hivernale."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Feuilles bouillies puis servies froides."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles frites dans huile d’olive."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Soupe avec reste de carottes et feuilles vertes."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles en infusion pour perte d’appétit."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles mélangées à lentilles."
+  },
+  {
+    "N°": 19,
+    "Répondant": "Ali Choufani",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles cuites avec vermicelles et cumin."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Purée aux feuilles et ail."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Tartine chaude de feuilles au fromage."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Soupe poivrée."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane du matin."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Salade tiède citronnée."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Feuilles mixées avec tomates."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles bouillies."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Tajine aux feuilles et olives."
+  },
+  {
+    "N°": 20,
+    "Répondant": "Hind Jaouhari",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Soupe légère du soir."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce",
+    "Recette ou méthode de préparation": "Recette ou méthode de préparation"
+  },
+  {
+    "N°": 21,
+    "Répondant": "Fatna Bouziane",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles hachées avec œufs, cumin et huile d’olive."
+  },
+  {
+    "N°": 21,
+    "Répondant": "Fatna Bouziane",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Bakoula rustique aux feuilles de betterave, citron confit et huile d’olive."
+  },
+  {
+    "N°": 21,
+    "Répondant": "Fatna Bouziane",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Soupe épaisse aux feuilles de navet, pommes de terre et épices douces."
+  },
+  {
+    "N°": 21,
+    "Répondant": "Fatna Bouziane",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles sautées à la tomate et ail, servies avec pain d’orge."
+  },
+  {
+    "N°": 22,
+    "Répondant": "Mustapha Amrani",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Omelette berbère avec feuilles d’oignon et menthe sèche."
+  },
+  {
+    "N°": 22,
+    "Répondant": "Mustapha Amrani",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Tajine d’agneau aux feuilles de betterave."
+  },
+  {
+    "N°": 22,
+    "Répondant": "Mustapha Amrani",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane de feuilles de fenouil avec anis vert."
+  },
+  {
+    "N°": 22,
+    "Répondant": "Mustapha Amrani",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles de navet bouillies puis poêlées à l’huile d’olive."
+  },
+  {
+    "N°": 22,
+    "Répondant": "Mustapha Amrani",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Infusion amère des feuilles pour digestion."
+  },
+  {
+    "N°": 22,
+    "Répondant": "Mustapha Amrani",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles incorporées dans une rfissa végétale."
+  },
+  {
+    "N°": 22,
+    "Répondant": "Mustapha Amrani",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Purée verte avec feuilles de poireau et pommes de terre."
+  },
+  {
+    "N°": 23,
+    "Répondant": "Naïma Messaoudi",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles d’oignon sautées avec lentilles corail."
+  },
+  {
+    "N°": 23,
+    "Répondant": "Naïma Messaoudi",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Infusion de feuilles de radis séchées contre le rhume."
+  },
+  {
+    "N°": 23,
+    "Répondant": "Naïma Messaoudi",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles de navet préparées comme épinards avec ail et huile d’olive."
+  },
+  {
+    "N°": 23,
+    "Répondant": "Naïma Messaoudi",
+    "Espèce": "Cynara scolymus (Artichaut)",
+    "Recette ou méthode de préparation": "Feuilles bouillies et servies avec vinaigrette citronnée."
+  },
+  {
+    "N°": 23,
+    "Répondant": "Naïma Messaoudi",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Tarte rustique aux feuilles de poireau et fromage frais."
+  },
+  {
+    "N°": 24,
+    "Répondant": "Reda Mechbal",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Soupe verte d’oignon et coriandre."
+  },
+  {
+    "N°": 24,
+    "Répondant": "Reda Mechbal",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles dans couscous végétarien."
+  },
+  {
+    "N°": 24,
+    "Répondant": "Reda Mechbal",
+    "Espèce": "Raphanus sativus (Radis)",
+    "Recette ou méthode de préparation": "Tisane des feuilles contre ballonnements."
+  },
+  {
+    "N°": 24,
+    "Répondant": "Reda Mechbal",
+    "Espèce": "Foeniculum vulgare (Fenouil)",
+    "Recette ou méthode de préparation": "Tisane douce aux graines et feuilles fraîches."
+  },
+  {
+    "N°": 24,
+    "Répondant": "Reda Mechbal",
+    "Espèce": "Brassica oleracea (Chou-rave)",
+    "Recette ou méthode de préparation": "Feuilles cuites à l’étouffée avec oignons."
+  },
+  {
+    "N°": 24,
+    "Répondant": "Reda Mechbal",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Feuilles farcies au riz façon dolma."
+  },
+  {
+    "N°": 25,
+    "Répondant": "Meryem Fikri",
+    "Espèce": "Allium cepa (Oignon)",
+    "Recette ou méthode de préparation": "Feuilles d’oignon en salade tiède au citron."
+  },
+  {
+    "N°": 25,
+    "Répondant": "Meryem Fikri",
+    "Espèce": "Beta vulgaris (Betterave)",
+    "Recette ou méthode de préparation": "Feuilles sautées avec olives noires."
+  },
+  {
+    "N°": 25,
+    "Répondant": "Meryem Fikri",
+    "Espèce": "Brassica rapa (Navet)",
+    "Recette ou méthode de préparation": "Feuilles cuites à la vapeur avec huile d’olive."
+  },
+  {
+    "N°": 25,
+    "Répondant": "Meryem Fikri",
+    "Espèce": "Daucus carota (Carotte)",
+    "Recette ou méthode de préparation": "Soupe mixée aux feuilles de carotte et cumin."
+  },
+  {
+    "N°": 25,
+    "Répondant": "Meryem Fikri",
+    "Espèce": "Allium porrum (Poireau)",
+    "Recette ou méthode de préparation": "Tajine végétarien à base de feuilles de poireau."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce utilisée",
+    "Recette ou méthode de préparation": "Nom de la recette",
+    "__EMPTY": "Description de la recette"
+  },
+  {
+    "N°": 26,
+    "Répondant": "Hassan Jbari",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tagine aux feuilles d’oignon",
+    "__EMPTY": "Les feuilles sont sautées à l’huile d’olive avec ail, ajoutées au tagine avec pommes de terre, tomates et viande."
+  },
+  {
+    "N°": 26,
+    "Répondant": "Hassan Jbari",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Feuilles de navet à la vapeur",
+    "__EMPTY": "Les feuilles sont cuites à la vapeur puis assaisonnées avec huile d’olive, cumin, citron et ail."
+  },
+  {
+    "N°": 26,
+    "Répondant": "Hassan Jbari",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Pain farci aux feuilles de poireau",
+    "__EMPTY": "Les feuilles sont coupées finement et incorporées à une pâte levée pour faire des galettes farcies."
+  },
+  {
+    "N°": 27,
+    "Répondant": "Khadija Ouahbi",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Rghaïf bel bsel (feuilles)",
+    "__EMPTY": "Pâte à rghaïf farcie d’un mélange de feuilles d’oignon sautées avec épices et huile d’olive."
+  },
+  {
+    "N°": 27,
+    "Répondant": "Khadija Ouahbi",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula aux feuilles de betterave",
+    "__EMPTY": "Feuilles bouillies puis sautées avec ail, citron, olives noires, cumin et huile d’olive."
+  },
+  {
+    "N°": 27,
+    "Répondant": "Khadija Ouahbi",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tartes salées aux feuilles de poireau",
+    "__EMPTY": "Base de pâte brisée garnie d’un mélange d’œufs, crème et feuilles de poireau."
+  },
+  {
+    "N°": 28,
+    "Répondant": "Amina Fadli",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine feuilles de navet et pois chiches",
+    "__EMPTY": "Cuisson des feuilles avec pois chiches, tomates, curcuma, huile d’olive, servi chaud."
+  },
+  {
+    "N°": 28,
+    "Répondant": "Amina Fadli",
+    "Espèce": "Artichaut",
+    "Recette ou méthode de préparation": "Feuilles externes en infusion médicinale",
+    "__EMPTY": "Feuilles séchées utilisées en tisane pour les troubles digestifs (non alimentaire)."
+  },
+  {
+    "N°": 28,
+    "Répondant": "Amina Fadli",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Feuilles de poireau à la tomate",
+    "__EMPTY": "Feuilles hachées, cuites avec sauce tomate, huile d’olive, ail."
+  },
+  {
+    "N°": 29,
+    "Répondant": "Rachid Lakrari",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Omelette aux feuilles d’oignon",
+    "__EMPTY": "Feuilles fraîches hachées intégrées à des œufs battus et cuites à la poêle."
+  },
+  {
+    "N°": 29,
+    "Répondant": "Rachid Lakrari",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles sautées façon khlii",
+    "__EMPTY": "Feuilles sautées avec ail, huile et morceaux de viande confite (khlii), servies avec pain."
+  },
+  {
+    "N°": 29,
+    "Répondant": "Rachid Lakrari",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Rghaïf farci aux feuilles de chou-rave",
+    "__EMPTY": "Feuilles cuites à la vapeur, hachées et utilisées comme farce dans les rghaïf."
+  },
+  {
+    "N°": 30,
+    "Répondant": "Lalla Aziza",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula traditionnelle",
+    "__EMPTY": "Feuilles de betterave préparées comme des épinards, avec citron confit, olives, huile d’olive."
+  },
+  {
+    "N°": 30,
+    "Répondant": "Lalla Aziza",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tagine aux feuilles et abats",
+    "__EMPTY": "Feuilles d’oignon cuites avec foie et cœur de mouton dans un tagine aux épices douces."
+  },
+  {
+    "N°": 30,
+    "Répondant": "Lalla Aziza",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Feuilles au couscous",
+    "__EMPTY": "Feuilles mélangées à la tfaya et légumes dans un couscous traditionnel du vendredi."
+  },
+  {
+    "N°": 30,
+    "Répondant": "Lalla Aziza",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Beignets aux feuilles de carotte",
+    "__EMPTY": "Feuilles incorporées dans une pâte à beignet salé, frits à l’huile."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce",
+    "Recette ou méthode de préparation": "Nom de la recette",
+    "__EMPTY": "Description"
+  },
+  {
+    "N°": 31,
+    "Répondant": "Youssef Hattab",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine aux feuilles d’oignon",
+    "__EMPTY": "Feuilles coupées finement, revenues avec oignons, tomates et épices, puis mijotées avec viande."
+  },
+  {
+    "N°": 31,
+    "Répondant": "Youssef Hattab",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Rfissa aux feuilles de radis",
+    "__EMPTY": "Les feuilles sont intégrées au bouillon épicé avec lentilles et msemen émietté."
+  },
+  {
+    "N°": 31,
+    "Répondant": "Youssef Hattab",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Infusion fenouil",
+    "__EMPTY": "Feuilles et graines séchées utilisées en tisane pour soulager les ballonnements."
+  },
+  {
+    "N°": 31,
+    "Répondant": "Youssef Hattab",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Bakoula aux feuilles de navet",
+    "__EMPTY": "Préparée avec citron confit, olives, ail et huile d’olive."
+  },
+  {
+    "N°": 31,
+    "Répondant": "Youssef Hattab",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Galette farcie",
+    "__EMPTY": "Pâte à pain farcie de poireau cuit et épicé."
+  },
+  {
+    "N°": 32,
+    "Répondant": "Fatima Zahra Bouderbala",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Rghaïf farcis",
+    "__EMPTY": "Feuilles d’oignon sautées avec épices puis farcies dans des rghaïfs."
+  },
+  {
+    "N°": 32,
+    "Répondant": "Fatima Zahra Bouderbala",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula à la betterave",
+    "__EMPTY": "Feuilles bouillies et sautées avec citron, ail, huile d’olive et olives noires."
+  },
+  {
+    "N°": 32,
+    "Répondant": "Fatima Zahra Bouderbala",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Tajine poisson au fenouil",
+    "__EMPTY": "Feuilles intégrées dans un tajine de poisson aux légumes et citron confit."
+  },
+  {
+    "N°": 32,
+    "Répondant": "Fatima Zahra Bouderbala",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine aux feuilles de navet",
+    "__EMPTY": "Tajine végétarien avec pois chiches et feuilles de navet."
+  },
+  {
+    "N°": 32,
+    "Répondant": "Fatima Zahra Bouderbala",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles sautées",
+    "__EMPTY": "Feuilles sautées avec ail, curcuma, huile d’olive, servies avec pain."
+  },
+  {
+    "N°": 32,
+    "Répondant": "Fatima Zahra Bouderbala",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Quiche aux poireaux",
+    "__EMPTY": "Mélange de feuilles de poireaux, œufs, lait et fromage dans une pâte brisée."
+  },
+  {
+    "N°": 33,
+    "Répondant": "Mohamed Bennani",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Omelette",
+    "__EMPTY": "Feuilles finement hachées, mélangées aux œufs et frites comme une omelette."
+  },
+  {
+    "N°": 33,
+    "Répondant": "Mohamed Bennani",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Bakoula radis",
+    "__EMPTY": "Feuilles mijotées avec huile, ail, citron confit et olives noires."
+  },
+  {
+    "N°": 33,
+    "Répondant": "Mohamed Bennani",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Soupe aux feuilles de navet",
+    "__EMPTY": "Feuilles cuites dans une soupe avec pommes de terre, vermicelles et coriandre."
+  },
+  {
+    "N°": 33,
+    "Répondant": "Mohamed Bennani",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Rghaïf farci",
+    "__EMPTY": "Feuilles sautées et utilisées comme farce dans des rghaïfs."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine aux abats",
+    "__EMPTY": "Feuilles d’oignon mijotées avec foie, cœur et épices."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula",
+    "__EMPTY": "Feuilles bouillies, puis sautées avec citron confit, ail et olives."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Tajine berbère",
+    "__EMPTY": "Feuilles de radis intégrées à un tajine de légumes racines."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Pain au fenouil",
+    "__EMPTY": "Feuilles séchées incorporées dans la pâte à pain."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine de veau aux feuilles",
+    "__EMPTY": "Feuilles de navet ajoutées à un tajine de veau aux pois chiches."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Beignets salés aux feuilles",
+    "__EMPTY": "Feuilles de carotte hachées dans une pâte salée, frites."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Rghaïf ronds",
+    "__EMPTY": "Feuilles utilisées en farce avec ail et cumin."
+  },
+  {
+    "N°": 34,
+    "Répondant": "Zahra Meskini",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tartes individuelles",
+    "__EMPTY": "Feuilles de poireau avec œuf, fromage et herbes."
+  },
+  {
+    "N°": 35,
+    "Répondant": "Rachida Benslama",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine aux feuilles",
+    "__EMPTY": "Feuilles sautées avec oignon, ail, épices, incorporées dans un tagine de viande."
+  },
+  {
+    "N°": 35,
+    "Répondant": "Rachida Benslama",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula traditionnelle",
+    "__EMPTY": "Feuilles avec citron confit, ail, huile d’olive, servies avec pain."
+  },
+  {
+    "N°": 35,
+    "Répondant": "Rachida Benslama",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Tajine de fenouil et pommes de terre",
+    "__EMPTY": "Feuilles dans un tajine végétarien avec pommes de terre."
+  },
+  {
+    "N°": 35,
+    "Répondant": "Rachida Benslama",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Feuilles vapeur",
+    "__EMPTY": "Feuilles vapeur assaisonnées d’huile d’olive, ail et citron."
+  },
+  {
+    "N°": 35,
+    "Répondant": "Rachida Benslama",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Tajine poulet aux feuilles de carotte",
+    "__EMPTY": "Feuilles ajoutées au bouillon avec carottes, poulet et épices douces."
+  },
+  {
+    "N°": 35,
+    "Répondant": "Rachida Benslama",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Rghaïf roulé",
+    "__EMPTY": "Feuilles vapeur hachées, farcies dans des galettes roulées."
+  },
+  {
+    "N°": 35,
+    "Répondant": "Rachida Benslama",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Poireaux au four",
+    "__EMPTY": "Feuilles avec crème et œuf, gratinées au four."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce",
+    "Recette ou méthode de préparation": "Nom de la recette",
+    "__EMPTY": "Description"
+  },
+  {
+    "N°": 36,
+    "Répondant": "Hamza Nait Ali",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine kefta aux feuilles d’oignon",
+    "__EMPTY": "Les feuilles d’oignon sont sautées avec la viande hachée, cumin, curcuma et ail puis mijotées avec sauce tomate."
+  },
+  {
+    "N°": 36,
+    "Répondant": "Hamza Nait Ali",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Chorba bel fenouil",
+    "__EMPTY": "Tisane chaude à base de graines et feuilles de fenouil, utilisée pour les maux de ventre."
+  },
+  {
+    "N°": 36,
+    "Répondant": "Hamza Nait Ali",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Bakoula de navet",
+    "__EMPTY": "Préparée avec citron confit, ail, huile d’olive et épices."
+  },
+  {
+    "N°": 36,
+    "Répondant": "Hamza Nait Ali",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Galette farcie au poireau",
+    "__EMPTY": "Pain roulé farci de poireau sauté aux épices."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Feuilles farcies",
+    "__EMPTY": "Feuilles d’oignon blanchies et farcies de riz, ail, herbes, cuites à la vapeur."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula",
+    "__EMPTY": "Feuilles bouillies puis revenues avec huile d’olive, ail et citron confit."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Tajine bel radis",
+    "__EMPTY": "Feuilles de radis intégrées à un tajine avec petits pois et carottes."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Tajine de poisson au fenouil",
+    "__EMPTY": "Feuilles ajoutées au fond du plat avec tranches de tomate, citron et poisson."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Soupe paysanne",
+    "__EMPTY": "Feuilles dans une soupe de légumes de saison."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles sautées aux œufs",
+    "__EMPTY": "Feuilles hachées revenues dans l’huile avec œufs battus."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Galette verte",
+    "__EMPTY": "Feuilles incorporées dans une pâte à pain maison."
+  },
+  {
+    "N°": 37,
+    "Répondant": "Samira El Alami",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Gratin de poireaux",
+    "__EMPTY": "Feuilles dans une béchamel légère, gratinées avec fromage."
+  },
+  {
+    "N°": 38,
+    "Répondant": "Abdeljalil Bouziane",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Omelette berbère",
+    "__EMPTY": "Feuilles hachées ajoutées aux œufs battus avec cumin et sel."
+  },
+  {
+    "N°": 38,
+    "Répondant": "Abdeljalil Bouziane",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Feuilles vapeur",
+    "__EMPTY": "Feuilles cuites à la vapeur et assaisonnées d’huile d’olive."
+  },
+  {
+    "N°": 38,
+    "Répondant": "Abdeljalil Bouziane",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine de chèvre",
+    "__EMPTY": "Feuilles intégrées dans un tajine de viande de chèvre."
+  },
+  {
+    "N°": 38,
+    "Répondant": "Abdeljalil Bouziane",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles sautées",
+    "__EMPTY": "Préparées avec ail, sel, curcuma, puis servies tièdes."
+  },
+  {
+    "N°": 38,
+    "Répondant": "Abdeljalil Bouziane",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Farce pour msemen",
+    "__EMPTY": "Feuilles sautées avec oignon et curcuma utilisées pour farcir des msemen."
+  },
+  {
+    "N°": 39,
+    "Répondant": "Aicha Chaoui",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine bel kefta",
+    "__EMPTY": "Feuilles incorporées avec viande hachée et sauce tomate épicée."
+  },
+  {
+    "N°": 39,
+    "Répondant": "Aicha Chaoui",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula rouge",
+    "__EMPTY": "Préparation classique avec olives et citron confit."
+  },
+  {
+    "N°": 39,
+    "Répondant": "Aicha Chaoui",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Infusion de fenouil",
+    "__EMPTY": "Feuilles et graines utilisées pour préparer une tisane digestive."
+  },
+  {
+    "N°": 39,
+    "Répondant": "Aicha Chaoui",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Salade de feuilles",
+    "__EMPTY": "Feuilles cuites et mélangées à l’huile d’olive, cumin et citron."
+  },
+  {
+    "N°": 39,
+    "Répondant": "Aicha Chaoui",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Rghaïf farci",
+    "__EMPTY": "Feuilles sautées et utilisées comme farce de galette."
+  },
+  {
+    "N°": 39,
+    "Répondant": "Aicha Chaoui",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Bakoula chou-rave",
+    "__EMPTY": "Préparée comme bakoula, avec citron confit, ail, huile d’olive."
+  },
+  {
+    "N°": 39,
+    "Répondant": "Aicha Chaoui",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tartine rustique au poireau",
+    "__EMPTY": "Feuilles cuites et servies sur tranche de pain avec fromage fondu."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine de bœuf aux feuilles",
+    "__EMPTY": "Feuilles revenues avec ail et viande de bœuf, mijotées avec pommes de terre."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula classique",
+    "__EMPTY": "Feuilles bouillies et sautées avec citron confit et olives noires."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Tajine simple",
+    "__EMPTY": "Feuilles incorporées dans un tajine de légumes."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Feuilles en salade",
+    "__EMPTY": "Feuilles hachées crues mélangées à du citron et huile d’olive."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Pain farci navet",
+    "__EMPTY": "Feuilles sautées, intégrées dans un pain maison au four."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Petits beignets",
+    "__EMPTY": "Feuilles dans une pâte à beignet salée, puis frits."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Galette feuillue",
+    "__EMPTY": "Feuilles dans une pâte à base de semoule et levure."
+  },
+  {
+    "N°": 40,
+    "Répondant": "Houda Fadili",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tarte poireau chèvre",
+    "__EMPTY": "Feuilles de poireau avec crème, œufs et fromage de chèvre."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce",
+    "Recette ou méthode de préparation": "Nom de la recette",
+    "__EMPTY": "Description"
+  },
+  {
+    "N°": 41,
+    "Répondant": "Ahmed Ait Taleb",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine tafarnout",
+    "__EMPTY": "Feuilles d’oignon incorporées dans un tajine traditionnel cuit dans un four en terre (tafarnout), avec viande et herbes."
+  },
+  {
+    "N°": 41,
+    "Répondant": "Ahmed Ait Taleb",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Tazribt n lbard",
+    "__EMPTY": "Feuilles bouillies, mélangées à du blé concassé (tazribt) avec huile d’olive."
+  },
+  {
+    "N°": 41,
+    "Répondant": "Ahmed Ait Taleb",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Tissane n afennu",
+    "__EMPTY": "Infusion de graines et feuilles de fenouil pour apaiser l’estomac."
+  },
+  {
+    "N°": 41,
+    "Répondant": "Ahmed Ait Taleb",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Takila n tighdawin",
+    "__EMPTY": "Feuilles cuites à la vapeur, servies avec huile d’argan et sel."
+  },
+  {
+    "N°": 41,
+    "Répondant": "Ahmed Ait Taleb",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tajine bel poireau",
+    "__EMPTY": "Feuilles utilisées dans un tajine avec carottes, pommes de terre et cumin."
+  },
+  {
+    "N°": 42,
+    "Répondant": "Naima Ait Boulmane",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine berbère",
+    "__EMPTY": "Feuilles d’oignon ajoutées aux légumes secs et viande séchée (gueddid) dans un tajine de montagne."
+  },
+  {
+    "N°": 42,
+    "Répondant": "Naima Ait Boulmane",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Tagoula n touncht",
+    "__EMPTY": "Feuilles mélangées à du orge bouilli (tagoula) avec huile d’olive."
+  },
+  {
+    "N°": 42,
+    "Répondant": "Naima Ait Boulmane",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Tifinagh n lkhobz",
+    "__EMPTY": "Galette d’orge farcie de feuilles de radis cuites avec ail et cumin."
+  },
+  {
+    "N°": 42,
+    "Répondant": "Naima Ait Boulmane",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Afennu s’tamen",
+    "__EMPTY": "Feuilles ajoutées à une soupe à base de semoule d’orge."
+  },
+  {
+    "N°": 42,
+    "Répondant": "Naima Ait Boulmane",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine n aghroum",
+    "__EMPTY": "Tajine de pain sec réhydraté avec feuilles de navet, pois chiches et huile d’olive."
+  },
+  {
+    "N°": 42,
+    "Répondant": "Naima Ait Boulmane",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Berkoukes amazigh",
+    "__EMPTY": "Feuilles cuites avec gros grains de semoule et légumes."
+  },
+  {
+    "N°": 42,
+    "Répondant": "Naima Ait Boulmane",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tajine vert",
+    "__EMPTY": "Poireau sauté avec ail, huile d’olive, servi avec œufs durs."
+  },
+  {
+    "N°": 43,
+    "Répondant": "Mohamed Oulhaj",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine à l’huile d’argan",
+    "__EMPTY": "Feuilles d’oignon intégrées dans une préparation de légumes et huile d’argan."
+  },
+  {
+    "N°": 43,
+    "Répondant": "Mohamed Oulhaj",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Tfaya berbère",
+    "__EMPTY": "Feuilles cuites avec oignons, raisins secs, épices douces, servies sur couscous."
+  },
+  {
+    "N°": 43,
+    "Répondant": "Mohamed Oulhaj",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Infusion rurale",
+    "__EMPTY": "Tisane de fenouil contre les coliques."
+  },
+  {
+    "N°": 43,
+    "Répondant": "Mohamed Oulhaj",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Bakoula rifaine",
+    "__EMPTY": "Feuilles mijotées avec citron confit, ail, piment doux, servies tièdes."
+  },
+  {
+    "N°": 43,
+    "Répondant": "Mohamed Oulhaj",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Tajine de montagne",
+    "__EMPTY": "Feuilles ajoutées à un tajine rustique sans viande."
+  },
+  {
+    "N°": 43,
+    "Répondant": "Mohamed Oulhaj",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Galette à l’huile",
+    "__EMPTY": "Galette d’orge farcie aux feuilles de poireau et oignon, cuite sur tajine."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine rifain",
+    "__EMPTY": "Feuilles sautées avec ail, tomate, puis ajoutées au tajine de sardines."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula rouge",
+    "__EMPTY": "Préparée avec olives noires, citron confit, huile d’olive."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Berkoukes n’tighdouine",
+    "__EMPTY": "Feuilles de radis intégrées dans un berkoukes aux légumes et pois chiches."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Soupe amazighe",
+    "__EMPTY": "Fenouil dans une soupe épaisse à base de farine d’orge."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine citadin",
+    "__EMPTY": "Feuilles utilisées comme base de sauce avec cumin et gingembre."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles à la vapeur",
+    "__EMPTY": "Servies froides avec citron et sel."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Tajine végétarien",
+    "__EMPTY": "Feuilles ajoutées avec pois chiches et courge."
+  },
+  {
+    "N°": 44,
+    "Répondant": "Fatima Zahra Ouakrim",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tarte salée",
+    "__EMPTY": "Poireau cuit au four avec œufs et fromage frais."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tagine s’fraiche",
+    "__EMPTY": "Feuilles d’oignon fraîches dans un tajine sans viande avec pommes de terre et curcuma."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula",
+    "__EMPTY": "simplifiée",
+    "__EMPTY_1": "Préparation classique avec citron, huile d’olive, ail."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Ghriba verte",
+    "__EMPTY": "Feuilles séchées incorporées dans une pâte de semoule et sucre, cuite au four."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Berbouche aux herbes",
+    "__EMPTY": "Petits escargots cuits avec fenouil sauvage et herbes."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine de printemps",
+    "__EMPTY": "Feuilles fraîches avec fèves, petits pois et coriandre."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles au couscous",
+    "__EMPTY": "Feuilles ajoutées au bouillon de couscous."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Chorba aux feuilles",
+    "__EMPTY": "Feuilles dans une soupe d’orge."
+  },
+  {
+    "N°": 45,
+    "Répondant": "Mina Ouzerzour",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tajine bel beid",
+    "__EMPTY": "Poireau avec œufs durs et sauce rouge."
+  },
+  {
+    "N°": "N°",
+    "Répondant": "Répondant",
+    "Espèce": "Espèce",
+    "Recette ou méthode de préparation": "Nom de la recette",
+    "__EMPTY": "Description"
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine azir n’chermoula",
+    "__EMPTY": "Feuilles fraîches d’oignon mélangées à une chermoula amazighe (ail, persil, citron) dans un tajine de poulet."
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula rouge soussi",
+    "__EMPTY": "Feuilles sautées avec huile d’argan, ail, cumin et olives rouges."
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Tajine n’ighram",
+    "__EMPTY": "Feuilles fraîches avec pommes de terre, carottes et œufs durs dans une sauce rouge."
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Tisane n’afennou",
+    "__EMPTY": "Infusion douce de fenouil sauvage contre ballonnement et toux."
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Aghroum amazigh farci",
+    "__EMPTY": "Pain maison farci de feuilles de navet sautées avec oignons et curcuma."
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles en beignets",
+    "__EMPTY": "Feuilles de carotte hachées et mélangées à pâte salée puis frites."
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Soupe rustique",
+    "__EMPTY": "Feuilles dans une soupe épaisse de pois cassés et semoule."
+  },
+  {
+    "N°": 46,
+    "Répondant": "Lhassan Ait Lhaj",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Galette verte",
+    "__EMPTY": "Galette de blé farcie de poireaux et cumin cuite sur tajine."
+  },
+  {
+    "N°": 47,
+    "Répondant": "Zineb Oukessou",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Trid amazigh",
+    "__EMPTY": "Feuilles d’oignon cuites avec viande et versées sur trid (crêpes découpées à la main)."
+  },
+  {
+    "N°": 47,
+    "Répondant": "Zineb Oukessou",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Tajine sans viande",
+    "__EMPTY": "Feuilles dans un tajine de légumes et pois chiches."
+  },
+  {
+    "N°": 47,
+    "Répondant": "Zineb Oukessou",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Galette au radis",
+    "__EMPTY": "Galette rustique farcie aux feuilles hachées, cumin et huile d’olive."
+  },
+  {
+    "N°": 47,
+    "Répondant": "Zineb Oukessou",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Chorba n’ighram",
+    "__EMPTY": "Soupe d’orge avec fenouil et légumes."
+  },
+  {
+    "N°": 47,
+    "Répondant": "Zineb Oukessou",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine berbère végétarien",
+    "__EMPTY": "Feuilles de navet ajoutées à un tajine sans viande aux herbes de montagne."
+  },
+  {
+    "N°": 47,
+    "Répondant": "Zineb Oukessou",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Rghaïf farci aux feuilles",
+    "__EMPTY": "Pain farci aux feuilles de carottes et poivrons."
+  },
+  {
+    "N°": 47,
+    "Répondant": "Zineb Oukessou",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tajine classique",
+    "__EMPTY": "Feuilles ajoutées au plat de sardines avec citron confit."
+  },
+  {
+    "N°": 48,
+    "Répondant": "Ali Aznag",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Omelette aux herbes",
+    "__EMPTY": "Feuilles d’oignon sautées avec œufs, sel, poivre et cumin."
+  },
+  {
+    "N°": 48,
+    "Répondant": "Ali Aznag",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Infusion médicinale",
+    "__EMPTY": "Feuilles infusées contre la toux, mélangées à la menthe et au thym."
+  },
+  {
+    "N°": 48,
+    "Répondant": "Ali Aznag",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Couscous du vendredi",
+    "__EMPTY": "Feuilles et graines ajoutées au bouillon de couscous aux légumes."
+  },
+  {
+    "N°": 48,
+    "Répondant": "Ali Aznag",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Tajine de chèvre",
+    "__EMPTY": "Feuilles dans un tajine de viande de chèvre avec légumes secs."
+  },
+  {
+    "N°": 48,
+    "Répondant": "Ali Aznag",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Beignets verts",
+    "__EMPTY": "Feuilles de carotte mixées dans une pâte à frire avec ail et coriandre."
+  },
+  {
+    "N°": 48,
+    "Répondant": "Ali Aznag",
+    "Espèce": "Chou-rave",
+    "Recette ou méthode de préparation": "Soupe à la menthe",
+    "__EMPTY": "Feuilles associées à menthe, ail et pois dans une soupe épaisse."
+  },
+  {
+    "N°": 48,
+    "Répondant": "Ali Aznag",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Galette d’hiver",
+    "__EMPTY": "Poireau dans pâte à base de semoule, cuite sur tajine."
+  },
+  {
+    "N°": 49,
+    "Répondant": "Amina Tafsut",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Tajine familial",
+    "__EMPTY": "Feuilles d’oignon avec courgettes, tomates, ail dans tajine sans viande."
+  },
+  {
+    "N°": 49,
+    "Répondant": "Amina Tafsut",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Bakoula simplifiée",
+    "__EMPTY": "Feuilles bouillies et assaisonnées à l’ancienne : ail, cumin, huile."
+  },
+  {
+    "N°": 49,
+    "Répondant": "Amina Tafsut",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Tajine de campagne",
+    "__EMPTY": "Feuilles dans un plat de pommes de terre et carottes."
+  },
+  {
+    "N°": 49,
+    "Répondant": "Amina Tafsut",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Tisane digestive",
+    "__EMPTY": "Tisane pour digestion, fatigue et douleurs abdominales."
+  },
+  {
+    "N°": 49,
+    "Répondant": "Amina Tafsut",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Feuilles au pain sec",
+    "__EMPTY": "Feuilles de navet cuites avec miettes de pain rassis et huile d’olive."
+  },
+  {
+    "N°": 49,
+    "Répondant": "Amina Tafsut",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Feuilles au couscous",
+    "__EMPTY": "Ajoutées dans le bouillon de couscous."
+  },
+  {
+    "N°": 49,
+    "Répondant": "Amina Tafsut",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Salade tiède",
+    "__EMPTY": "Feuilles de poireau cuites vapeur puis assaisonnées citron-ail."
+  },
+  {
+    "N°": 50,
+    "Répondant": "Mohamed Irbah",
+    "Espèce": "Oignon",
+    "Recette ou méthode de préparation": "Omelette montagnarde",
+    "__EMPTY": "Feuilles d’oignon et œufs battus cuits sur plat chaud avec huile d’olive."
+  },
+  {
+    "N°": 50,
+    "Répondant": "Mohamed Irbah",
+    "Espèce": "Betterave",
+    "Recette ou méthode de préparation": "Tajine végétarien",
+    "__EMPTY": "Feuilles avec courgette, tomates et pois chiches."
+  },
+  {
+    "N°": 50,
+    "Répondant": "Mohamed Irbah",
+    "Espèce": "Radis",
+    "Recette ou méthode de préparation": "Soupe rurale",
+    "__EMPTY": "Feuilles de radis, semoule d’orge, huile d’olive."
+  },
+  {
+    "N°": 50,
+    "Répondant": "Mohamed Irbah",
+    "Espèce": "Fenouil",
+    "Recette ou méthode de préparation": "Couscous bel fenouil",
+    "__EMPTY": "Fenouil dans bouillon rouge avec viande de bœuf."
+  },
+  {
+    "N°": 50,
+    "Répondant": "Mohamed Irbah",
+    "Espèce": "Navet",
+    "Recette ou méthode de préparation": "Galette farcie",
+    "__EMPTY": "Galette de semoule garnie de feuilles de navet et fromage frais."
+  },
+  {
+    "N°": 50,
+    "Répondant": "Mohamed Irbah",
+    "Espèce": "Carotte",
+    "Recette ou méthode de préparation": "Rghaïf printanier",
+    "__EMPTY": "Feuilles sautées et intégrées à une pâte roulée puis cuite."
+  },
+  {
+    "N°": 50,
+    "Répondant": "Mohamed Irbah",
+    "Espèce": "Poireau",
+    "Recette ou méthode de préparation": "Tagine bel lham",
+    "__EMPTY": "Feuilles de poireau mijotées avec viande de bœuf et pois."
+  }
+]
