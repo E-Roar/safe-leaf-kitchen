@@ -44,6 +44,7 @@ export const recipes: Recipe[] = [
   {
     "id": 1,
     "leafType": "onion",
+    "published": false,
     "title": {
       "fr": "Msemen farci aux feuilles d'oignon",
       "en": "Stuffed Msemen with Onion Leaves",
@@ -73,6 +74,7 @@ export const recipes: Recipe[] = [
   {
     "id": 2,
     "leafType": "onion",
+    "published": false,
     "title": {
       "fr": "Galette d'orge aux feuilles d'oignon",
       "en": "Barley Flatbread with Onion Leaves",
@@ -102,6 +104,7 @@ export const recipes: Recipe[] = [
   {
     "id": 3,
     "leafType": "onion",
+    "published": false,
     "title": {
       "fr": "Omelette aux feuilles d'oignon",
       "en": "Omelette with Onion Leaves",
@@ -131,6 +134,7 @@ export const recipes: Recipe[] = [
   {
     "id": 4,
     "leafType": "onion",
+    "published": false,
     "title": {
       "fr": "Poudre de feuilles d'oignon séchées",
       "en": "Powdered Dried Onion Leaves",
@@ -160,6 +164,7 @@ export const recipes: Recipe[] = [
   {
     "id": 5,
     "leafType": "beetroot",
+    "published": false,
     "title": {
       "fr": "Salade de feuilles de betterave au citron",
       "en": "Beet Leaf Salad with Lemon Vinaigrette",
@@ -189,6 +194,7 @@ export const recipes: Recipe[] = [
   {
     "id": 6,
     "leafType": "beetroot",
+    "published": false,
     "title": {
       "fr": "Feuilles de betterave sautées à l'ail",
       "en": "Sautéed Beet Greens with Garlic",
@@ -218,6 +224,7 @@ export const recipes: Recipe[] = [
   {
     "id": 7,
     "leafType": "carrot",
+    "published": false,
     "title": {
       "fr": "Pesto de feuilles de carotte",
       "en": "Carrot Leaf Pesto",
@@ -247,6 +254,7 @@ export const recipes: Recipe[] = [
   {
     "id": 8,
     "leafType": "fennel",
+    "published": false,
     "title": {
       "fr": "Riz aux feuilles de fenouil et citron",
       "en": "Fennel Leaf and Lemon Rice",
@@ -276,6 +284,7 @@ export const recipes: Recipe[] = [
   {
     "id": 9,
     "leafType": "kohlrabi",
+    "published": false,
     "title": {
       "fr": "Feuilles de chou rave sautées aux tomates",
       "en": "Kohlrabi Leaf Stir-fry with Tomatoes",
@@ -305,6 +314,7 @@ export const recipes: Recipe[] = [
   {
     "id": 10,
     "leafType": "leek",
+    "published": false,
     "title": {
       "fr": "Soupe de feuilles de poireau et pommes de terre",
       "en": "Leek Leaf and Potato Soup",

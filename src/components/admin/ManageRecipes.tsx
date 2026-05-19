@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Plus, Save, Trash2, Upload, Image as ImageIcon, BookOpen, ExternalLink, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, Plus, Save, Trash2, Upload, Image as ImageIcon, BookOpen, ExternalLink, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { PDFGenerationProgress, PDFGenerationStep } from './PDFGenerationProgress';
 import { compressImageForPDF } from '@/utils/imageCompression';
@@ -428,6 +428,26 @@ export const ManageRecipes = () => {
         }
     };
 
+    const handleTogglePublished = async (recipe: Recipe) => {
+        const newPublished = recipe.published === false;
+        try {
+            const { error } = await supabase.functions.invoke('manage-content', {
+                headers: { 'x-admin-key': 'hidachi' },
+                body: {
+                    table: 'recipes',
+                    action: 'upsert',
+                    data: { ...recipe, published: newPublished },
+                    id: parseInt(recipe.id.toString())
+                }
+            });
+            if (error) throw error;
+            toast.success(`Recipe ${newPublished ? 'published' : 'hidden'}`);
+            fetchRecipes();
+        } catch (error: any) {
+            toast.error('Failed to update published state');
+        }
+    };
+
     const getRecipeImage = (recipe: Recipe) => {
         if (recipe.image_url) return recipe.image_url;
 
@@ -834,26 +854,42 @@ export const ManageRecipes = () => {
                                 </div>
                             )}
                         </div>
-                        <CardHeader className="p-4">
+                        <CardHeader className="p-4 pb-2">
                             <CardTitle className="text-base truncate">{recipe.title?.en}</CardTitle>
                             <CardDescription className="text-xs truncate">{recipe.title?.fr}</CardDescription>
                         </CardHeader>
-                        <CardContent className="p-4 pt-0 flex justify-end gap-2 flex-wrap">
-                            {(recipe as any).status === 'pending' ? (
-                                <>
-                                    <Button variant="ghost" size="sm" className="text-emerald-600 hover:bg-emerald-50" onClick={() => handleApproveRecipe(recipe.id.toString())}>
-                                        <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
-                                    </Button>
-                                    <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50" onClick={() => handleRejectRecipe(recipe.id.toString())}>
-                                        <XCircle className="w-4 h-4 mr-1" /> Reject
-                                    </Button>
-                                </>
-                            ) : (
-                                <>
-                                    <Button variant="ghost" size="sm" onClick={() => setEditingRecipe(recipe)}>Edit</Button>
-                                    <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50" onClick={() => handleDelete(recipe.id.toString())}><Trash2 className="w-4 h-4" /></Button>
-                                </>
-                            )}
+                        <CardContent className="p-4 pt-0 flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <div
+                                        onClick={(e) => { e.stopPropagation(); handleTogglePublished(recipe); }}
+                                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${recipe.published !== false ? 'bg-emerald-400' : 'bg-slate-300'}`}
+                                    >
+                                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${recipe.published !== false ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                                    </div>
+                                    <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+                                        {recipe.published !== false ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                        {recipe.published !== false ? 'Published' : 'Hidden'}
+                                    </span>
+                                </label>
+                                <div className="flex gap-1">
+                                    {(recipe as any).status === 'pending' ? (
+                                        <>
+                                            <Button variant="ghost" size="sm" className="text-emerald-600 hover:bg-emerald-50 h-7 px-2" onClick={() => handleApproveRecipe(recipe.id.toString())}>
+                                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve
+                                            </Button>
+                                            <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50 h-7 px-2" onClick={() => handleRejectRecipe(recipe.id.toString())}>
+                                                <XCircle className="w-3.5 h-3.5 mr-1" /> Reject
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setEditingRecipe(recipe)}>Edit</Button>
+                                            <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50 h-7 px-2" onClick={() => handleDelete(recipe.id.toString())}><Trash2 className="w-3.5 h-3.5" /></Button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 ))}

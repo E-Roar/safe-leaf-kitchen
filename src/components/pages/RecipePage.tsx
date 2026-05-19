@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { logger } from '@/lib/logger';
 import { useI18n } from "@/hooks/useI18n";
-import { Search, ChefHat, Star, BookOpen, Play, Loader2, ArrowLeft } from "lucide-react";
+import { Search, ChefHat, Star, BookOpen, Play, Loader2, ArrowLeft, Upload, Trash2, X, Image as ImageIcon } from "lucide-react";
 import { recipes as staticRecipes } from "@/data/recipes";
 import { supabase } from "@/lib/supabaseClient";
 import { Analytics } from "@/services/analyticsEventService";
@@ -33,6 +33,7 @@ interface Recipe {
   gallery_images?: string[];
   origin?: string;
   sources?: string[];
+  published?: boolean;
 }
 
 // Species emoji map for visual cards
@@ -73,6 +74,8 @@ export default function RecipePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState<string>('all');
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Load favorites
   useEffect(() => {
@@ -172,6 +175,41 @@ export default function RecipePage() {
     return leafTypes.length > 0 ? leafTypes : ['Onion Leaves'];
   };
 
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length || !selectedRecipe) return;
+    setUploadingGallery(true);
+    const newUrls: string[] = [];
+    try {
+      for (let i = 0; i < e.target.files.length; i++) {
+        const file = e.target.files[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `recipe-gallery-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `recipes/${fileName}`;
+        const { error: uploadError } = await supabase.storage.from('content').upload(filePath, file);
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from('content').getPublicUrl(filePath);
+        newUrls.push(publicUrl);
+      }
+      const updated = { ...selectedRecipe, gallery_images: [...(selectedRecipe.gallery_images || []), ...newUrls] };
+      setSelectedRecipe(updated);
+      setRecipes(prev => prev.map(r => r.id === selectedRecipe.id ? updated : r));
+    } catch (err) {
+      console.error('Gallery upload failed:', err);
+    } finally {
+      setUploadingGallery(false);
+    }
+  };
+
+  const handleDeleteGalleryImage = async (index: number) => {
+    if (!selectedRecipe?.gallery_images) return;
+    const updated = {
+      ...selectedRecipe,
+      gallery_images: selectedRecipe.gallery_images.filter((_, i) => i !== index)
+    };
+    setSelectedRecipe(updated);
+    setRecipes(prev => prev.map(r => r.id === selectedRecipe.id ? updated : r));
+  };
+
   const getRecipeImage = (recipe: Recipe) => {
     if (recipe.image_url) return recipe.image_url;
     const folderName = (recipe.title?.en || '')
@@ -189,6 +227,7 @@ export default function RecipePage() {
   };
 
   const filteredRecipes = recipes.filter(r => {
+    if (r.published === false) return false;
     if (speciesFilter !== 'all' && getSpeciesCategory(r) !== speciesFilter) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -302,6 +341,81 @@ export default function RecipePage() {
               </div>
             </div>
           </div>
+
+          {/* Gallery */}
+          {(selectedRecipe.gallery_images?.length ?? 0) > 0 || user ? (
+            <div className="max-w-4xl mx-auto px-4 md:px-8 mt-8">
+              <h3 className="font-semibold flex items-center gap-2 mb-4">
+                <ImageIcon className="w-5 h-5 text-primary" /> Gallery
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {selectedRecipe.gallery_images?.map((url, idx) => (
+                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-border aspect-square">
+                    <img
+                      src={url}
+                      alt={`Gallery ${idx + 1}`}
+                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                      onClick={() => setLightboxIndex(idx)}
+                    />
+                    {user && (
+                      <button
+                        onClick={() => handleDeleteGalleryImage(idx)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {user && (
+                  <label className="cursor-pointer bg-muted/50 hover:bg-muted border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center aspect-square text-muted-foreground hover:text-foreground transition-colors">
+                    <Upload className="w-6 h-6 mb-2" />
+                    <span className="text-xs font-medium">{uploadingGallery ? 'Uploading...' : 'Add Photo'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      disabled={uploadingGallery}
+                      onChange={handleGalleryUpload}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Lightbox */}
+          {lightboxIndex !== null && selectedRecipe.gallery_images?.[lightboxIndex] && (
+            <div
+              className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+              onClick={() => setLightboxIndex(null)}
+            >
+              <button
+                onClick={() => setLightboxIndex(null)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-8 h-8" />
+              </button>
+              <img
+                src={selectedRecipe.gallery_images[lightboxIndex]}
+                alt="Gallery full size"
+                className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+              {selectedRecipe.gallery_images.length > 1 && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                  {selectedRecipe.gallery_images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${idx === lightboxIndex ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/70'}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
