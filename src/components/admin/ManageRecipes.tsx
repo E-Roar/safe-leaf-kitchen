@@ -59,17 +59,12 @@ export const ManageRecipes = () => {
 
     const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'hidden' | 'pending'>('all');
     const [leafFilter, setLeafFilter] = useState<string>('all');
-    const [categoryFilter, setCategoryFilter] = useState<string>('all');
+    const [dishTypeFilter, setDishTypeFilter] = useState<string>('all');
+    const [cuisineFilter, setCuisineFilter] = useState<string>('all');
 
     const uniqueLeaves = [...new Set(recipes.map(r => (r as any).leafType).filter(Boolean))] as string[];
-    const uniqueCategories = [...new Set(
-        recipes.flatMap(r => {
-            const tags: string[] = [];
-            if ((r as any).origin) tags.push((r as any).origin);
-            if ((r as any).dietary_tags) tags.push(...(r as any).dietary_tags);
-            return tags;
-        }).filter(Boolean)
-    )] as string[];
+    const uniqueDishTypes = [...new Set(recipes.map(r => (r as any).category).filter(Boolean))] as string[];
+    const uniqueCuisines = [...new Set(recipes.map(r => (r as any).origin).filter(Boolean))] as string[];
 
     const filteredRecipes = recipes.filter(r => {
         if (filterStatus === 'all') return true;
@@ -81,10 +76,11 @@ export const ManageRecipes = () => {
         if (leafFilter === 'all') return true;
         return (r as any).leafType === leafFilter || (r as any).leafIds?.includes(parseInt(leafFilter));
     }).filter(r => {
-        if (categoryFilter === 'all') return true;
-        const origin = (r as any).origin;
-        const tags = (r as any).dietary_tags || [];
-        return origin === categoryFilter || tags.includes(categoryFilter);
+        if (dishTypeFilter === 'all') return true;
+        return (r as any).category === dishTypeFilter;
+    }).filter(r => {
+        if (cuisineFilter === 'all') return true;
+        return (r as any).origin === cuisineFilter;
     });
 
     // PDF Generation State
@@ -583,15 +579,33 @@ export const ManageRecipes = () => {
                             <p className="text-xs text-muted-foreground mt-1">Select one or more leaves this recipe uses. Used for nutrition/CO2/savings calculations.</p>
                         </div>
 
-                        {/* Recipe Metadata */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* Recipe Category + Origin */}
+                        <div className="grid grid-cols-3 gap-4">
                             <div>
-                                <Label>Origin / Cuisine</Label>
-                                <Input
+                                <Label>Dish Type</Label>
+                                <select
+                                    value={(editingRecipe as any).category || ''}
+                                    onChange={e => setEditingRecipe(prev => ({ ...prev, category: e.target.value }))}
+                                    className="w-full bg-white border border-border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                                >
+                                    <option value="">Select type...</option>
+                                    {['Main Dish', 'Soup', 'Salad', 'Drink', 'Tajine', 'Bread', 'Side Dish', 'Snack', 'Dessert', 'Sauce/Condiment', 'Preserve', 'Other'].map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <Label>Cuisine Origin</Label>
+                                <select
                                     value={(editingRecipe as any).origin || ''}
                                     onChange={e => setEditingRecipe(prev => ({ ...prev, origin: e.target.value }))}
-                                    placeholder="e.g. Traditional Moroccan"
-                                />
+                                    className="w-full bg-white border border-border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                                >
+                                    <option value="">Select cuisine...</option>
+                                    {['Moroccan', 'Mediterranean', 'Middle Eastern', 'Asian', 'European', 'African', 'Latin American', 'International', 'Other'].map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <Label>Dietary Tags (comma separated)</Label>
@@ -752,7 +766,7 @@ export const ManageRecipes = () => {
                         <div>
                             <Label className="block mb-2">Image</Label>
                             <div className="flex items-center gap-4">
-            {/* Leaf & Category filters */}
+            {/* Leaf, Dish Type & Cuisine filters */}
             <div className="flex flex-wrap gap-2 items-center">
                 <select
                     value={leafFilter}
@@ -764,18 +778,26 @@ export const ManageRecipes = () => {
                         <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>
                     ))}
                 </select>
-                {uniqueCategories.length > 0 && (
-                    <select
-                        value={categoryFilter}
-                        onChange={e => setCategoryFilter(e.target.value)}
-                        className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    >
-                        <option value="all">All Categories</option>
-                        {uniqueCategories.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
-                    </select>
-                )}
+                <select
+                    value={dishTypeFilter}
+                    onChange={e => setDishTypeFilter(e.target.value)}
+                    className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                >
+                    <option value="all">All Dish Types</option>
+                    {['Main Dish', 'Soup', 'Salad', 'Drink', 'Tajine', 'Bread', 'Side Dish', 'Snack', 'Dessert', 'Sauce/Condiment', 'Preserve', 'Other'].map(c => (
+                        <option key={c} value={c}>{c}</option>
+                    ))}
+                </select>
+                <select
+                    value={cuisineFilter}
+                    onChange={e => setCuisineFilter(e.target.value)}
+                    className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                >
+                    <option value="all">All Cuisines</option>
+                    {['Moroccan', 'Mediterranean', 'Middle Eastern', 'Asian', 'European', 'African', 'Latin American', 'International', 'Other'].map(c => (
+                        <option key={c} value={c}>{c}</option>
+                    ))}
+                </select>
             </div>
 
             {editingRecipe && (

@@ -13,13 +13,12 @@ serve(async (req) => {
   }
 
   try {
-    const { content, minLength = 20 } = await req.json()
+    const { content, minLength = 20, source_type = 'text', metadata = {} } = await req.json()
 
     if (!content || content.length < minLength) {
       throw new Error(`Content too short (min ${minLength} chars)`)
     }
 
-    // 1. Generate Embedding
     const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
       headers: {
@@ -35,17 +34,16 @@ serve(async (req) => {
     const embeddingData = await embeddingResponse.json()
     const embedding = embeddingData.data[0].embedding
 
-    // 2. Store in Database
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
     const { data, error } = await supabase.from('document_chunks').insert({
-      source_type: 'text', // Default to text, can be passed in body
+      source_type: source_type,
       content: content,
       embedding: embedding,
-      metadata: { source: 'api_upload' }
+      metadata: { source: 'api_upload', ...metadata }
     }).select().single()
 
     if (error) {

@@ -38,6 +38,9 @@ export interface Recipe {
   image_url?: string;
   gallery_images?: string[];
   published?: boolean;
+  category?: string;
+  origin?: string;
+  dietary_tags?: string[];
 }
 
 export const recipes: Recipe[] = [

@@ -75,7 +75,8 @@ export default function RecipePage() {
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState<string>('all');
   const [leafFilter, setLeafFilter] = useState<string>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [dishTypeFilter, setDishTypeFilter] = useState<string>('all');
+  const [cuisineFilter, setCuisineFilter] = useState<string>('all');
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -229,24 +230,14 @@ export default function RecipePage() {
   };
 
   const uniqueLeafTypes = [...new Set(recipes.map(r => (r as any).leafType).filter(Boolean))] as string[];
-  const uniqueCategories = [...new Set(
-    recipes.flatMap(r => {
-      const tags: string[] = [];
-      if ((r as any).origin) tags.push((r as any).origin);
-      if ((r as any).dietary_tags) tags.push(...(r as any).dietary_tags);
-      return tags;
-    }).filter(Boolean)
-  )] as string[];
+  const uniqueCuisines = [...new Set(recipes.map(r => (r as any).origin).filter(Boolean))] as string[];
 
   const filteredRecipes = recipes.filter(r => {
     if (r.published !== true) return false;
     if (speciesFilter !== 'all' && getSpeciesCategory(r) !== speciesFilter) return false;
     if (leafFilter !== 'all' && (r as any).leafType !== leafFilter) return false;
-    if (categoryFilter !== 'all') {
-      const origin = (r as any).origin;
-      const tags = (r as any).dietary_tags || [];
-      if (origin !== categoryFilter && !tags.includes(categoryFilter)) return false;
-    }
+    if (dishTypeFilter !== 'all' && (r as any).category !== dishTypeFilter) return false;
+    if (cuisineFilter !== 'all' && (r as any).origin !== cuisineFilter) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
       const title = (r.title?.[selectedLanguage] || r.title?.fr || '').toLowerCase();
@@ -468,30 +459,36 @@ export default function RecipePage() {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {uniqueLeafTypes.length > 0 && (
-            <select
-              value={leafFilter}
-              onChange={e => setLeafFilter(e.target.value)}
-              className="text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="all">All Leaves</option>
-              {uniqueLeafTypes.map(l => (
-                <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)} leaves</option>
-              ))}
-            </select>
-          )}
-          {uniqueCategories.length > 0 && (
-            <select
-              value={categoryFilter}
-              onChange={e => setCategoryFilter(e.target.value)}
-              className="text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="all">All Categories</option>
-              {uniqueCategories.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          )}
+          <select
+            value={leafFilter}
+            onChange={e => setLeafFilter(e.target.value)}
+            className="text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            <option value="all">All Leaves</option>
+            {uniqueLeafTypes.map(l => (
+              <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>
+            ))}
+          </select>
+          <select
+            value={dishTypeFilter}
+            onChange={e => setDishTypeFilter(e.target.value)}
+            className="text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            <option value="all">All Dish Types</option>
+            {['Main Dish', 'Soup', 'Salad', 'Drink', 'Tajine', 'Bread', 'Side Dish', 'Snack', 'Dessert', 'Sauce/Condiment', 'Preserve', 'Other'].map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <select
+            value={cuisineFilter}
+            onChange={e => setCuisineFilter(e.target.value)}
+            className="text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            <option value="all">All Cuisines</option>
+            {['Moroccan', 'Mediterranean', 'Middle Eastern', 'Asian', 'European', 'African', 'Latin American', 'International', 'Other'].map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
       </div>
 
